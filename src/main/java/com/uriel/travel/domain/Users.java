@@ -7,6 +7,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
+
+import java.time.LocalDate;
 import java.util.*;
 @Entity
 @Getter
@@ -20,13 +22,13 @@ public class Users {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     @Column
-    Date created_date;
+    LocalDate created_date;
     @Column
-    Date modified_date;
+    LocalDate modified_date;
     @Column
     String userName;
     @Column
-    Date birth;
+    LocalDate birth;
     @Column
     String email; //=회원 아이디
     @Column
@@ -38,11 +40,14 @@ public class Users {
     @Column
     String childName;
     @Column
-    String sex;
+    Gender gender;
 //    @OneToMany(mappedBy = "users")
 //    List <Reservation> reservationList=new ArrayList<>();
 //    @OneToOne(mappedBy = "users")
 //    JwtRefreshToken jwtRefreshToken;
+    public void encodePassword(PasswordEncoder passwordEncoder){
+        password=passwordEncoder.encode(password);
+    }
 
 
 

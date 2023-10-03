@@ -7,17 +7,19 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ErrorCode {
     /**
-     * 성공 코드
+     * 200: 성공 코드
      */
     OK(200, "요청이 정상적으로 수행되었습니다."),
 
     /**
-     * 400 BAD REQUEST
+     * 400: BAD REQUEST
      */
     BAD_REQUEST(400,"잘못된 요청입니다."),
+    DUPLICATE_PHONE_NUMBER(40001,"전화번호가 중복되었습니다."),
+    DUPLICATE_EMAIL(40002,"이미 존재하는 이메일입니다."),
 
     /**
-     * 401
+     * 401 : 인증되지 않은 사용자
      */
     EXPIRED_TOKEN(40101, "토큰 유효 시간이 만료되었습니다"),
     INVALID_TOKEN(40102, "유효하지 않은 토큰입니다."),
@@ -25,25 +27,18 @@ public enum ErrorCode {
     REFRESH_TOKEN_NOT_EXIST(40104, "리프레쉬 토큰이 존재하지 않습니다"),
 
     /**
-     * 401
+     * 403: 권한 없음
      */
     FORBIDDEN(403, "권한이 없습니다."),
-    /**
-     * * 403
-     */
 
     /**
-     * 404 NOT FOUND
+     * 404: NOT FOUND
      */
     NOT_FOUND(404, "요청한 자원을 찾을 수 없습니다."),
     NOT_FOUND_MEMBER(40401, "존재하지 않는 사용자 정보입니다"),
     NOT_FOUND_REVIEW(40402, "존재하지 않는 리뷰입니다"),
-    NOT_FOUND_CART(40403, "존재하지 않는 장바구니 품목입니다."),
     NOT_FOUND_ORDER(40404, "존재하지 않는 주문 번호입니다."),
     NOT_FOUND_PRODUCT(40405,"물건을 찾을 수 없습니다"),
-    NOT_FOUND_PURCHASE(40406,"구매 물건을 찾을 수 없습니다."),
-
-
 
     /**
      * 500 서버에러
