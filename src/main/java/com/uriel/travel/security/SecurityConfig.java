@@ -47,8 +47,11 @@ public class SecurityConfig {
                         configurer
                                 .logoutUrl("/api/users/logout")
                                 .deleteCookies("JSESSIONID")
-                );
-
+                )
+                //인증되지 않은 자원에 접근 시,
+                .exceptionHandling((configurer)->
+                        configurer.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                .apply(new JwtSecurityConfig(tokenProvider));
         return http.build();
     }
 

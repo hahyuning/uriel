@@ -1,19 +1,16 @@
-package com.uriel.travel.jwt;
-
-
+package com.uriel.travel.security;
+import com.uriel.travel.jwt.TokenProvider;
 import jakarta.servlet.*;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
-
 import java.io.IOException;
 
 @RequiredArgsConstructor
-public class jwtAuthenticationFilter extends GenericFilterBean {
+public class JwtAuthenticationFilter extends GenericFilterBean {
     private final TokenProvider tokenProvider;
 
     @Override
