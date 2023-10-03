@@ -46,6 +46,10 @@ public class AuthService {
                     throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
                 });
     }
-
+    /**
+     * 로그인
+     * @param  - 이메일(아이디),비밀번호
+     * @return 회원가입 정보 + pk
+     */
 
 }

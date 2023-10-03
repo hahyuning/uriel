@@ -11,6 +11,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -30,12 +31,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 @Component
 public class TokenProvider {
     private final Key key;
     public static final String TOKEN_TYPE ="Bearer";
 
-    public TokenProvider(@Value("${jwt.token.key}") String secretKey){
+    public TokenProvider(@Value("${jwt.secret}") String secretKey){
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
