@@ -3,6 +3,7 @@ package com.uriel.travel.jwt;
 import com.uriel.travel.exception.CustomException;
 import com.uriel.travel.exception.CustomUnauthorizedException;
 import com.uriel.travel.exception.ErrorCode;
+import com.uriel.travel.jwt.entity.RefreshToken;
 import com.uriel.travel.jwt.entity.TokenResponseDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -40,16 +41,16 @@ public class TokenProvider {
     private long accessTokenValidTime;
     @Value("${jwt.live.rtk}")
     private long refreshTokenValidTime;
+    RefreshToken refreshToken;
 
     @PostConstruct
     protected void init(){
       secretKey= Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
-    public String generateToken(String email,long tokenValid) {
-        Claims claims=Jwts.claims().setSubject(email);
+    public String generateToken(Authentication authentication,long tokenValid) {
+        Claims claims=Jwts.claims().setSubject(authentication.getName());
         Date date=new Date();
         key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
-
         return Jwts.builder()
                 .setIssuer("uriel")
                 .setClaims(claims)
@@ -59,16 +60,16 @@ public class TokenProvider {
                 .compact();
     }
     //access token 생성
-    public String createAccessToken(String email) {
-       return this.generateToken(email,accessTokenValidTime);
+    public String createAccessToken(Authentication authentication) {
+       return this.generateToken(authentication,accessTokenValidTime);
     }
-    public String createRefreshToken(String email){
-        return this.generateToken(email,refreshTokenValidTime);
+    public String createRefreshToken(Authentication authentication){
+        return this.generateToken(authentication,refreshTokenValidTime);
     }
-    public TokenResponseDto createTokenDto(String email){
+    public TokenResponseDto createTokenDto(String at, String rt){
         return TokenResponseDto.builder()
-                .accessToken(this.createAccessToken(email))
-                .refreshToken(this.createRefreshToken(email))
+                .accessToken(at)
+                .refreshToken(rt)
                 .grantType(TOKEN_TYPE)
                 .build();
     }
@@ -123,4 +124,27 @@ public class TokenProvider {
     public String getUserEmail(String accessToken){
         return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(accessToken).getBody().getSubject();
     }
+    /**
+     * 리프레쉬 토큰 관련
+     */
+//    public TokenResponseDto updateRefreshToken(HttpServletRequest request){
+//        String accessToken=getAccessToken(request);
+//        String refreshToken=getRefreshToken(request);
+//        if(!validateToken())
+//    }
+    public Long getMemberIdFromRefreshToken(String refreshToken) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(secretKey.getBytes(StandardCharsets.UTF_8))
+                .build()
+                .parseClaimsJws(refreshToken)
+                .getBody();
+
+        // 주체(Subject)를 추출하고 Long으로 변환하여 반환
+        String subject = claims.getSubject();
+        return Long.parseLong(subject);
+    }
+
+
+
+
 }

@@ -5,16 +5,25 @@ import com.uriel.travel.dto.UserRequestDto;
 import com.uriel.travel.dto.UserResponseDto;
 import com.uriel.travel.exception.CustomBadRequestException;
 import com.uriel.travel.exception.CustomException;
+import com.uriel.travel.exception.CustomUnauthorizedException;
 import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.jwt.TokenProvider;
+import com.uriel.travel.jwt.entity.RefreshToken;
 import com.uriel.travel.jwt.entity.TokenResponseDto;
+import com.uriel.travel.repository.RefreshTokenRepository;
 import com.uriel.travel.repository.UsersRepository;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 
 @Service
@@ -22,9 +31,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class AuthService {
     private final UsersRepository usersRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final TokenProvider tokenProvider;
+    private final RefreshTokenService refreshTokenService;
 
     /**
      * 회원 정보 저장(회원가입)
@@ -61,21 +72,39 @@ public class AuthService {
      * @return 회원가입 정보 + pk
      */
     public TokenResponseDto login(UserRequestDto.login loginDto){
-        Users user=usersRepository.findByEmail(loginDto.getEmail()).orElseThrow(()->
-                new CustomBadRequestException(ErrorCode.LOGIN_EMAIL_ERROR));
-        boolean matches=passwordEncoder.matches(loginDto.getPassword(),user.getPassword());
-        if(!matches) throw new CustomBadRequestException(ErrorCode.LOGIN_PASSWORD_ERROR);
-        return tokenProvider.createTokenDto(loginDto.getEmail());
+
+        Authentication authenticationToken = new UsernamePasswordAuthenticationToken(
+                loginDto.getEmail(),loginDto.getPassword()
+        );
+
+        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String accessToken = tokenProvider.createAccessToken(authentication);
+        String refreshToken = tokenProvider.createRefreshToken(authentication);
+
+        Long userId = tokenProvider.getMemberIdFromRefreshToken(refreshToken);
+        RefreshToken refreshTokenEntity = refreshTokenRepository.findByUserId(userId)
+                .orElse(RefreshToken.builder().user(Users.builder().id(userId).build())
+                        .build());
+        refreshTokenEntity.updateRefreshToken(refreshToken);
+        refreshTokenRepository.save(refreshTokenEntity);
+
+        return tokenProvider.createTokenDto(accessToken,refreshToken);
     }
     public void logout(HttpServletRequest request){
-        String refreshToken= tokenProvider.getRefreshToken(request);
-
+        String token= tokenProvider.getRefreshToken(request);
+        RefreshToken refreshToken = refreshTokenRepository.findByUserId(tokenProvider.getMemberIdFromRefreshToken(token))
+                .orElseThrow(()->
+                        new CustomUnauthorizedException(ErrorCode.REFRESH_TOKEN_NOT_EXIST));
+        refreshTokenRepository.delete(refreshToken);
     }
+
     /**
-     * 회원정보 수정
-     * @param  -
-     * @return
+     * 회원정보 관련
      */
+//    public UserResponseDto.Profile updateUserProfile(UserRequestDto.Profile userRequestDto){
+//
+//    }
 
 
 }

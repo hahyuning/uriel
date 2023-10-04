@@ -55,11 +55,19 @@ public class UserRequestDto {
     public static class Email {
         String email;
     }
+
     @Getter
     @Setter
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class verifyEmail {
+    public static class Profile {
         String email;
+        String password;
+        String userName;
+        Gender gender;
+        LocalDate birth;
+        String phoneNumber;
+        int headCount;
+        String childName;
     }
 
 }
