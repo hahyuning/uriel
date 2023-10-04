@@ -17,6 +17,9 @@ public enum ErrorCode {
     BAD_REQUEST(400,"잘못된 요청입니다."),
     DUPLICATE_PHONE_NUMBER(40001,"전화번호가 중복되었습니다."),
     DUPLICATE_EMAIL(40002,"이미 존재하는 이메일입니다."),
+    LOGIN_EMAIL_ERROR(40003,"사용자 이메일이 존재하지 않습니다."),
+    LOGIN_PASSWORD_ERROR(40004,"비밀번호 오류입니다."),
+    DUPLICATE_UNIQUE_KEY(40005,"무결성 제약조건에 위배되었습니다."),
 
     /**
      * 401 : 인증되지 않은 사용자
@@ -25,6 +28,7 @@ public enum ErrorCode {
     INVALID_TOKEN(40102, "유효하지 않은 토큰입니다."),
     LOGIN_REQUIRED(40103, "토큰이 존재하지 않습니다. 로그인 이후 요청해주세요"),
     REFRESH_TOKEN_NOT_EXIST(40104, "리프레쉬 토큰이 존재하지 않습니다"),
+    REFRESH_TOKEN_NULL(40105,"리프레쉬 토큰 값이 비었습니다."),
 
     /**
      * 403: 권한 없음
@@ -38,7 +42,7 @@ public enum ErrorCode {
     NOT_FOUND_MEMBER(40401, "존재하지 않는 사용자 정보입니다"),
     NOT_FOUND_REVIEW(40402, "존재하지 않는 리뷰입니다"),
     NOT_FOUND_ORDER(40404, "존재하지 않는 주문 번호입니다."),
-    NOT_FOUND_PRODUCT(40405,"물건을 찾을 수 없습니다"),
+    NOT_FOUND_PRODUCT(40405,"물건을 찾지을 수 없습니다"),
 
     /**
      * 500 서버에러

@@ -57,8 +57,7 @@ public class SecurityConfig {
                 )
                 //인증되지 않은 자원에 접근 시,
                 .exceptionHandling((configurer)->
-                        configurer.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-                .apply(new JwtSecurityConfig(tokenProvider));
+                        configurer.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
         return http.build();
     }
 
