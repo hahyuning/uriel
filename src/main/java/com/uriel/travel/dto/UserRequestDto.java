@@ -1,5 +1,6 @@
 package com.uriel.travel.dto;
 
+import com.uriel.travel.domain.Gender;
 import com.uriel.travel.domain.Users;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -14,6 +15,7 @@ public class UserRequestDto {
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class SignUp{
         String userName;
+        Gender gender;
         LocalDate birth;
         String email;
         String password;
@@ -23,11 +25,13 @@ public class UserRequestDto {
         public Users toUserEntity(){
             return Users.builder()
                     .userName(userName)
+                    .gender(gender)
                     .birth(birth)
                     .email(email)
                     .password(password)
                     .phoneNumber(phoneNumber)
                     .headCount(headCount)
+                    .childName(childName)
                     .build();
         }
     }

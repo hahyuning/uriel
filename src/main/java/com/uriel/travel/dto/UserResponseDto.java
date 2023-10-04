@@ -55,5 +55,16 @@ public class UserResponseDto {
                     .build();
         }
     }
+    @Getter
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class Simple{
+        Long id;
+        public static Simple of(Users users){
+            return Simple.builder()
+                    .id(users.getId())
+                    .build();
+        }
+    }
 
 }

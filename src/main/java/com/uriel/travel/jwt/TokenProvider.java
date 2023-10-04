@@ -1,16 +1,17 @@
 package com.uriel.travel.jwt;
 
-import com.uriel.travel.exception.BusinessException;
 import com.uriel.travel.exception.CustomException;
+import com.uriel.travel.exception.CustomUnauthorizedException;
 import com.uriel.travel.exception.ErrorCode;
-import com.uriel.travel.jwt.dto.TokenResponseDto;
+import com.uriel.travel.jwt.entity.TokenResponseDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,56 +23,60 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 @Component
 public class TokenProvider {
-    private final Key key;
+    @Value("${jwt.secret}")
+    private String secretKey;
+    private Key key;
     public static final String TOKEN_TYPE ="Bearer";
+    @Value("${jwt.live.atk}")
+    private long accessTokenValidTime;
+    @Value("${jwt.live.rtk}")
+    private long refreshTokenValidTime;
 
-    public TokenProvider(@Value("${jwt.token.key}") String secretKey){
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
+    @PostConstruct
+    protected void init(){
+      secretKey= Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
+    public String generateToken(String email,long tokenValid) {
+        Claims claims=Jwts.claims().setSubject(email);
+        Date date=new Date();
+        key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
 
-    public TokenResponseDto generateToken(Authentication authentication){
-        String authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
-
-        long now = (new Date()).getTime();
-        //access token 생성
-        Date accessTokenExpiresIn = new Date(now + 86400000);
-        String accessToken = Jwts.builder()
-                .setSubject(authentication.getName())
-                .claim("auth", authorities)
-                .setExpiration(accessTokenExpiresIn)
-                .signWith(key, SignatureAlgorithm.HS256)
+        return Jwts.builder()
+                .setIssuer("uriel")
+                .setClaims(claims)
+                .setIssuedAt(date)
+                .setExpiration(new Date(date.getTime() + tokenValid))
+                .signWith(key,SignatureAlgorithm.HS256)
                 .compact();
-        //refresh token 생성
-        String refreshToken = Jwts.builder()
-                .setExpiration(new Date(now + 86400000))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-
+    }
+    //access token 생성
+    public String createAccessToken(String email) {
+       return this.generateToken(email,accessTokenValidTime);
+    }
+    public String createRefreshToken(String email){
+        return this.generateToken(email,refreshTokenValidTime);
+    }
+    public TokenResponseDto createTokenDto(String email){
         return TokenResponseDto.builder()
-                .grantType("Bearer")
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .accessToken(this.createAccessToken(email))
+                .refreshToken(this.createRefreshToken(email))
+                .grantType(TOKEN_TYPE)
                 .build();
     }
     //jwt 토큰 안에 있는 정보를 꺼내는 메서드
     public Authentication getAuthentication(String accessToken){
         Claims claims = parseClaims(accessToken);
-
         if(claims.get("auth") == null){
-            throw new BusinessException(ErrorCode.INVALID_TOKEN);
+            throw new CustomUnauthorizedException(ErrorCode.INVALID_TOKEN);
         }
         //클레임에서 권한 정보 가져오기
         Collection<? extends GrantedAuthority> authorities =
@@ -90,13 +95,21 @@ public class TokenProvider {
         }
         return token.substring(7);
     }
+    public String getRefreshToken(HttpServletRequest request){
+        String token = Optional.ofNullable(request.getHeader("refreshToken")).orElseThrow(()->
+            new CustomException(ErrorCode.REFRESH_TOKEN_NOT_EXIST));
+        if(StringUtils.hasText(token)){ //토큰 값이 비었으면,
+            throw new CustomException(ErrorCode.REFRESH_TOKEN_NULL);
+        }
+        return token.substring(7);
+    }
 
     public boolean validateToken(String token){
         try{
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (Exception e){
-            throw new BusinessException(ErrorCode.INVALID_TOKEN);
+            throw new CustomUnauthorizedException(ErrorCode.INVALID_TOKEN);
         }
     }
 
@@ -106,5 +119,8 @@ public class TokenProvider {
         } catch (ExpiredJwtException e){
             return e.getClaims();
         }
+    }
+    public String getUserEmail(String accessToken){
+        return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(accessToken).getBody().getSubject();
     }
 }
