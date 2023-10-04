@@ -1,5 +1,6 @@
 package com.uriel.travel.domain;
 
+import com.uriel.travel.jwt.entity.RefreshToken;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -41,6 +42,8 @@ public class Users {
     String childName;
     @Column
     Gender gender;
+    @OneToOne
+    RefreshToken refreshToken;
 //    @OneToMany(mappedBy = "users")
 //    List <Reservation> reservationList=new ArrayList<>();
 //    @OneToOne(mappedBy = "users")
@@ -48,7 +51,9 @@ public class Users {
     public void encodePassword(PasswordEncoder passwordEncoder){
         password=passwordEncoder.encode(password);
     }
-
+    public void setRefreshToken(RefreshToken refreshToken){
+        this.refreshToken=refreshToken;
+    }
 
 
 
