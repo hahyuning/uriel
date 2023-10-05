@@ -15,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -22,43 +23,31 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final TokenProvider tokenProvider;
-    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
-    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .exceptionHandling(configurer -> {
-                    configurer.authenticationEntryPoint(jwtAuthenticationEntryPoint);
-                    configurer.accessDeniedHandler(jwtAccessDeniedHandler);
-                })
-                .sessionManagement(configurer ->
-                        configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-
-                .authorizeHttpRequests((authorizeRequest) ->
-                        authorizeRequest
-                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/**").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/**").permitAll()
-                                .requestMatchers(HttpMethod.PUT, "/**").permitAll()
-                                .requestMatchers(HttpMethod.DELETE, "/**").permitAll()
-                                .requestMatchers(HttpMethod.OPTIONS, "/**")
-                                .permitAll()
-                )
-
                 .formLogin(AbstractHttpConfigurer::disable)
-
-                .logout((configurer) ->
-                        configurer
-                                .logoutUrl("/api/users/logout")
-                                .deleteCookies("JSESSIONID")
+                .sessionManagement((sessionManagement) ->
+                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                //인증되지 않은 자원에 접근 시,
-                .exceptionHandling((configurer)->
-                        configurer.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
+                .authorizeHttpRequests((authorizeRequest) -> authorizeRequest
+                        .requestMatchers("/users/login").anonymous()
+                        .anyRequest().permitAll()
+                )
+                .logout((configurer) -> configurer
+                        .logoutUrl("/api/users/logout")
+                        .deleteCookies("JSESSIONID")
+                )
+                //앞이 통과하면 실행 x
+                .addFilterBefore(
+                        new JwtAuthenticationFilter(tokenProvider),
+                        UsernamePasswordAuthenticationFilter.class
+                );
+
         return http.build();
+
     }
 
     @Bean

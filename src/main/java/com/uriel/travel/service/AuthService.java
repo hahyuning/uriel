@@ -71,8 +71,10 @@ public class AuthService {
      * @param  - 이메일(아이디),비밀번호
      * @return 회원가입 정보 + pk
      */
-    public TokenResponseDto login(UserRequestDto.login loginDto){
 
+    public TokenResponseDto login(UserRequestDto.login loginDto){
+        String encodedPassword = passwordEncoder.encode(loginDto.getPassword());
+        loginDto.setPassword(encodedPassword);
         Authentication authenticationToken = new UsernamePasswordAuthenticationToken(
                 loginDto.getEmail(),loginDto.getPassword()
         );
@@ -83,9 +85,11 @@ public class AuthService {
         String refreshToken = tokenProvider.createRefreshToken(authentication);
 
         Long userId = tokenProvider.getMemberIdFromRefreshToken(refreshToken);
+
         RefreshToken refreshTokenEntity = refreshTokenRepository.findByUserId(userId)
                 .orElse(RefreshToken.builder().user(Users.builder().id(userId).build())
                         .build());
+
         refreshTokenEntity.updateRefreshToken(refreshToken);
         refreshTokenRepository.save(refreshTokenEntity);
 
@@ -98,6 +102,7 @@ public class AuthService {
                         new CustomUnauthorizedException(ErrorCode.REFRESH_TOKEN_NOT_EXIST));
         refreshTokenRepository.delete(refreshToken);
     }
+
 
     /**
      * 회원정보 관련
