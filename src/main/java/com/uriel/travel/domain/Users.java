@@ -47,9 +47,8 @@ public class Users {
     Gender gender;
     @OneToOne
     RefreshToken refreshToken;
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Builder.Default
-    private List<String> roles = new ArrayList<>();
+    Authority authority;
+
 //    @OneToMany(mappedBy = "users")
 //    List <Reservation> reservationList=new ArrayList<>();
 //    @OneToOne(mappedBy = "users")
@@ -60,6 +59,8 @@ public class Users {
     public void setRefreshToken(RefreshToken refreshToken){
         this.refreshToken=refreshToken;
     }
-
+    public void setAuthority(Authority authority){
+        this.authority=authority;
+    }
 
 }

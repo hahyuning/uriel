@@ -42,7 +42,7 @@ public class SecurityConfig {
                 )
                 //앞이 통과하면 실행 x
                 .addFilterBefore(
-                        new JwtAuthenticationFilter(tokenProvider),
+                        new JwtFilter(tokenProvider),
                         UsernamePasswordAuthenticationFilter.class
                 );
 
