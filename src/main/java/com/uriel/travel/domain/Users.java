@@ -6,11 +6,14 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
+
 @Entity
 @Getter
 @AllArgsConstructor
@@ -44,6 +47,8 @@ public class Users {
     Gender gender;
     @OneToOne
     RefreshToken refreshToken;
+    Authority authority;
+
 //    @OneToMany(mappedBy = "users")
 //    List <Reservation> reservationList=new ArrayList<>();
 //    @OneToOne(mappedBy = "users")
@@ -54,7 +59,8 @@ public class Users {
     public void setRefreshToken(RefreshToken refreshToken){
         this.refreshToken=refreshToken;
     }
-
-
+    public void setAuthority(Authority authority){
+        this.authority=authority;
+    }
 
 }
