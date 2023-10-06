@@ -1,7 +1,6 @@
 package com.uriel.travel.Controller;
 
 
-import com.fasterxml.jackson.databind.ser.Serializers;
 import com.uriel.travel.Base.BaseResponse;
 import com.uriel.travel.dto.UserRequestDto;
 import com.uriel.travel.dto.UserResponseDto;
@@ -29,9 +28,9 @@ public class AuthController {
     }
     //로그아웃
     @PostMapping("/logout")
-    public BaseResponse<Void> login(HttpServletRequest request){
+    public BaseResponse<String> logout(HttpServletRequest request){
         authService.logout(request);
-        return BaseResponse.ok();
+        return BaseResponse.ok("로그아웃 되었습니다.");
     }
 
     //회원정보 조회

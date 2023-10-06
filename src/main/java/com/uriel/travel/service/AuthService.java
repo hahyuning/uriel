@@ -115,17 +115,17 @@ public class AuthService implements UserDetailsService {
     3. 요청의 token refreshToken 저장소의 token 과 비교합니다.
     4. 맞으면 토큰을 지웁니다.
      */
+    //todo: 수정 필요,,계속 200만 찍힘
     public void logout(HttpServletRequest request){
-        request.getHeader(REFRESH_TOKEN);
         String token= tokenProvider.getRefreshToken(request); //refresh token
-        System.out.println(token);
-        System.out.println(userService.getLoginMemberId());
-        //todo: 현재 로그인한 사용자랑 로그아웃 요청한 사용자가 맞는지 확인하는 로직을 추가해야 할까..?
-        RefreshToken refreshToken = refreshTokenRepository.findByUserId(userService.getLoginMemberId()) //이 토큰이 누구 것인가
-                .orElseThrow(()->
-                        new CustomUnauthorizedException(ErrorCode.REFRESH_TOKEN_NOT_EXIST));
-        refreshTokenRepository.delete(refreshToken);
-        System.out.println("로그아웃 완료했음");
+        Users user = usersRepository.findByEmail(tokenProvider.getAuthentication(token).getName()).orElseThrow(()->
+                new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
+        if(userService.getLoginMemberId().equals(user.getId())){
+            RefreshToken refreshToken = refreshTokenRepository.findByUserId(userService.getLoginMemberId()) //이 토큰이 누구 것인가
+                    .orElseThrow(()->
+                            new CustomUnauthorizedException(ErrorCode.REFRESH_TOKEN_NOT_EXIST));
+            refreshTokenRepository.delete(refreshToken);
+        }
     }
 
 
