@@ -36,6 +36,15 @@ public class Package extends BaseTimeEntity {
 
     String season;
 
+    @Lob
+    String hotelInfo;
+
+    @Lob
+    String regionInfo;
+
+    @Lob
+    String terms;
+
     @Enumerated(EnumType.STRING)
     TagType tagType;
 
