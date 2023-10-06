@@ -33,6 +33,7 @@ public class SecurityConfig {
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests((authorizeRequest) -> authorizeRequest
+                        .requestMatchers("/users/signup").anonymous()
                         .requestMatchers("/users/login").anonymous()
                         .anyRequest().permitAll()
                 )
@@ -40,7 +41,7 @@ public class SecurityConfig {
                         .logoutUrl("/api/users/logout")
                         .deleteCookies("JSESSIONID")
                 )
-                //앞이 통과하면 실행 x
+                //jwt 필터를 UsernamePasswordAuthenticationFilter보다 전에 실행
                 .addFilterBefore(
                         new JwtFilter(tokenProvider),
                         UsernamePasswordAuthenticationFilter.class

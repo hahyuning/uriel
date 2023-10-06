@@ -2,6 +2,7 @@ package com.uriel.travel.jwt;
 
 import com.uriel.travel.domain.Authority;
 import com.uriel.travel.exception.CustomException;
+import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.CustomUnauthorizedException;
 import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.jwt.entity.RefreshToken;
@@ -12,9 +13,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -87,21 +90,49 @@ public class TokenProvider {
         Collection<? extends GrantedAuthority> authority = Collections.singleton(new SimpleGrantedAuthority(claims.get("auth").toString()));
         return new UsernamePasswordAuthenticationToken(claims.getSubject(), "", authority);
     }
-    public String getAccessToken(HttpServletRequest request){ //요청에서 토큰을 빼냄
-        return request.getHeader(ACCESS_TOKEN);
-    }
-    public String getRefreshToken(HttpServletRequest request){
-       return request.getHeader(REFRESH_TOKEN);
-    }
-
     public boolean validateToken(String token){
-        try{
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return true;
-        } catch (Exception e){
+       try{
+           parseClaims(token);
+       }catch (CustomUnauthorizedException customUnauthorizedException){
+           throw new CustomUnauthorizedException(ErrorCode.INVALID_TOKEN);
+       }
+       return false;
+    }
+    public String getAccessToken(HttpServletRequest request) {
+        String token = Optional.ofNullable(request.getHeader(HttpHeaders.AUTHORIZATION)).orElseThrow(() ->
+                new CustomUnauthorizedException(ErrorCode.LOGIN_REQUIRED));
+
+        if (!StringUtils.hasText(token) || !StringUtils.startsWithIgnoreCase(token, TOKEN_TYPE)) {
             throw new CustomUnauthorizedException(ErrorCode.INVALID_TOKEN);
         }
+
+        return token.substring(7);
     }
+    public String getRefreshToken(HttpServletRequest request) {
+        String token = getCookieByName(request, "Refresh-Token").orElseThrow(() ->
+                new CustomUnauthorizedException(ErrorCode.REFRESH_TOKEN_NOT_EXIST)
+        );
+
+        if (!StringUtils.hasText(token) || !StringUtils.startsWithIgnoreCase(token, TOKEN_TYPE)) {
+            throw new CustomUnauthorizedException(ErrorCode.INVALID_TOKEN);
+        }
+
+        return token.substring(7);
+    }
+    private Optional<String> getCookieByName(HttpServletRequest request, String name) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(name)) {
+                    return Optional.of(cookie.getValue());
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+
+
 
     private Claims parseClaims(String accessToken){
         try{
@@ -113,18 +144,6 @@ public class TokenProvider {
     public String getUserEmail(String accessToken){
         return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(accessToken).getBody().getSubject();
     }
-
-    /**
-     * 리프레쉬 토큰 관련
-     */
-//    public TokenResponseDto updateRefreshToken(HttpServletRequest request){
-//        String accessToken=getAccessToken(request);
-//        String refreshToken=getRefreshToken(request);
-//        if(!validateToken())
-//    }
-
-
-
 
 
 }
