@@ -1,8 +1,6 @@
 package com.uriel.travel.jwt;
 
 import com.uriel.travel.domain.Authority;
-import com.uriel.travel.exception.CustomException;
-import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.CustomUnauthorizedException;
 import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.jwt.entity.RefreshToken;
@@ -26,52 +24,40 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-
-
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.ACCESS_TOKEN;
-import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.REFRESH_TOKEN;
 
 
 @Slf4j
 @Component
 public class TokenProvider {
-    @Value("${jwt.secret}")
-    private String secretKey;
-    private Key key;
-    public static final String TOKEN_TYPE ="Bearer";
-    @Value("${jwt.live.atk}")
-    private long accessTokenValidTime;
-    @Value("${jwt.live.rtk}")
-    private long refreshTokenValidTime;
-    RefreshToken refreshToken;
-
-    @PostConstruct
-    protected void init(){
-      secretKey= Base64.getEncoder().encodeToString(secretKey.getBytes());
+    private final Key key;
+    private static final String AUTHORITIES_KEY = "auth";
+    private static final String TOKEN_TYPE = "Bearer";
+    private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 60 * 1000L;              // 30분
+    private static final long REFRESH_TOKEN_EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000L;    // 7일
+    public TokenProvider( @Value("${jwt.secret}") String secretKey){
+        key= Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
-    public String generateToken(String email,long tokenValid,Authority authority) {
+    public String generateToken(Authentication authentication,long tokenValid,Authority authority) {
         Date date=new Date();
-        key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
         return Jwts.builder()
                 .setIssuer("uriel")
-                .setSubject(email)
-                .claim("auth",authority)
+                .setSubject(authentication.getName())
+                .claim(AUTHORITIES_KEY,authority)
                 .setIssuedAt(date)
                 .setExpiration(new Date(date.getTime() + tokenValid))
                 .signWith(key,SignatureAlgorithm.HS256)
                 .compact();
     }
     //access token 생성
-    public String createAccessToken(String email,Authority authority) {
-       return this.generateToken(email,accessTokenValidTime,authority);
+    public String createAccessToken(Authentication authentication,Authority authority) {
+       return this.generateToken(authentication,ACCESS_TOKEN_EXPIRE_TIME,authority);
     }
-    public String createRefreshToken(String email, Authority authority){
-        return this.generateToken(email,refreshTokenValidTime,authority);
+    public String createRefreshToken(Authentication authentication, Authority authority){
+        return this.generateToken(authentication,REFRESH_TOKEN_EXPIRE_TIME,authority);
     }
     public TokenResponseDto createTokenDto(String at, String rt){
         return TokenResponseDto.builder()
@@ -83,20 +69,24 @@ public class TokenProvider {
     //jwt 토큰 안에 있는 정보를 꺼내는 메서드
     public Authentication getAuthentication(String accessToken){
         Claims claims = parseClaims(accessToken);
-        if(claims.get("auth") == null){
+        if(claims.get(AUTHORITIES_KEY) == null){
             throw new CustomUnauthorizedException(ErrorCode.INVALID_TOKEN);
         }
         //클레임에서 권한 정보 가져오기
-        Collection<? extends GrantedAuthority> authority = Collections.singleton(new SimpleGrantedAuthority(claims.get("auth").toString()));
-        return new UsernamePasswordAuthenticationToken(claims.getSubject(), "", authority);
+        Collection<? extends GrantedAuthority> authorities =
+                Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+                        .map(SimpleGrantedAuthority::new)
+                        .toList();
+        UserDetails principal = new User(claims.getSubject(), "", authorities);
+        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
     public boolean validateToken(String token){
        try{
-           parseClaims(token);
+           Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+           return true;
        }catch (CustomUnauthorizedException customUnauthorizedException){
            throw new CustomUnauthorizedException(ErrorCode.INVALID_TOKEN);
        }
-       return false;
     }
     public String getAccessToken(HttpServletRequest request) {
         String token = Optional.ofNullable(request.getHeader(HttpHeaders.AUTHORIZATION)).orElseThrow(() ->
@@ -109,7 +99,7 @@ public class TokenProvider {
         return token.substring(7);
     }
     public String getRefreshToken(HttpServletRequest request) {
-        String token = getCookieByName(request, "Refresh-Token").orElseThrow(() ->
+        String token = getCookieByName(request).orElseThrow(() ->
                 new CustomUnauthorizedException(ErrorCode.REFRESH_TOKEN_NOT_EXIST)
         );
 
@@ -119,30 +109,23 @@ public class TokenProvider {
 
         return token.substring(7);
     }
-    private Optional<String> getCookieByName(HttpServletRequest request, String name) {
+    private Optional<String> getCookieByName(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (cookie.getName().equals(name)) {
+                if (cookie.getName().equals("Refresh-Token")) {
                     return Optional.of(cookie.getValue());
                 }
             }
         }
         return Optional.empty();
     }
-
-
-
-
     private Claims parseClaims(String accessToken){
         try{
             return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
         } catch (ExpiredJwtException e){
             return e.getClaims();
         }
-    }
-    public String getUserEmail(String accessToken){
-        return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(accessToken).getBody().getSubject();
     }
 
 

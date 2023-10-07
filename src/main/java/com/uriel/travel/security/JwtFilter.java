@@ -21,13 +21,13 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try { //try문에서 예외 발생시, 빠짐
             String token = tokenProvider.getAccessToken(request);
-            if (token != null && tokenProvider.validateToken(token)) {
+            if(tokenProvider.validateToken(token)){
                 Authentication authentication = tokenProvider.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception e) {
-            filterChain.doFilter(request, response); //필터를 넘김
         }
+        filterChain.doFilter(request, response); //필터를 넘김
     }
 
 

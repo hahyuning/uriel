@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 @Entity
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -55,6 +56,12 @@ public class Users {
 //    JwtRefreshToken jwtRefreshToken;
     public void encodePassword(PasswordEncoder passwordEncoder){
         password=passwordEncoder.encode(password);
+    }
+    public void setEncodePassword(String password, PasswordEncoder passwordEncoder) {
+        if (StringUtils.hasText(password)) {
+            this.password = password;
+            encodePassword(passwordEncoder);
+        }
     }
     public void setRefreshToken(RefreshToken refreshToken){
         this.refreshToken=refreshToken;

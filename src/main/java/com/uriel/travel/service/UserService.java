@@ -18,10 +18,7 @@ public class UserService {
 
     /* 현재 로그인 중인 사용자의 pk 값 받아오기 */
     public Long getLoginMemberId() {
-        Users user = usersRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(() ->
-                new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER)
-        );
-        return user.getId();
+        return Long.parseLong(SecurityContextHolder.getContext().getAuthentication().getName());
     }
 
 }
