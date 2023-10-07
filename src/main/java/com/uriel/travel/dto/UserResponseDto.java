@@ -41,17 +41,25 @@ public class UserResponseDto {
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class Profile{
+        String email;
+        String password;
         String userName;
         Gender gender;
         LocalDate birth;
         String phoneNumber;
+        int headCount;
+        String childName;
 
         public static Profile of(Users users){
             return Profile.builder()
+                    .email(users.getEmail())
+                    .password(users.getPassword())
                     .userName(users.getUserName())
                     .gender(users.getGender())
                     .birth(users.getBirth())
                     .phoneNumber(users.getPhoneNumber())
+                    .headCount(users.getHeadCount())
+                    .childName(users.getChildName())
                     .build();
         }
     }

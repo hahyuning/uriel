@@ -68,7 +68,6 @@ public class AuthService implements UserDetailsService {
                     throw new CustomBadRequestException(ErrorCode.DUPLICATE_EMAIL);
                 });
     }
-
     /**
      * 로그인 관련
      */
@@ -78,7 +77,7 @@ public class AuthService implements UserDetailsService {
         Users users = usersRepository.findByEmail(email).orElseThrow(()->
                 new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
         return User.builder()
-                .username(users.getEmail())
+                .username(users.getId().toString())
                 .password(users.getPassword())
                 .build();
     }
@@ -94,18 +93,16 @@ public class AuthService implements UserDetailsService {
                 new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER)
         );
 
-        /* 사용자 인증 완료 후 토큰 발급 +이메일로 Claims subject를 설정 */
-        String accessToken = tokenProvider.createAccessToken(loginDto.getEmail(),user.getAuthority());
-        String refreshToken = tokenProvider.createRefreshToken(loginDto.getEmail(),user.getAuthority());
-
-
+        /* 사용자 인증 완료 후 토큰 발급 + 이메일로 Claims subject를 설정 */
+        String accessToken = tokenProvider.createAccessToken(authentication,user.getAuthority());
+        String refreshToken = tokenProvider.createRefreshToken(authentication,user.getAuthority());
 
         /* 발급한 리프레쉬 토큰을 따로 저장, 레포에 없으면 새로 빌드 */
         RefreshToken refreshTokenEntity = refreshTokenRepository.findByUserId(user.getId())
-                .orElse(RefreshToken.builder().user(Users.builder().id(user.getId()).build())
-                        .build());
+                .orElse(RefreshToken.builder().user(user).build());
         refreshTokenEntity.updateRefreshToken(refreshToken);
         refreshTokenRepository.save(refreshTokenEntity);
+        user.setRefreshToken(refreshTokenEntity);
 
         return tokenProvider.createTokenDto(accessToken,refreshToken);
     }
@@ -115,26 +112,43 @@ public class AuthService implements UserDetailsService {
     3. 요청의 token refreshToken 저장소의 token 과 비교합니다.
     4. 맞으면 토큰을 지웁니다.
      */
-    //todo: 수정 필요,,계속 200만 찍힘
-    public void logout(HttpServletRequest request){
-        String token= tokenProvider.getRefreshToken(request); //refresh token
-        Users user = usersRepository.findByEmail(tokenProvider.getAuthentication(token).getName()).orElseThrow(()->
-                new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
-        if(userService.getLoginMemberId().equals(user.getId())){
-            RefreshToken refreshToken = refreshTokenRepository.findByUserId(userService.getLoginMemberId()) //이 토큰이 누구 것인가
-                    .orElseThrow(()->
-                            new CustomUnauthorizedException(ErrorCode.REFRESH_TOKEN_NOT_EXIST));
-            refreshTokenRepository.delete(refreshToken);
-        }
-    }
-
-
+    //todo: 수정 필요,,
+//    public void logout(HttpServletRequest request){
+//        String token= tokenProvider.getRefreshToken(request); //refresh token
+//        if(!tokenProvider.validateToken(token)){
+//            throw new CustomBadRequestException(ErrorCode.BAD_REQUEST);
+//        }
+//        Users user = usersRepository.findByEmail(tokenProvider.getAuthentication(token).getName()).orElseThrow(()->
+//                new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
+//        if(userService.getLoginMemberId().equals(user.getId())){
+//            RefreshToken refreshToken = refreshTokenRepository.findByUserId(userService.getLoginMemberId()) //이 토큰이 누구 것인가
+//                    .orElseThrow(()->
+//                            new CustomUnauthorizedException(ErrorCode.REFRESH_TOKEN_NOT_EXIST));
+//            refreshTokenRepository.delete(refreshToken);
+//        }
+//    }
     /**
      * 회원정보 관련
      */
-//    public UserResponseDto.Profile updateUserProfile(UserRequestDto.Profile userRequestDto){
-//
-//    }
+    @Transactional
+    public void updateUserProfile(UserRequestDto.Profile userRequestDto){
+        Users user = usersRepository.findById(userService.getLoginMemberId()).orElseThrow(()->
+                new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
+
+        user.setEmail(userRequestDto.getEmail());
+        user.setEncodePassword(userRequestDto.getPassword(),passwordEncoder);
+        user.setUserName(userRequestDto.getUserName());
+        user.setGender(userRequestDto.getGender());
+        user.setBirth(userRequestDto.getBirth());
+        user.setHeadCount(userRequestDto.getHeadCount());
+        user.setChildName(userRequestDto.getChildName());
+
+    }
+    public UserResponseDto.Profile getUserProfile(){
+        Users user = usersRepository.findById(userService.getLoginMemberId()).orElseThrow(()->
+                new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
+        return UserResponseDto.Profile.of(user);
+    }
 
 
 }

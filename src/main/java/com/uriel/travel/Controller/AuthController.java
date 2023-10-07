@@ -26,15 +26,23 @@ public class AuthController {
     public BaseResponse<TokenResponseDto> login(@RequestBody UserRequestDto.login userRequestDto){
         return BaseResponse.ok(authService.login(userRequestDto));
     }
-    //로그아웃
-    @PostMapping("/logout")
-    public BaseResponse<String> logout(HttpServletRequest request){
-        authService.logout(request);
-        return BaseResponse.ok("로그아웃 되었습니다.");
-    }
+    //todo: 로그아웃 수정
+//    @PostMapping("/logout")
+//    public BaseResponse<Void> logout(HttpServletRequest request){
+//        authService.logout(request);
+//        return BaseResponse.ok();
+//    }
+    //Todo: refresh token 재발급 추가
 
     //회원정보 조회
-//    @GetMapping("/mypage")
-//    public BaseResponse<UserResponseDto.Profile> getUserProfile(){
-//    }
-}
+    @GetMapping("/my-page")
+    public BaseResponse<UserResponseDto.Profile> getUserProfile(){
+        return BaseResponse.ok(authService.getUserProfile());
+    }
+    //회원정보 수정
+    @PutMapping ("/my-page")
+    public BaseResponse<Void> updateUserProfile(@RequestBody UserRequestDto.Profile requestDto){
+        authService.updateUserProfile(requestDto);
+        return BaseResponse.ok();
+    }
+    @PostMapping("/")

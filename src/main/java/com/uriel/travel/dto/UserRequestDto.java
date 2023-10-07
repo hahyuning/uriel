@@ -41,7 +41,6 @@ public class UserRequestDto {
     public static class login{
         String email;
         String password;
-
     }
     @Getter
     @Setter
