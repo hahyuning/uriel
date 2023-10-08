@@ -10,7 +10,6 @@ import com.uriel.travel.jwt.entity.RefreshToken;
 import com.uriel.travel.jwt.entity.TokenResponseDto;
 import com.uriel.travel.repository.RefreshTokenRepository;
 import com.uriel.travel.repository.UsersRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -24,14 +23,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.REFRESH_TOKEN;
-
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class AuthService implements UserDetailsService {
     private final UsersRepository usersRepository;
+//    private final VerifiedUserRepository verifiedUserRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
@@ -133,21 +131,51 @@ public class AuthService implements UserDetailsService {
     @Transactional
     public void updateUserProfile(UserRequestDto.Profile userRequestDto){
         Users user = usersRepository.findById(userService.getLoginMemberId()).orElseThrow(()->
-                new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
+                new CustomUnauthorizedException(ErrorCode.LOGIN_REQUIRED));
 
         user.setEmail(userRequestDto.getEmail());
         user.setEncodePassword(userRequestDto.getPassword(),passwordEncoder);
         user.setUserName(userRequestDto.getUserName());
         user.setGender(userRequestDto.getGender());
         user.setBirth(userRequestDto.getBirth());
+        user.setPhoneNumber(userRequestDto.getPhoneNumber());
         user.setHeadCount(userRequestDto.getHeadCount());
         user.setChildName(userRequestDto.getChildName());
 
     }
     public UserResponseDto.Profile getUserProfile(){
         Users user = usersRepository.findById(userService.getLoginMemberId()).orElseThrow(()->
-                new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
+                new CustomUnauthorizedException(ErrorCode.LOGIN_REQUIRED));
         return UserResponseDto.Profile.of(user);
+    }
+    public UserResponseDto.FindId findId(UserRequestDto.FindId userRequestDto){
+        Users loginUser = usersRepository.findById(userService.getLoginMemberId()).orElseThrow(()->
+                new CustomUnauthorizedException(ErrorCode.LOGIN_REQUIRED));
+        Users user = usersRepository.findIdByUserNameAndPhoneNumber(userRequestDto.getUserName(),userRequestDto.getPhoneNumber()).orElseThrow(()->
+                new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
+        if(loginUser.getId().equals(user.getId())){
+            return UserResponseDto.FindId.of(user.getEmail());
+        }
+        throw new CustomForbiddenException(ErrorCode.FORBIDDEN);
+    }
+    public void findPw(UserRequestDto.FindPw userRequestDto){
+        Users user = usersRepository.findIdByUserNameAndEmail(userRequestDto.getUserName(),userRequestDto.getEmail()).orElseThrow(()->
+                new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
+        resetPassword(user,userRequestDto.getPassword());
+    }
+//    public void isValidate(UserRequestDto.FindPw userRequestDto){
+//        Optional<VerifiedUser> verifiedUserOptional = verifiedUserRepository.findIdByUserNameAndEmail(userRequestDto.getUserName(), userRequestDto.getEmail());
+//        if(verifiedUserOptional.isPresent()){
+//            VerifiedUser verifiedUser = verifiedUserOptional.get();
+//            if(!verifiedUser.getEmail().equals(userRequestDto.getEmail()) || !verifiedUser.getUserName().equals(userRequestDto.getUserName())){
+//                throw new CustomUnauthorizedException(ErrorCode.FORBIDDEN);
+//            }
+//
+//        }
+//    }
+    @Transactional
+    public void resetPassword(Users user,String password){
+        user.setEncodePassword(password,passwordEncoder);
     }
 
 

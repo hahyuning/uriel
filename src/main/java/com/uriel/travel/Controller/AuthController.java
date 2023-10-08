@@ -6,7 +6,6 @@ import com.uriel.travel.dto.UserRequestDto;
 import com.uriel.travel.dto.UserResponseDto;
 import com.uriel.travel.jwt.entity.TokenResponseDto;
 import com.uriel.travel.service.AuthService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,4 +44,14 @@ public class AuthController {
         authService.updateUserProfile(requestDto);
         return BaseResponse.ok();
     }
-    @PostMapping("/")
+    @PostMapping("/find-id")
+    public BaseResponse<UserResponseDto.FindId> findId(@RequestBody UserRequestDto.FindId requestDto){
+        return BaseResponse.ok(authService.findId(requestDto));
+    }
+    @PostMapping("/find-pw")
+    public BaseResponse<Void> findPw(@RequestBody UserRequestDto.FindPw requestDto){
+        authService.findPw(requestDto);
+        return BaseResponse.ok();
+    }
+
+}
