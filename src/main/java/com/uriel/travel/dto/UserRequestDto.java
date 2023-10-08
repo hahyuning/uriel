@@ -45,14 +45,17 @@ public class UserRequestDto {
     @Getter
     @Setter
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class PhoneNumber {
+    public static class FindId {
+        String userName;
         String phoneNumber;
     }
     @Getter
     @Setter
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class Email {
+    public static class FindPw {
+        String userName;
         String email;
+        String password;
     }
 
     @Getter
@@ -68,5 +71,11 @@ public class UserRequestDto {
         int headCount;
         String childName;
     }
+//    @Getter
+//    @Setter
+//    @FieldDefaults(level = AccessLevel.PRIVATE)
+//    public static class ChangePassword {
+//        String password;
+//    }
 
 }

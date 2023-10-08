@@ -74,5 +74,29 @@ public class UserResponseDto {
                     .build();
         }
     }
+    @Getter
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class FindId{
+        String email;
+        public static FindId of(String email){
+            return FindId.builder()
+                    .email(email)
+                    .build();
+        }
+    }
+
+    @Getter
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class FindPw{
+        String password;
+
+        public static FindPw of(Users user){
+            return FindPw.builder()
+                    .password(user.getPassword())
+                    .build();
+        }
+    }
 
 }
