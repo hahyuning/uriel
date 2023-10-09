@@ -1,20 +1,20 @@
 package com.uriel.travel.domain;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Banner {
+public class Thumbnail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "banner_id")
+    @Column(name = "thumbnail_id")
     Long id;
 
     String originalImageName;
@@ -26,10 +26,19 @@ public class Banner {
 
     String imageUrl;
 
-    public Banner(String originalImageName, String uploadImageName, String imagePath, String imageUrl) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "package_id")
+    Package aPackage;
+
+    public Thumbnail(String originalImageName, String uploadImageName, String imagePath, String imageUrl) {
         this.originalImageName = originalImageName;
         this.uploadImageName = uploadImageName;
         this.imagePath = imagePath;
         this.imageUrl = imageUrl;
+    }
+
+    public void setPackage(Package aPackage) {
+        this.aPackage = aPackage;
+        aPackage.getThumbnailList().add(this);
     }
 }

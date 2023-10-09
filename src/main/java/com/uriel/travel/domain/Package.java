@@ -47,6 +47,10 @@ public class Package extends BaseTimeEntity {
     @Lob
     String terms;
 
+    @Builder.Default
+    @JsonIgnore
+    @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Thumbnail> thumbnailList = new ArrayList<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -55,10 +59,6 @@ public class Package extends BaseTimeEntity {
     @JsonIgnore
     @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Product> productList = new ArrayList<>();
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Banner> imageList = new ArrayList<>();
 
     public void update(PackageRequestDto.Update requestDto) {
         this.packageName = requestDto.getPackageName();

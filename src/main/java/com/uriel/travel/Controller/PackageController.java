@@ -6,8 +6,11 @@ import com.uriel.travel.Base.BaseResponse;
 import com.uriel.travel.dto.PackageRequestDto;
 import com.uriel.travel.dto.PackageResponseDto;
 import com.uriel.travel.service.PackageService;
+import com.uriel.travel.service.S3Service;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -15,16 +18,21 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/packages")
+@Slf4j
 public class PackageController {
 
     private final PackageService packageService;
+    private final S3Service s3Service;
     ObjectMapper snakeMapper = new ObjectMapper()
             .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
     // 패키지 등록
     @PostMapping("/create")
-    public BaseResponse<Void> create(@RequestBody PackageRequestDto.Create requestDto) {
-        packageService.create(requestDto);
+    public BaseResponse<Void> create(@RequestPart("data") PackageRequestDto.Create requestDto,
+                                     @RequestPart("files") List<MultipartFile> files) {
+
+        Long id = packageService.create(requestDto);
+        s3Service.uploadThumbnails(files, id);
         return BaseResponse.ok();
     }
 

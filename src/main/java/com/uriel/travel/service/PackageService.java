@@ -20,8 +20,8 @@ public class PackageService {
     private final PackageRepository packageRepository;
 
     // 패키지 등록
-    public void create(PackageRequestDto.Create requestDto) {
-        packageRepository.save(requestDto.toEntity());
+    public Long create(PackageRequestDto.Create requestDto) {
+        return packageRepository.save(requestDto.toEntity()).getId();
     }
 
     // 패키지 수정
