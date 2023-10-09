@@ -2,9 +2,7 @@ package com.uriel.travel.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
@@ -12,6 +10,8 @@ import java.util.List;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Package extends BaseTimeEntity {
@@ -25,8 +25,9 @@ public class Package extends BaseTimeEntity {
 
     String summary;
 
-    @Enumerated(EnumType.STRING)
-    Country country;
+    int period;
+
+    String country;
 
     String theme;
 
@@ -45,16 +46,16 @@ public class Package extends BaseTimeEntity {
     @Lob
     String terms;
 
-    @Enumerated(EnumType.STRING)
-    TagType tagType;
-
-    String tagContent;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "aPackage")
+    @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Schedule> scheduleList = new ArrayList<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "aPackage")
+    @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Product> productList = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Image> imageList = new ArrayList<>();
 }
