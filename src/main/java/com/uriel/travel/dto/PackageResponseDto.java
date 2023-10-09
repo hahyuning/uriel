@@ -29,8 +29,8 @@ public class PackageResponseDto {
         String regionInfo;
         String terms;
 
-        public static PackageResponseDto.getPackage of(Package aPackage) {
-            return getPackage.builder()
+        public static PackageResponseDto.GetPackage of(Package aPackage) {
+            return GetPackage.builder()
                     .packageId(aPackage.getId())
                     .packageName(aPackage.getPackageName())
                     .summary(aPackage.getSummary())

@@ -58,7 +58,7 @@ public class Package extends BaseTimeEntity {
 
     @JsonIgnore
     @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Image> imageList = new ArrayList<>();
+    List<Banner> imageList = new ArrayList<>();
 
     public void update(PackageRequestDto.Update requestDto) {
         this.packageName = requestDto.getPackageName();
