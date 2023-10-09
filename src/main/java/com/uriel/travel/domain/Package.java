@@ -1,6 +1,7 @@
 package com.uriel.travel.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.uriel.travel.dto.PackageRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -58,4 +59,18 @@ public class Package extends BaseTimeEntity {
     @JsonIgnore
     @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Image> imageList = new ArrayList<>();
+
+    public void update(PackageRequestDto.Update requestDto) {
+        this.packageName = requestDto.getPackageName();
+        this.summary = requestDto.getSummary();
+        this.period = requestDto.getPeriod();
+        this.country = requestDto.getCountry();
+        this.theme = requestDto.getTheme();
+        this.familyMember = requestDto.getFamilyMember();
+        this.price = requestDto.getPrice();
+        this.season = requestDto.getSeason();
+        this.hotelInfo = requestDto.getHotelInfo();
+        this.regionInfo = requestDto.getRegionInfo();
+        this.terms = requestDto.getTerms();
+    }
 }
