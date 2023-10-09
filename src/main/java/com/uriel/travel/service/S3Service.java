@@ -73,6 +73,33 @@ public class S3Service {
         });
     }
 
+    // 기존 썸네일 삭제
+    public void deleteThumbnail(Long id) {
+        List<Thumbnail> thumbnailList = thumbnailRepository.findAllByPackageId(id);
+        Package aPackage = packageRepository.findById(id)
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+
+        thumbnailList.forEach(thumbnail -> {
+            delete(thumbnail.getImagePath(), thumbnail.getUploadImageName());
+            aPackage.getThumbnailList().remove(thumbnail);
+        });
+    }
+
+    // s3 이미지 삭제
+    public void delete(String imagePath, String uploadImageName) {
+        try {
+            String keyName = imagePath + "/" + uploadImageName;
+            boolean isObjectExist = amazonS3Client.doesObjectExist(bucket, keyName);
+
+            if (isObjectExist) {
+                amazonS3Client.deleteObject(bucket, keyName);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     // 다중 이미지 업로드
     public List<ImageDto> upload(List<MultipartFile> files, String type) {
 

@@ -38,9 +38,12 @@ public class PackageController {
 
     // 패키지 수정
     @PutMapping("/{packageId}/update")
-    public BaseResponse<Void> modify(@RequestBody PackageRequestDto.Update requestDto,
+    public BaseResponse<Void> modify(@RequestPart("data") PackageRequestDto.Update requestDto,
+                                     @RequestPart("files") List<MultipartFile> files,
                                      @PathVariable Long packageId) {
         packageService.update(requestDto, packageId);
+        s3Service.deleteThumbnail(packageId);
+        s3Service.uploadThumbnails(files, packageId);
         return BaseResponse.ok();
     }
 
