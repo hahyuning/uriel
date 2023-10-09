@@ -44,11 +44,11 @@ public class PackageService {
     }
 
     // 패키지 한건 조회
-    public PackageResponseDto.getPackage getPackageById(Long id) {
+    public PackageResponseDto.GetPackage getPackageById(Long id) {
         Package aPackage = packageRepository.findById(id)
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND));
 
-        return PackageResponseDto.getPackage.of(aPackage);
+        return PackageResponseDto.GetPackage.of(aPackage);
     }
 }

@@ -14,7 +14,7 @@ public class PackageResponseDto {
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-    public static class getPackage {
+    public static class GetPackage {
 
         Long packageId;
         String packageName;

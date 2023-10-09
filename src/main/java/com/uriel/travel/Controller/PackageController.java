@@ -46,7 +46,7 @@ public class PackageController {
 
     // 패키지 한건 조회
     @GetMapping("/{packageId}")
-    public BaseResponse<PackageResponseDto.getPackage> getPackageById(@PathVariable Long packageId) {
+    public BaseResponse<PackageResponseDto.GetPackage> getPackageById(@PathVariable Long packageId) {
         return BaseResponse.ok(packageService.getPackageById(packageId));
     }
 }
