@@ -52,10 +52,12 @@ public class Package extends BaseTimeEntity {
     @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Thumbnail> thumbnailList = new ArrayList<>();
 
+    @Builder.Default
     @JsonIgnore
     @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Schedule> scheduleList = new ArrayList<>();
 
+    @Builder.Default
     @JsonIgnore
     @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Product> productList = new ArrayList<>();

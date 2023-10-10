@@ -7,6 +7,7 @@ import com.uriel.travel.dto.PackageRequestDto;
 import com.uriel.travel.dto.PackageResponseDto;
 import com.uriel.travel.service.PackageService;
 import com.uriel.travel.service.S3Service;
+import com.uriel.travel.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,8 @@ public class PackageController {
 
     private final PackageService packageService;
     private final S3Service s3Service;
+    private final ScheduleService scheduleService;
+
     ObjectMapper snakeMapper = new ObjectMapper()
             .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
@@ -31,8 +34,11 @@ public class PackageController {
     public BaseResponse<Void> create(@RequestPart("data") PackageRequestDto.Create requestDto,
                                      @RequestPart("files") List<MultipartFile> files) {
 
-        Long id = packageService.create(requestDto);
-        s3Service.uploadThumbnails(files, id);
+        Long id = packageService.create(requestDto); // 패키지 저장
+        s3Service.uploadThumbnails(files, id); // 썸네일 저장
+
+        // 일정 저장
+        scheduleService.create(requestDto.getScheduleList(), id);
         return BaseResponse.ok();
     }
 
@@ -44,6 +50,9 @@ public class PackageController {
         packageService.update(requestDto, packageId);
         s3Service.deleteThumbnail(packageId);
         s3Service.uploadThumbnails(files, packageId);
+
+        scheduleService.deleteAllSchedule(packageId);
+        scheduleService.create(requestDto.getScheduleList(), packageId);
         return BaseResponse.ok();
     }
 

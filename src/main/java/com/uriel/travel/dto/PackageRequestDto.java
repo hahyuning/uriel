@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 public class PackageRequestDto {
 
     @Getter
@@ -28,6 +30,7 @@ public class PackageRequestDto {
         String hotelInfo;
         String regionInfo;
         String terms;
+        List<ScheduleDto> scheduleList;
 
         public Package toEntity() {
             return Package.builder()
@@ -62,5 +65,6 @@ public class PackageRequestDto {
         String hotelInfo;
         String regionInfo;
         String terms;
+        List<ScheduleDto> scheduleList;
     }
 }
