@@ -40,6 +40,7 @@ public class S3Service {
     private String bucket;
 
     // 배너 업로드
+    // TODO: 배너 3개 유지
     public List<ImageDto> uploadBanners(List<MultipartFile> files) {
         List<ImageDto> banners = upload(files, "banners");
 
