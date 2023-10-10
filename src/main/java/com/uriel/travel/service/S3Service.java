@@ -155,16 +155,12 @@ public class S3Service {
         List<Banner> allBanners = bannerRepository.findAll();
         List<ImageDto> imageList = new ArrayList<>();
 
-        allBanners.forEach(banner -> {
-            imageList.add(ImageDto.builder()
-                    .originalImageName(banner.getOriginalImageName())
-                    .uploadImageName(banner.getUploadImageName())
-                    .imagePath(banner.getImagePath())
-                    .imageUrl(banner.getImageUrl())
-                    .build());
-
-        });
-
+        allBanners.forEach(banner -> imageList.add(ImageDto.builder()
+                .originalImageName(banner.getOriginalImageName())
+                .uploadImageName(banner.getUploadImageName())
+                .imagePath(banner.getImagePath())
+                .imageUrl(banner.getImageUrl())
+                .build()));
         return imageList;
     }
 

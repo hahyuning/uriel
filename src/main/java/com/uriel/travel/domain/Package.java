@@ -30,13 +30,9 @@ public class Package extends BaseTimeEntity {
 
     String country;
 
-    String theme;
-
-    String familyMember;
-
     int price;
 
-    String season;
+    String hashTag;
 
     @Lob
     String hotelInfo;
@@ -52,10 +48,12 @@ public class Package extends BaseTimeEntity {
     @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Thumbnail> thumbnailList = new ArrayList<>();
 
+    @Builder.Default
     @JsonIgnore
     @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Schedule> scheduleList = new ArrayList<>();
 
+    @Builder.Default
     @JsonIgnore
     @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Product> productList = new ArrayList<>();
@@ -65,10 +63,8 @@ public class Package extends BaseTimeEntity {
         this.summary = requestDto.getSummary();
         this.period = requestDto.getPeriod();
         this.country = requestDto.getCountry();
-        this.theme = requestDto.getTheme();
-        this.familyMember = requestDto.getFamilyMember();
+        this.hashTag = requestDto.getHashTag();
         this.price = requestDto.getPrice();
-        this.season = requestDto.getSeason();
         this.hotelInfo = requestDto.getHotelInfo();
         this.regionInfo = requestDto.getRegionInfo();
         this.terms = requestDto.getTerms();

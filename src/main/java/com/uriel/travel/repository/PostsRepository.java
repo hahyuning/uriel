@@ -10,5 +10,5 @@ import java.util.List;
 @Repository
 public interface PostsRepository extends JpaRepository<Posts, Long> {
 
-    public List<Posts> findAllByPostType(PostType postType);
+    List<Posts> findAllByPostType(PostType postType);
 }

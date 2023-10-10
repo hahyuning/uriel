@@ -14,15 +14,19 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Tag extends BaseTimeEntity{
+public class Tag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "tag_id")
     Long id;
 
+    String tagContent;
+
     @Enumerated(EnumType.STRING)
     TagType tagType;
 
-    String tagContent;
+    @JsonIgnore
+    @OneToMany(mappedBy = "tag")
+    List<Tagging> taggingList = new ArrayList<>();
 }

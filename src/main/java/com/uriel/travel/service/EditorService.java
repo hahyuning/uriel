@@ -47,6 +47,7 @@ public class EditorService {
     }
 
     // 게시글 한건 조회
+    @Transactional(readOnly = true)
     public EditorResponseDto.GetPost getPost(Long postId) {
         Posts post = postsRepository.findById(postId)
                 .orElseThrow(() ->
@@ -55,6 +56,7 @@ public class EditorService {
     }
 
     // 게시글 목록 조회 (공지사항, 블로그)
+    @Transactional(readOnly = true)
     public List<EditorResponseDto.GetPost> getPostByPostType(PostType postType) {
         List<Posts> allByPostType = postsRepository.findAllByPostType(postType);
         List<EditorResponseDto.GetPost> postList = new ArrayList<>();

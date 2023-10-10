@@ -1,5 +1,6 @@
 package com.uriel.travel.domain;
 
+import com.uriel.travel.dto.ScheduleDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -21,7 +22,7 @@ public class Schedule extends BaseTimeEntity {
     @JoinColumn(name = "package_id")
     Package aPackage;
 
-    int dayCount;
+    int day;
 
     @Lob
     String dayContent;
@@ -34,4 +35,17 @@ public class Schedule extends BaseTimeEntity {
 
     @Lob
     String vehicle;
+
+    public Schedule(ScheduleDto dto) {
+        this.day = dto.getDay();
+        this.dayContent = dto.getDayContent();
+        this.hotel = dto.getHotel();
+        this.meal = dto.getMeal();
+        this.vehicle = dto.getVehicle();
+    }
+
+    public void setPackage(Package aPackage) {
+        this.aPackage = aPackage;
+        aPackage.getScheduleList().add(this);
+    }
 }
