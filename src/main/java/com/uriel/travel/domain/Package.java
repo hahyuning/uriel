@@ -1,6 +1,8 @@
 package com.uriel.travel.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.uriel.travel.domain.enumeration.Country;
+import com.uriel.travel.domain.enumeration.TagType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

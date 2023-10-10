@@ -1,14 +1,11 @@
 package com.uriel.travel.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.uriel.travel.domain.enumeration.TagType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter

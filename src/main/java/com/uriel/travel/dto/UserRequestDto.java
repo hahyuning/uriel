@@ -1,6 +1,6 @@
 package com.uriel.travel.dto;
 
-import com.uriel.travel.domain.Gender;
+import com.uriel.travel.domain.enumeration.Gender;
 import com.uriel.travel.domain.Users;
 import lombok.AccessLevel;
 import lombok.Getter;

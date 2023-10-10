@@ -1,4 +1,4 @@
-package com.uriel.travel.domain;
+package com.uriel.travel.domain.enumeration;
 
 public enum TagType {
     COUNTRY,
