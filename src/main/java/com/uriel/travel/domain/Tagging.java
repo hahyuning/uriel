@@ -22,4 +22,11 @@ public class Tagging {
     @JoinColumn(name = "tag_id")
     Tag tag;
 
+    public Tagging(Tag tag) {
+        this.tag = tag;
+    }
+
+    public void setPackage(Package aPackage) {
+        this.aPackage = aPackage;
+    }
 }

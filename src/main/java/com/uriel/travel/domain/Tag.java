@@ -1,14 +1,10 @@
 package com.uriel.travel.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -21,8 +17,8 @@ public class Tag extends BaseTimeEntity{
     @Column(name = "tag_id")
     Long id;
 
+    String tagContent;
+
     @Enumerated(EnumType.STRING)
     TagType tagType;
-
-    String tagContent;
 }
