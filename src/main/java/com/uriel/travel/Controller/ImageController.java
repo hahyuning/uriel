@@ -11,15 +11,21 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/image")
+@RequestMapping("/images")
 public class ImageController {
 
     private final S3Service s3Service;
 
     // 이미지 한개 등록 (ckeditor 사진 등록 시 사용)
-    @PostMapping("/upload")
+    @PostMapping
     public BaseResponse<ImageDto> upload(@RequestBody MultipartFile file) {
         return BaseResponse.ok(s3Service.upload(file));
+    }
+
+    // 이미지 한개 삭제
+    @DeleteMapping
+    public BaseResponse<Void> delete(@RequestBody MultipartFile file) {
+        return BaseResponse.ok();
     }
 
     // 다중 이미지 등록
