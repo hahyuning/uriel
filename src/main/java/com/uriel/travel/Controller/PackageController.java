@@ -1,6 +1,7 @@
 package com.uriel.travel.Controller;
 
 import com.uriel.travel.Base.BaseResponse;
+import com.uriel.travel.dto.PackageFilterResponseDto;
 import com.uriel.travel.dto.PackageRequestDto;
 import com.uriel.travel.dto.PackageResponseDto;
 import com.uriel.travel.service.PackageService;
@@ -88,8 +89,8 @@ public class PackageController {
     }
 
     // 패키지 태크 필터링
-//    @PostMapping
-//    public BaseResponse<List<PackageResponseDto.GetPackage>> packageSearch(@RequestBody PackageRequestDto.FilterCond filterCond) {
-//        packageService.search(filterCond);
-//    }
+    @PostMapping
+    public BaseResponse<List<PackageFilterResponseDto>> packageSearch(@RequestBody PackageRequestDto.FilterCond filterCond) {
+        return BaseResponse.ok(packageService.packageSearchByFilterCond(filterCond));
+    }
 }

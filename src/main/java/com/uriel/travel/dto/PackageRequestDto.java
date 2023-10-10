@@ -72,10 +72,9 @@ public class PackageRequestDto {
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class FilterCond {
 
-        String country;
-        List<String> themeList;
-        List<String> familyList;
+        List<Long> themeList;
+        List<Long> familyList;
         int cost;
-        List<String> seasonList;
+        List<Long> seasonList;
     }
 }

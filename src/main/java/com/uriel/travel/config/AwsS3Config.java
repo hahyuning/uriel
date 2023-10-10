@@ -1,4 +1,4 @@
-package com.uriel.travel.aws;
+package com.uriel.travel.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class S3Config {
+public class AwsS3Config {
 
     @Value("${cloud.aws.credential.access-key}")
     private String accessKey;
