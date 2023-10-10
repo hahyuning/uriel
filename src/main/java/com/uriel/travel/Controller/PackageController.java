@@ -1,7 +1,5 @@
 package com.uriel.travel.Controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.uriel.travel.Base.BaseResponse;
 import com.uriel.travel.dto.PackageRequestDto;
 import com.uriel.travel.dto.PackageResponseDto;
@@ -28,30 +26,30 @@ public class PackageController {
     private final ScheduleService scheduleService;
     private final TagService tagService;
 
-    ObjectMapper snakeMapper = new ObjectMapper()
-            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+//    ObjectMapper snakeMapper = new ObjectMapper()
+//            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
     // 패키지 등록
     @PostMapping("/create")
     public BaseResponse<Void> create(@RequestPart("data") PackageRequestDto.Create requestDto,
                                      @RequestPart("files") List<MultipartFile> files) {
 
-        Long id = packageService.create(requestDto); // 패키지 저장
-        s3Service.uploadThumbnails(files, id); // 썸네일 저장
+        Long packageId = packageService.create(requestDto); // 패키지 저장
+        s3Service.uploadThumbnails(files, packageId); // 썸네일 저장
 
         // 일정 저장
-        scheduleService.create(requestDto.getScheduleList(), id);
+        scheduleService.create(requestDto.getScheduleList(), packageId);
 
         // 태그 저장
-        tagService.taggingToPackage(requestDto.getTheme(), id);
-        tagService.taggingToPackage(requestDto.getFamilyMember(), id);
-        tagService.taggingToPackage(requestDto.getSeason(), id);
+        tagService.taggingToPackage(requestDto.getThemeList(), packageId);
+        tagService.taggingToPackage(requestDto.getFamilyList(), packageId);
+        tagService.taggingToPackage(requestDto.getSeasonList(), packageId);
         return BaseResponse.ok();
     }
 
     // 패키지 수정
     @PutMapping("/{packageId}/update")
-    public BaseResponse<Void> modify(@RequestPart("data") PackageRequestDto.Update requestDto,
+    public BaseResponse<Void> update(@RequestPart("data") PackageRequestDto.Update requestDto,
                                      @RequestPart("files") List<MultipartFile> files,
                                      @PathVariable Long packageId) {
         packageService.update(requestDto, packageId);
@@ -60,6 +58,11 @@ public class PackageController {
 
         scheduleService.deleteAllSchedule(packageId);
         scheduleService.create(requestDto.getScheduleList(), packageId);
+
+        tagService.deleteTagging(packageId);
+        tagService.taggingToPackage(requestDto.getThemeList(), packageId);
+        tagService.taggingToPackage(requestDto.getFamilyList(), packageId);
+        tagService.taggingToPackage(requestDto.getSeasonList(), packageId);
         return BaseResponse.ok();
     }
 
@@ -67,6 +70,7 @@ public class PackageController {
     @PostMapping("/batch-delete")
     public BaseResponse<Void> delete(@RequestBody Map<String, List<Long>> param) {
         List<Long> ids = param.get("ids");
+        ids.forEach(tagService::deleteTagging);
         packageService.delete(ids);
         return BaseResponse.ok();
     }
@@ -75,5 +79,11 @@ public class PackageController {
     @GetMapping("/{packageId}")
     public BaseResponse<PackageResponseDto.GetPackage> getPackageById(@PathVariable Long packageId) {
         return BaseResponse.ok(packageService.getPackageById(packageId));
+    }
+
+    // 전체 태그 조회
+    @GetMapping("/tags")
+    public BaseResponse<PackageResponseDto.GetAllTags> getAllTags() {
+        return BaseResponse.ok(tagService.getAllTags());
     }
 }

@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 public class PackageResponseDto {
 
     @Getter
@@ -22,6 +24,7 @@ public class PackageResponseDto {
         int period;
         String country;
         int price;
+        String hashTag;
         String hotelInfo;
         String regionInfo;
         String terms;
@@ -33,10 +36,32 @@ public class PackageResponseDto {
                     .summary(aPackage.getSummary())
                     .period(aPackage.getPeriod())
                     .country(aPackage.getCountry())
+                    .hashTag(aPackage.getHashTag())
                     .price(aPackage.getPrice())
                     .hotelInfo(aPackage.getHotelInfo())
                     .regionInfo(aPackage.getRegionInfo())
                     .terms(aPackage.getTerms())
+                    .build();
+        }
+    }
+
+    @Getter
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    public static class GetAllTags {
+
+        List<String> themeList;
+        List<String> familyList;
+        List<String> seasonList;
+
+        public static PackageResponseDto.GetAllTags of(List<String> themeList,
+                                                       List<String> familyList,
+                                                       List<String> seasonList) {
+            return GetAllTags.builder()
+                    .themeList(themeList)
+                    .familyList(familyList)
+                    .seasonList(seasonList)
                     .build();
         }
     }

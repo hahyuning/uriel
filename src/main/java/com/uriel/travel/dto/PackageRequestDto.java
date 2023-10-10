@@ -23,10 +23,10 @@ public class PackageRequestDto {
         int period;
         int price;
         String country;
-        List<String> theme;
-        List<String> familyMember;
-        List<String> season;
-        String tag;
+        List<String> themeList;
+        List<String> familyList;
+        List<String> seasonList;
+        String hashTag;
         String hotelInfo;
         String regionInfo;
         String terms;
@@ -56,9 +56,10 @@ public class PackageRequestDto {
         int period;
         int price;
         String country;
-        List<String> theme;
-        List<String> familyMember;
-        List<String> season;
+        List<String> themeList;
+        List<String> familyList;
+        List<String> seasonList;
+        String hashTag;
         String hotelInfo;
         String regionInfo;
         String terms;

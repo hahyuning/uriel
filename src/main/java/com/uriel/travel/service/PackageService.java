@@ -39,6 +39,7 @@ public class PackageService {
             Package aPackage = packageRepository.findById(id)
                     .orElseThrow(() ->
                             new CustomNotFoundException(ErrorCode.NOT_FOUND));
+
             packageRepository.delete(aPackage);
         });
     }

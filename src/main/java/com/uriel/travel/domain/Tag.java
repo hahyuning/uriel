@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Tag extends BaseTimeEntity{
+public class Tag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

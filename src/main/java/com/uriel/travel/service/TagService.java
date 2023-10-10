@@ -2,7 +2,9 @@ package com.uriel.travel.service;
 
 import com.uriel.travel.domain.Package;
 import com.uriel.travel.domain.Tag;
+import com.uriel.travel.domain.TagType;
 import com.uriel.travel.domain.Tagging;
+import com.uriel.travel.dto.PackageResponseDto;
 import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.repository.PackageRepository;
@@ -38,5 +40,20 @@ public class TagService {
             taggingRepository.save(tagging);
             tagging.setPackage(aPackage);
         });
+    }
+
+    // 패키지 삭제 시 태그 삭제
+    public void deleteTagging(Long packageId) {
+        taggingRepository.deleteAll(taggingRepository.findAllByPackageId(packageId));
+    }
+
+    // 태그 전체 조회
+    @Transactional(readOnly = true)
+    public PackageResponseDto.GetAllTags getAllTags() {
+
+        List<String> themeList = tagRepository.findByTagType(TagType.THEME);
+        List<String> familyList = tagRepository.findByTagType(TagType.FAMILY);
+        List<String> seasonList = tagRepository.findByTagType(TagType.SEASON);
+        return PackageResponseDto.GetAllTags.of(themeList, familyList, seasonList);
     }
 }

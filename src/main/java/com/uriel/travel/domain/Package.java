@@ -32,6 +32,8 @@ public class Package extends BaseTimeEntity {
 
     int price;
 
+    String hashTag;
+
     @Lob
     String hotelInfo;
 
@@ -61,6 +63,7 @@ public class Package extends BaseTimeEntity {
         this.summary = requestDto.getSummary();
         this.period = requestDto.getPeriod();
         this.country = requestDto.getCountry();
+        this.hashTag = requestDto.getHashTag();
         this.price = requestDto.getPrice();
         this.hotelInfo = requestDto.getHotelInfo();
         this.regionInfo = requestDto.getRegionInfo();
