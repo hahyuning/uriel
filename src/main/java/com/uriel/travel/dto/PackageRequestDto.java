@@ -21,11 +21,11 @@ public class PackageRequestDto {
         String packageName;
         String summary;
         int period;
-        String country;
-        String theme;
-        String familyMember;
         int price;
-        String season;
+        String country;
+        List<String> theme;
+        List<String> familyMember;
+        List<String> season;
         String tag;
         String hotelInfo;
         String regionInfo;
@@ -37,11 +37,8 @@ public class PackageRequestDto {
                     .packageName(packageName)
                     .summary(summary)
                     .period(period)
-                    .country(country)
-                    .theme(theme)
-                    .familyMember(familyMember)
                     .price(price)
-                    .season(season)
+                    .country(country)
                     .hotelInfo(hotelInfo)
                     .regionInfo(regionInfo)
                     .terms(terms).build();
@@ -57,11 +54,11 @@ public class PackageRequestDto {
         String packageName;
         String summary;
         int period;
-        String country;
-        String theme;
-        String familyMember;
         int price;
-        String season;
+        String country;
+        List<String> theme;
+        List<String> familyMember;
+        List<String> season;
         String hotelInfo;
         String regionInfo;
         String terms;

@@ -30,13 +30,7 @@ public class Package extends BaseTimeEntity {
 
     String country;
 
-    String theme;
-
-    String familyMember;
-
     int price;
-
-    String season;
 
     @Lob
     String hotelInfo;
@@ -67,10 +61,7 @@ public class Package extends BaseTimeEntity {
         this.summary = requestDto.getSummary();
         this.period = requestDto.getPeriod();
         this.country = requestDto.getCountry();
-        this.theme = requestDto.getTheme();
-        this.familyMember = requestDto.getFamilyMember();
         this.price = requestDto.getPrice();
-        this.season = requestDto.getSeason();
         this.hotelInfo = requestDto.getHotelInfo();
         this.regionInfo = requestDto.getRegionInfo();
         this.terms = requestDto.getTerms();

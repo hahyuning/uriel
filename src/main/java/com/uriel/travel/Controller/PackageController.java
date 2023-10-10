@@ -8,6 +8,7 @@ import com.uriel.travel.dto.PackageResponseDto;
 import com.uriel.travel.service.PackageService;
 import com.uriel.travel.service.S3Service;
 import com.uriel.travel.service.ScheduleService;
+import com.uriel.travel.service.TagService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,7 @@ public class PackageController {
     private final PackageService packageService;
     private final S3Service s3Service;
     private final ScheduleService scheduleService;
+    private final TagService tagService;
 
     ObjectMapper snakeMapper = new ObjectMapper()
             .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
@@ -39,6 +41,11 @@ public class PackageController {
 
         // 일정 저장
         scheduleService.create(requestDto.getScheduleList(), id);
+
+        // 태그 저장
+        tagService.taggingToPackage(requestDto.getTheme(), id);
+        tagService.taggingToPackage(requestDto.getFamilyMember(), id);
+        tagService.taggingToPackage(requestDto.getSeason(), id);
         return BaseResponse.ok();
     }
 

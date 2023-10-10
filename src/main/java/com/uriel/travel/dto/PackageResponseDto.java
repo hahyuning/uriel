@@ -21,10 +21,7 @@ public class PackageResponseDto {
         String summary;
         int period;
         String country;
-        String theme;
-        String familyMember;
         int price;
-        String season;
         String hotelInfo;
         String regionInfo;
         String terms;
@@ -36,10 +33,7 @@ public class PackageResponseDto {
                     .summary(aPackage.getSummary())
                     .period(aPackage.getPeriod())
                     .country(aPackage.getCountry())
-                    .theme(aPackage.getTheme())
-                    .familyMember(aPackage.getFamilyMember())
                     .price(aPackage.getPrice())
-                    .season(aPackage.getSeason())
                     .hotelInfo(aPackage.getHotelInfo())
                     .regionInfo(aPackage.getRegionInfo())
                     .terms(aPackage.getTerms())
