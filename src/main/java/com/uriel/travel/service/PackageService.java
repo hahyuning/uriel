@@ -52,4 +52,10 @@ public class PackageService {
                         new CustomNotFoundException(ErrorCode.NOT_FOUND));
         return PackageResponseDto.GetPackage.of(aPackage);
     }
+
+    // 패키지 태그 검색
+//    @Transactional(readOnly = true)
+//    public List<PackageResponseDto.GetPackage> search(PackageRequestDto.FilterCond requestDto) {
+//
+//    }
 }

@@ -65,4 +65,17 @@ public class PackageRequestDto {
         String terms;
         List<ScheduleDto> scheduleList;
     }
+
+    @Getter
+    @Setter
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    public static class FilterCond {
+
+        String country;
+        List<String> themeList;
+        List<String> familyList;
+        int cost;
+        List<String> seasonList;
+    }
 }

@@ -86,4 +86,10 @@ public class PackageController {
     public BaseResponse<PackageResponseDto.GetAllTags> getAllTags() {
         return BaseResponse.ok(tagService.getAllTags());
     }
+
+    // 패키지 태크 필터링
+//    @PostMapping
+//    public BaseResponse<List<PackageResponseDto.GetPackage>> packageSearch(@RequestBody PackageRequestDto.FilterCond filterCond) {
+//        packageService.search(filterCond);
+//    }
 }
