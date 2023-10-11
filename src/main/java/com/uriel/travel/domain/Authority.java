@@ -1,4 +1,4 @@
-package com.uriel.travel.domain.enumeration;
+package com.uriel.travel.domain;
 
 
 import lombok.AllArgsConstructor;

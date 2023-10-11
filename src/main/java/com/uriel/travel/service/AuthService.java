@@ -1,6 +1,6 @@
 package com.uriel.travel.service;
 
-import com.uriel.travel.domain.enumeration.Authority;
+import com.uriel.travel.domain.Authority;
 import com.uriel.travel.domain.Users;
 import com.uriel.travel.dto.UserRequestDto;
 import com.uriel.travel.dto.UserResponseDto;
@@ -22,10 +22,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 
 
 @Service

@@ -1,6 +1,6 @@
 package com.uriel.travel.jwt;
 
-import com.uriel.travel.domain.enumeration.Authority;
+import com.uriel.travel.domain.Authority;
 import com.uriel.travel.exception.CustomUnauthorizedException;
 import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.jwt.entity.TokenResponseDto;

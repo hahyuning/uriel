@@ -1,6 +1,5 @@
 package com.uriel.travel.domain;
 
-import com.uriel.travel.domain.enumeration.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;

@@ -1,4 +1,4 @@
-package com.uriel.travel.domain.enumeration;
+package com.uriel.travel.domain;
 
 public enum Country {
     EASTERN_EUROPE,

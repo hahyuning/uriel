@@ -1,7 +1,5 @@
 package com.uriel.travel.domain;
 
-import com.uriel.travel.domain.enumeration.Authority;
-import com.uriel.travel.domain.enumeration.Gender;
 import com.uriel.travel.jwt.entity.RefreshToken;
 import jakarta.persistence.*;
 import lombok.*;
