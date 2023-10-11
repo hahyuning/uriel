@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -22,7 +23,7 @@ public class Order extends BaseTimeEntity{
     LocalDateTime modifiedDate;
     @ManyToOne(fetch = FetchType.LAZY)
     Users user;
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "order")
     List<Product> productList;
     int totalPrice;
     @Enumerated(EnumType.STRING)

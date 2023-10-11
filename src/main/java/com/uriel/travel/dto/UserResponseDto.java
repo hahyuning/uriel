@@ -2,12 +2,14 @@ package com.uriel.travel.dto;
 
 import com.uriel.travel.domain.Gender;
 import com.uriel.travel.domain.Users;
+import com.uriel.travel.dto.SocialLogin.SocialLoginResponseDto;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class UserResponseDto {
     @Getter
@@ -98,6 +100,38 @@ public class UserResponseDto {
                     .build();
         }
     }
+    @Getter
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class NaverUser {
+        String id;
+        String email;
+        String name;
+        Gender gender;
+        LocalDate birthday;
+        String password;
+        String phoneNumber;
+        public static NaverUser of(SocialLoginResponseDto.NaverDto.Response response){
+            LocalDate birthday = getBirth(response.getBirthyear(),response.getBirthday());
+            Gender parseGender = Gender.mapToGender(response.getGender());
+            return NaverUser.builder()
+                    .id(response.getId())
+                    .email(response.getEmail())
+                    .name(response.getName())
+                    .gender(parseGender)
+                    .birthday(birthday)
+                    .phoneNumber(response.getMobile())
+                    .build();
+        }
+
+        public static LocalDate getBirth(String birthday, String birthyear) {
+            StringBuilder stringBuilder = new StringBuilder().append(birthyear).append("-").append(birthday);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            return LocalDate.parse(stringBuilder, formatter);
+        }
+    }
+
+
 
 
 }
