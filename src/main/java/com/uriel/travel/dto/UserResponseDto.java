@@ -104,7 +104,7 @@ public class UserResponseDto {
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class NaverUser {
-        String id;
+        Long id;
         String email;
         String name;
         Gender gender;
@@ -115,12 +115,42 @@ public class UserResponseDto {
             LocalDate birthday = getBirth(response.getBirthyear(),response.getBirthday());
             Gender parseGender = Gender.mapToGender(response.getGender());
             return NaverUser.builder()
-                    .id(response.getId())
+                    .id(Long.parseLong(response.getId()))
                     .email(response.getEmail())
                     .name(response.getName())
                     .gender(parseGender)
                     .birthday(birthday)
                     .phoneNumber(response.getMobile())
+                    .build();
+        }
+
+        public static LocalDate getBirth(String birthday, String birthyear) {
+            StringBuilder stringBuilder = new StringBuilder().append(birthyear).append("-").append(birthday);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            return LocalDate.parse(stringBuilder, formatter);
+        }
+    }
+    @Getter
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class KakaoUser {
+        String id;
+        String email;
+        String name;
+        Gender gender;
+        LocalDate birthday;
+        String password;
+        String phoneNumber;
+        public static NaverUser of(SocialLoginResponseDto.KakaoDto response){
+            LocalDate birthday = getBirth(response.getKakao_account().getBirthyear(),response.getKakao_account().getBirthday());
+            Gender parseGender = Gender.mapToGender(response.getKakao_account().getGender());
+            return NaverUser.builder()
+                    .id(response.getId())
+                    .email(response.getKakao_account().getEmail())
+                    .name(response.getKakao_account().getName())
+                    .gender(parseGender)
+                    .birthday(birthday)
+                    .phoneNumber(response.getKakao_account().getPhone_number())
                     .build();
         }
 

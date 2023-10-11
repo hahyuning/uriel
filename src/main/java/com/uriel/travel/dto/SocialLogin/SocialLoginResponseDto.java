@@ -32,6 +32,41 @@ public class SocialLoginResponseDto{
         }
 
     }
+    @Builder
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class KakaoDto {
+        private Long id;
+        @Builder.Default
+        private KakaoAccount kakao_account = KakaoAccount.builder().build();
+        @Builder
+        @Data
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class KakaoAccount{
+            private String email;
+            private Boolean has_email;
+            private Boolean is_email_vaild;
+            private String name;
+            private String gender;
+            private String birthday;
+            private String birthyear;
+            private String phone_number;
+            @Builder.Default
+            private KakaoProfile kakaoProfile = KakaoProfile.builder().build();
+            @Data
+            @NoArgsConstructor
+            @AllArgsConstructor
+            @Builder
+            public static class KakaoProfile{
+                String nickname;
+            }
+
+        }
+
+
+    }
 
 
 

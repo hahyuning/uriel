@@ -10,8 +10,12 @@ import com.uriel.travel.jwt.entity.TokenResponseDto;
 import com.uriel.travel.service.Login.AuthService;
 import com.uriel.travel.service.Login.NaverLoginService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 @RestController
@@ -34,8 +38,8 @@ public class AuthController {
         return BaseResponse.ok(authService.doSocialLogin(request.getParameter("code"),SocialType.NAVER));
     }
     @GetMapping("/oauth/kakao")
-    public BaseResponse<TokenResponseDto> kakoLogin(HttpServletRequest request) {
-        return BaseResponse.ok(authService.doSocialLogin(request.getParameter("code"),SocialType.NAVER));
+    public BaseResponse<TokenResponseDto> kakaoLogin(HttpServletRequest request) {
+        return BaseResponse.ok(authService.doSocialLogin(request.getParameter("code"),SocialType.KAKAO));
     }
 
 
@@ -47,7 +51,11 @@ public class AuthController {
 //        return BaseResponse.ok();
 //    }
     //Todo: refresh token 재발급 추가
-
+    @PostMapping("/kakao/logout")
+    public BaseResponse<Long> kakaoLogout(HttpServletRequest request){
+        String access_token = (String)request.getHeader("access_token");
+        return BaseResponse.ok(authService.kakaoLogout(access_token));
+    }
     //회원정보 조회
     @GetMapping("/users/my-page")
     public BaseResponse<UserResponseDto.Profile> getUserProfile(){
