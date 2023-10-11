@@ -15,6 +15,9 @@ import com.uriel.travel.repository.RefreshTokenRepository;
 import com.uriel.travel.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -27,7 +30,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 
 @Service
@@ -126,10 +136,10 @@ public class AuthService implements UserDetailsService {
        SocialTokenResponseDto socialTokenResponseDto = socialLoginService.getAccessToken(code);
        UserResponseDto.NaverUser userResponseDto = socialLoginService.getUserInfo(socialTokenResponseDto.getAccess_token());
 
-       if(usersRepository.findById(Long.parseLong(userResponseDto.getId())).isEmpty()){
+       if(usersRepository.findById((userResponseDto.getId())).isEmpty()){
            Users user = usersRepository.save(
                    Users.builder()
-                           .id(Long.parseLong(userResponseDto.getId()))
+                           .id(userResponseDto.getId())
                            .email(userResponseDto.getEmail())
                            .gender(userResponseDto.getGender())
                            .authority(Authority.AUTH_USER)
@@ -138,7 +148,7 @@ public class AuthService implements UserDetailsService {
                            .build()
            );
        }
-       Users user =usersRepository.findById(Long.parseLong(userResponseDto.getId())).orElseThrow(()->
+       Users user =usersRepository.findById(userResponseDto.getId()).orElseThrow(()->
                new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
 
         String accessToken = socialTokenResponseDto.getAccess_token();
@@ -167,6 +177,22 @@ public class AuthService implements UserDetailsService {
 //            refreshTokenRepository.delete(refreshToken);
 //        }
 //    }
+    public Long kakaoLogout(String accessToken){
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.set("Authorization","Bearer "+ accessToken);
+        RestTemplate rt = new RestTemplate();
+        String requestUrl = "https://kapi.kakao.com/v1/user/logout";
+        HttpEntity<String> entity = new HttpEntity<>(httpHeaders);
+        //RestTemplate 초기화
+        ResponseEntity<String> response = rt.exchange(
+                requestUrl,
+                HttpMethod.POST,
+                entity,
+                String.class
+        );
+        return Long.parseLong(Objects.requireNonNull(response.getBody()));
+    }
+
     /**
      * 회원정보 관련
      */
