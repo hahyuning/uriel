@@ -19,19 +19,27 @@ public class Product extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")
     Long id;
+
     int privacy;
+
     @Column(unique = true)
     String productCode;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "package_id")
     Package aPackage;
+
     LocalDateTime startDate;
     LocalDateTime endDate;
+
     int minCount; // 최소 출발인원
     int maxCount; // 최대 예약인원
     int nowCount; // 현재 예약인원
+
     @Enumerated(EnumType.STRING)
     ProductState productState;
+
     String airline;
+
     int price;
 }

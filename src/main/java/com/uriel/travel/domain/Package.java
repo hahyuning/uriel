@@ -1,12 +1,9 @@
 package com.uriel.travel.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.uriel.travel.domain.enumeration.Country;
-import com.uriel.travel.domain.enumeration.TagType;
+import com.uriel.travel.dto.PackageRequestDto;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
@@ -14,6 +11,8 @@ import java.util.List;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Package extends BaseTimeEntity {
@@ -27,16 +26,13 @@ public class Package extends BaseTimeEntity {
 
     String summary;
 
-    @Enumerated(EnumType.STRING)
-    Country country;
+    int period;
 
-    String theme;
-
-    String familyMember;
+    String country;
 
     int price;
 
-    String season;
+    String hashTag;
 
     @Lob
     String hotelInfo;
@@ -47,16 +43,30 @@ public class Package extends BaseTimeEntity {
     @Lob
     String terms;
 
-    @Enumerated(EnumType.STRING)
-    TagType tagType;
-
-    String tagContent;
-
+    @Builder.Default
     @JsonIgnore
-    @OneToMany(mappedBy = "aPackage")
+    @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Thumbnail> thumbnailList = new ArrayList<>();
+
+    @Builder.Default
+    @JsonIgnore
+    @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Schedule> scheduleList = new ArrayList<>();
 
+    @Builder.Default
     @JsonIgnore
-    @OneToMany(mappedBy = "aPackage")
+    @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Product> productList = new ArrayList<>();
+
+    public void update(PackageRequestDto.Update requestDto) {
+        this.packageName = requestDto.getPackageName();
+        this.summary = requestDto.getSummary();
+        this.period = requestDto.getPeriod();
+        this.country = requestDto.getCountry();
+        this.hashTag = requestDto.getHashTag();
+        this.price = requestDto.getPrice();
+        this.hotelInfo = requestDto.getHotelInfo();
+        this.regionInfo = requestDto.getRegionInfo();
+        this.terms = requestDto.getTerms();
+    }
 }
