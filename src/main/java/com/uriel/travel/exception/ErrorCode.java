@@ -20,6 +20,8 @@ public enum ErrorCode {
     LOGIN_EMAIL_ERROR(40003,"사용자 이메일이 존재하지 않습니다."),
     LOGIN_PASSWORD_ERROR(40004,"비밀번호 오류입니다."),
     DUPLICATE_UNIQUE_KEY(40005,"무결성 제약조건에 위배되었습니다."),
+    DUPLICATE_SOCIAL_ID(40007,"이미 소셜 로그인을 등록하셨습니다."),
+    BAD_AUTHORIZATION_CODE(40006,"fail to load authorization code"),
 
     /**
      * 401 : 인증되지 않은 사용자

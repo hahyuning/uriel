@@ -41,4 +41,6 @@ public class Product extends BaseTimeEntity {
     String airline;
 
     int price;
+    @ManyToOne
+    Order order;
 }

@@ -1,7 +1,10 @@
-package com.uriel.travel.service;
+package com.uriel.travel.service.Login;
 
 import com.uriel.travel.domain.Authority;
+import com.uriel.travel.domain.Gender;
+import com.uriel.travel.domain.SocialType;
 import com.uriel.travel.domain.Users;
+import com.uriel.travel.dto.SocialLogin.SocialTokenResponseDto;
 import com.uriel.travel.dto.UserRequestDto;
 import com.uriel.travel.dto.UserResponseDto;
 import com.uriel.travel.exception.*;
@@ -11,6 +14,7 @@ import com.uriel.travel.jwt.entity.TokenResponseDto;
 import com.uriel.travel.repository.RefreshTokenRepository;
 import com.uriel.travel.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -22,6 +26,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 
 @Service
@@ -35,7 +41,7 @@ public class AuthService implements UserDetailsService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final TokenProvider tokenProvider;
     private final UserService userService;
-
+    private final List<SocialLoginService> loginServices;
     /**
      * 회원 정보 저장(회원가입)
      * @param  - 회원 정보
@@ -101,6 +107,42 @@ public class AuthService implements UserDetailsService {
         refreshTokenEntity.updateRefreshToken(refreshToken);
         refreshTokenRepository.save(refreshTokenEntity);
         user.setRefreshToken(refreshTokenEntity);
+
+        return tokenProvider.createTokenDto(accessToken,refreshToken);
+    }
+    /**
+     * 소셜 로그인
+     */
+    private SocialLoginService getSocialService(SocialType socialType){
+        for (SocialLoginService loginService: loginServices) {
+            if(socialType.equals(loginService.getSocialType())){
+                return loginService;
+            }
+        }
+        throw new CustomNotFoundException(ErrorCode.BAD_REQUEST);
+    }
+    public TokenResponseDto doSocialLogin(String code, SocialType socialType){
+       SocialLoginService socialLoginService = getSocialService(socialType);
+       SocialTokenResponseDto socialTokenResponseDto = socialLoginService.getAccessToken(code);
+       UserResponseDto.NaverUser userResponseDto = socialLoginService.getUserInfo(socialTokenResponseDto.getAccess_token());
+
+       if(usersRepository.findById(Long.parseLong(userResponseDto.getId())).isEmpty()){
+           Users user = usersRepository.save(
+                   Users.builder()
+                           .id(Long.parseLong(userResponseDto.getId()))
+                           .email(userResponseDto.getEmail())
+                           .gender(userResponseDto.getGender())
+                           .authority(Authority.AUTH_USER)
+                           .birth(userResponseDto.getBirthday())
+                           .phoneNumber(userResponseDto.getPhoneNumber())
+                           .build()
+           );
+       }
+       Users user =usersRepository.findById(Long.parseLong(userResponseDto.getId())).orElseThrow(()->
+               new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
+
+        String accessToken = socialTokenResponseDto.getAccess_token();
+        String refreshToken = socialTokenResponseDto.getRefresh_token();
 
         return tokenProvider.createTokenDto(accessToken,refreshToken);
     }

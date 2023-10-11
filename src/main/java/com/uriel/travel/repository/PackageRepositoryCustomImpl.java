@@ -39,7 +39,7 @@ public class PackageRepositoryCustomImpl implements PackageRepositoryCustom {
                 .from(aPackage)
                 .where(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(themeIn(filterCond)))
                         .and(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(familyIn(filterCond))))
-                                .and(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(seasonIn(filterCond))))
+                        .and(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(seasonIn(filterCond))))
                         .and(costLoe(filterCond)))
                 .fetch();
     }

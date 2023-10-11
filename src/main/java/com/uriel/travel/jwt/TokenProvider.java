@@ -49,11 +49,28 @@ public class TokenProvider {
                 .signWith(key,SignatureAlgorithm.HS256)
                 .compact();
     }
+    public String generateToken(Long id,long tokenValid,Authority authority) {
+        Date date=new Date();
+        return Jwts.builder()
+                .setIssuer("uriel")
+                .setSubject(id.toString())
+                .claim(AUTHORITIES_KEY,authority)
+                .setIssuedAt(date)
+                .setExpiration(new Date(date.getTime() + tokenValid))
+                .signWith(key,SignatureAlgorithm.HS256)
+                .compact();
+    }
     //access token 생성
     public String createAccessToken(Authentication authentication,Authority authority) {
        return this.generateToken(authentication,ACCESS_TOKEN_EXPIRE_TIME,authority);
     }
-    public String createRefreshToken(Authentication authentication, Authority authority){
+//    public String createAccessToken(Long id,Authority authority) {
+//        return this.generateToken(id,ACCESS_TOKEN_EXPIRE_TIME,authority); }
+
+//    public String createRefreshToken(Long id, Authority authority){
+//        return this.generateToken(id,REFRESH_TOKEN_EXPIRE_TIME,authority);
+//    }
+    public String createRefreshToken(Authentication authentication,Authority authority){
         return this.generateToken(authentication,REFRESH_TOKEN_EXPIRE_TIME,authority);
     }
     public TokenResponseDto createTokenDto(String at, String rt){

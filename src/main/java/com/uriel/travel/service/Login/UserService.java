@@ -1,4 +1,4 @@
-package com.uriel.travel.service;
+package com.uriel.travel.service.Login;
 
 import com.uriel.travel.domain.Users;
 import com.uriel.travel.exception.CustomNotFoundException;

@@ -2,15 +2,14 @@ package com.uriel.travel.Controller;
 
 
 import com.uriel.travel.Base.BaseResponse;
-import com.uriel.travel.dto.NaverDto;
+import com.uriel.travel.domain.SocialType;
+import com.uriel.travel.dto.SocialLogin.SocialLoginResponseDto;
 import com.uriel.travel.dto.UserRequestDto;
 import com.uriel.travel.dto.UserResponseDto;
 import com.uriel.travel.jwt.entity.TokenResponseDto;
-import com.uriel.travel.service.AuthService;
-import com.uriel.travel.service.SocialLoginService;
+import com.uriel.travel.service.Login.AuthService;
+import com.uriel.travel.service.Login.NaverLoginService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping
 public class AuthController {
     private final AuthService authService;
-    private final SocialLoginService socialLoginService;
     //회원가입
     @PostMapping("/users/signup")
     public BaseResponse<UserResponseDto.SignUp> signUp(@RequestBody UserRequestDto.SignUp userRequestDto) {
@@ -31,11 +29,16 @@ public class AuthController {
     public BaseResponse<TokenResponseDto> login(@RequestBody UserRequestDto.login userRequestDto){
         return BaseResponse.ok(authService.login(userRequestDto));
     }
-    @GetMapping("/callback")
-    public BaseResponse<Void> callback(HttpServletRequest request) throws Exception {
-        NaverDto naverInfo = socialLoginService.getNaverInfo(request.getParameter("code"));
-        return BaseResponse.ok();
+    @GetMapping("/oauth/naver")
+    public BaseResponse<TokenResponseDto> naverLogin(HttpServletRequest request) {
+        return BaseResponse.ok(authService.doSocialLogin(request.getParameter("code"),SocialType.NAVER));
     }
+    @GetMapping("/oauth/kakao")
+    public BaseResponse<TokenResponseDto> kakoLogin(HttpServletRequest request) {
+        return BaseResponse.ok(authService.doSocialLogin(request.getParameter("code"),SocialType.NAVER));
+    }
+
+
 
     //todo: 로그아웃 수정
 //    @PostMapping("/logout")
