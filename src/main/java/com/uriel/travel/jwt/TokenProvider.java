@@ -3,14 +3,12 @@ package com.uriel.travel.jwt;
 import com.uriel.travel.domain.Authority;
 import com.uriel.travel.exception.CustomUnauthorizedException;
 import com.uriel.travel.exception.ErrorCode;
-import com.uriel.travel.jwt.entity.RefreshToken;
 import com.uriel.travel.jwt.entity.TokenResponseDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +25,6 @@ import org.springframework.util.StringUtils;
 import java.security.Key;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Slf4j
