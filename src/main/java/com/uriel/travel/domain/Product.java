@@ -1,15 +1,16 @@
 package com.uriel.travel.domain;
 
+import com.uriel.travel.dto.ProductRequestDto;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Product extends BaseTimeEntity {
@@ -19,28 +20,57 @@ public class Product extends BaseTimeEntity {
     @Column(name = "product_id")
     Long id;
 
-    int privacy;
+    @Builder.Default
+    int privacy = 1; // 공개여부
 
-    @Column(unique = true)
-    String productCode;
+//    @Column(unique = true)
+//    String productCode; // 상품코드
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "package_id")
     Package aPackage;
 
-    LocalDateTime startDate;
-    LocalDateTime endDate;
+    LocalDateTime startDate; // 출발일시
+    LocalDateTime endDate; // 도착일시
 
     int minCount; // 최소 출발인원
     int maxCount; // 최대 예약인원
-    int nowCount; // 현재 예약인원
+
+    @Builder.Default
+    int nowCount = 0; // 현재 예약인원
 
     @Enumerated(EnumType.STRING)
-    ProductState productState;
+    @Builder.Default
+    ProductState productState = ProductState.RESERVATION_AVAILABLE; // 상품 상태
 
-    String airline;
+    String airline; // 항공사
 
-    int price;
-    @ManyToOne
+    int price; // 가격
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
     Order order;
+
+    // 연관관계
+    public void setPackage(Package aPackage) {
+        this.aPackage = aPackage;
+        aPackage.getProductList().add(this);
+    }
+
+    // 상품 수정
+    public void update(ProductRequestDto.Update requestDto) {
+        this.privacy = requestDto.getPrivacy();
+        this.startDate = requestDto.getStartDate();
+        this.endDate = requestDto.getEndDate();
+        this.minCount = requestDto.getMinCount();
+        this.maxCount = requestDto.getMaxCount();
+        this.productState = requestDto.getProductState();
+        this.airline = requestDto.getAirline();
+        this.price = requestDto.getPrice();
+    }
+
+    // id 초기화
+    public void idInitialize() {
+        this.id = null;
+    }
 }

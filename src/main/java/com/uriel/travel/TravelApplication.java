@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @EnableJpaAuditing
 @SpringBootApplication
-@EnableFeignClients("com.uriel.travel.feign")
+@EnableFeignClients("com.uriel.travel.exception.feign")
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
 public class TravelApplication {
 
