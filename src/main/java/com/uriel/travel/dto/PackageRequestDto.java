@@ -39,6 +39,7 @@ public class PackageRequestDto {
                     .period(period)
                     .price(price)
                     .country(country)
+                    .hashTag(hashTag)
                     .hotelInfo(hotelInfo)
                     .regionInfo(regionInfo)
                     .terms(terms).build();

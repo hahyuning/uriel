@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PackageFilterResponseDto {
@@ -16,6 +18,7 @@ public class PackageFilterResponseDto {
     String country;
     int price;
     String hashTag;
+    List<ImageDto> thumbnailList;
 
     @QueryProjection
     public PackageFilterResponseDto(Long packageId, String packageName, String summary, int period, String country, int price, String hashTag) {

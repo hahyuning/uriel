@@ -55,9 +55,4 @@ public class ProductController {
     public BaseResponse<Page<ProductResponseDto>> searchByPackage(@RequestBody ProductRequestDto.FilterCond filterCond) {
         return BaseResponse.ok(productService.searchByPackage(filterCond));
     }
-
-    // 상품 상세확인
-    @GetMapping("/{productId}")
-    public
-
 }
