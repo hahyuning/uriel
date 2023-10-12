@@ -1,16 +1,11 @@
 package com.uriel.travel.service;
 
+import com.uriel.travel.domain.*;
 import com.uriel.travel.domain.Package;
-import com.uriel.travel.domain.Product;
-import com.uriel.travel.domain.ProductDetail;
-import com.uriel.travel.dto.ProductFilterResponseDto;
-import com.uriel.travel.dto.ProductRequestDto;
+import com.uriel.travel.dto.*;
 import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.ErrorCode;
-import com.uriel.travel.repository.PackageRepository;
-import com.uriel.travel.repository.ProductDetailRepository;
-import com.uriel.travel.repository.ProductRepository;
-import com.uriel.travel.repository.ProductRepositoryCustomImpl;
+import com.uriel.travel.repository.*;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,6 +29,8 @@ public class ProductService {
     private final ProductDetailRepository productDetailRepository;
     private final EntityManager entityManager;
     private final ProductRepositoryCustomImpl productRepositoryCustom;
+    private final ThumbnailRepository thumbnailRepository;
+    private final ScheduleRepository scheduleRepository;
 
     // 상품 등록
     public Long create(ProductRequestDto.Create requestDto) {
@@ -126,5 +124,57 @@ public class ProductService {
     public Page<ProductFilterResponseDto> searchByPackage(ProductRequestDto.FilterCond filterCond) {
         PageRequest pageRequest = PageRequest.of(filterCond.getOffset(), filterCond.getLimit());
         return productRepositoryCustom.searchByFilterCond(filterCond, pageRequest);
+    }
+
+    // 상품 상세확인
+    public ProductDetailResponseDto productDetail(Long productId) {
+        // 상품 조회
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+
+        // 상품 디테일 조회
+        ProductDetail productDetail = productDetailRepository.findByProductId(productId);
+
+        ProductDetailResponseDto responseDto = new ProductDetailResponseDto();
+        responseDto.setProductInfo(ProductDetailResponseDto.GetProduct.of(product, productDetail));
+
+        // 패키지 조회
+        Package aPackage = packageRepository.findById(product.getAPackage().getId())
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+
+        PackageResponseDto.GetPackage packageInfo = PackageResponseDto.GetPackage.of(aPackage);
+
+        // 썸네일
+        List<Thumbnail> thumbnails = thumbnailRepository.findAllByPackageId(aPackage.getId());
+        List<ImageDto> thumbnailList = new ArrayList<>();
+        thumbnails.forEach(thumbnail -> {
+            thumbnailList.add(ImageDto.builder()
+                    .originalImageName(thumbnail.getOriginalImageName())
+                    .uploadImageName(thumbnail.getUploadImageName())
+                    .imagePath(thumbnail.getImagePath())
+                    .imageUrl(thumbnail.getImageUrl()).build());
+
+        });
+        packageInfo.setThumbnailList(thumbnailList);
+
+        // 일정
+        List<Schedule> schedules = scheduleRepository.findAllByPackageId(aPackage.getId());
+        List<ScheduleDto> scheduleList = new ArrayList<>();
+        schedules.forEach(schedule -> {
+            scheduleList.add(ScheduleDto.builder()
+                    .scheduleId(schedule.getId())
+                    .day(schedule.getDay())
+                    .dayContent(schedule.getDayContent())
+                    .hotel(schedule.getHotel())
+                    .meal(schedule.getMeal())
+                    .vehicle(schedule.getVehicle()).build());
+        });
+
+        packageInfo.setScheduleList(scheduleList);
+        responseDto.setPackageInfo(packageInfo);
+
+        return responseDto;
     }
 }
