@@ -98,4 +98,18 @@ public class ProductRequestDto {
         String reservationNotice; // 예약 유의사항
         String travelRegion; // 여행지역
     }
+
+    @Getter
+    @Setter
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    public static class FilterCond {
+
+        Long packageId;
+        ProductState productState;
+        LocalDateTime startDateMin;
+        LocalDateTime startDateMax;
+        int offset;
+        int limit;
+    }
 }

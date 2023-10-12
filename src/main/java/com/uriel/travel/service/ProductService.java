@@ -4,14 +4,18 @@ import com.uriel.travel.domain.Package;
 import com.uriel.travel.domain.Product;
 import com.uriel.travel.domain.ProductDetail;
 import com.uriel.travel.dto.ProductRequestDto;
+import com.uriel.travel.dto.ProductResponseDto;
 import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.repository.PackageRepository;
 import com.uriel.travel.repository.ProductDetailRepository;
 import com.uriel.travel.repository.ProductRepository;
+import com.uriel.travel.repository.ProductRepositoryCustomImpl;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +32,7 @@ public class ProductService {
     private final PackageRepository packageRepository;
     private final ProductDetailRepository productDetailRepository;
     private final EntityManager entityManager;
+    private final ProductRepositoryCustomImpl productRepositoryCustom;
 
     // 상품 등록
     public Long create(ProductRequestDto.Create requestDto) {
@@ -115,5 +120,11 @@ public class ProductService {
             productDetail.setProduct(product);
             productDetailRepository.save(productDetail);
         });
+    }
+
+    // 상품 조회
+    public Page<ProductResponseDto> searchByPackage(ProductRequestDto.FilterCond filterCond) {
+        PageRequest pageRequest = PageRequest.of(filterCond.getOffset(), filterCond.getLimit());
+        return productRepositoryCustom.searchByFilterCond(filterCond, pageRequest);
     }
 }
