@@ -39,6 +39,7 @@ public class PackageRequestDto {
                     .period(period)
                     .price(price)
                     .country(country)
+                    .hashTag(hashTag)
                     .hotelInfo(hotelInfo)
                     .regionInfo(regionInfo)
                     .terms(terms).build();
@@ -77,5 +78,8 @@ public class PackageRequestDto {
         List<Long> familyList;
         int cost;
         List<Long> seasonList;
+
+        int offset;
+        int limit;
     }
 }

@@ -3,9 +3,9 @@ package com.uriel.travel.repository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.uriel.travel.domain.QProduct;
+import com.uriel.travel.dto.ProductFilterResponseDto;
 import com.uriel.travel.dto.ProductRequestDto;
-import com.uriel.travel.dto.ProductResponseDto;
-import com.uriel.travel.dto.QProductResponseDto;
+import com.uriel.travel.dto.QProductFilterResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -22,9 +22,9 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     QProduct product = QProduct.product;
 
     @Override
-    public Page<ProductResponseDto> searchByFilterCond(ProductRequestDto.FilterCond filterCond, Pageable pageable) {
-        List<ProductResponseDto> productList = jpaQueryFactory
-                .select(new QProductResponseDto(
+    public Page<ProductFilterResponseDto> searchByFilterCond(ProductRequestDto.FilterCond filterCond, Pageable pageable) {
+        List<ProductFilterResponseDto> productList = jpaQueryFactory
+                .select(new QProductFilterResponseDto(
                         product.startDate,
                         product.endDate,
                         product.airline,

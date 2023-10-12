@@ -11,6 +11,9 @@ import com.uriel.travel.dto.PackageRequestDto;
 import com.uriel.travel.dto.QPackageFilterResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -25,8 +28,8 @@ public class PackageRepositoryCustomImpl implements PackageRepositoryCustom {
     QTagging tagging = QTagging.tagging;
 
     @Override
-    public List<PackageFilterResponseDto> searchPackageByFilter(PackageRequestDto.FilterCond filterCond) {
-        return jpaQueryFactory
+    public Page<PackageFilterResponseDto> searchPackageByFilter(PackageRequestDto.FilterCond filterCond, Pageable pageable) {
+        List<PackageFilterResponseDto> packageList = jpaQueryFactory
                 .select(new QPackageFilterResponseDto(
                         aPackage.id,
                         aPackage.packageName,
@@ -41,7 +44,20 @@ public class PackageRepositoryCustomImpl implements PackageRepositoryCustom {
                         .and(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(familyIn(filterCond))))
                         .and(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(seasonIn(filterCond))))
                         .and(costLoe(filterCond)))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .fetch();
+
+        Long count = jpaQueryFactory
+                .select(aPackage.count())
+                .from(aPackage)
+                .where(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(themeIn(filterCond)))
+                        .and(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(familyIn(filterCond))))
+                        .and(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(seasonIn(filterCond))))
+                        .and(costLoe(filterCond)))
+                .fetchOne();
+
+        return new PageImpl<>(packageList, pageable, count);
     }
 
     public BooleanExpression themeIn(PackageRequestDto.FilterCond filterCond) {

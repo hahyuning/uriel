@@ -10,6 +10,7 @@ import com.uriel.travel.service.ScheduleService;
 import com.uriel.travel.service.TagService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -90,7 +91,7 @@ public class PackageController {
 
     // 패키지 태크 필터링
     @PostMapping
-    public BaseResponse<List<PackageFilterResponseDto>> packageSearch(@RequestBody PackageRequestDto.FilterCond filterCond) {
+    public BaseResponse<Page<PackageFilterResponseDto>> packageSearch(@RequestBody PackageRequestDto.FilterCond filterCond) {
         return BaseResponse.ok(packageService.packageSearchByFilterCond(filterCond));
     }
 }

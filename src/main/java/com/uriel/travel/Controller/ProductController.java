@@ -2,7 +2,7 @@ package com.uriel.travel.Controller;
 
 import com.uriel.travel.Base.BaseResponse;
 import com.uriel.travel.dto.ProductRequestDto;
-import com.uriel.travel.dto.ProductResponseDto;
+import com.uriel.travel.dto.ProductFilterResponseDto;
 import com.uriel.travel.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -52,12 +52,7 @@ public class ProductController {
 
     // 패키지 별 상품 목록 조회
     @PostMapping("/search")
-    public BaseResponse<Page<ProductResponseDto>> searchByPackage(@RequestBody ProductRequestDto.FilterCond filterCond) {
+    public BaseResponse<Page<ProductFilterResponseDto>> searchByPackage(@RequestBody ProductRequestDto.FilterCond filterCond) {
         return BaseResponse.ok(productService.searchByPackage(filterCond));
     }
-
-    // 상품 상세확인
-    @GetMapping("/{productId}")
-    public
-
 }

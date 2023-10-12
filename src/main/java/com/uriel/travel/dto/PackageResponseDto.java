@@ -6,6 +6,7 @@ import com.uriel.travel.domain.Package;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 public class PackageResponseDto {
 
     @Getter
+    @Setter
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
@@ -28,6 +30,8 @@ public class PackageResponseDto {
         String hotelInfo;
         String regionInfo;
         String terms;
+        List<ImageDto> thumbnailList;
+        List<ScheduleDto> scheduleList;
 
         public static PackageResponseDto.GetPackage of(Package aPackage) {
             return GetPackage.builder()
