@@ -3,8 +3,8 @@ package com.uriel.travel.service;
 import com.uriel.travel.domain.Package;
 import com.uriel.travel.domain.Product;
 import com.uriel.travel.domain.ProductDetail;
+import com.uriel.travel.dto.ProductFilterResponseDto;
 import com.uriel.travel.dto.ProductRequestDto;
-import com.uriel.travel.dto.ProductResponseDto;
 import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.repository.PackageRepository;
@@ -123,7 +123,7 @@ public class ProductService {
     }
 
     // 상품 조회
-    public Page<ProductResponseDto> searchByPackage(ProductRequestDto.FilterCond filterCond) {
+    public Page<ProductFilterResponseDto> searchByPackage(ProductRequestDto.FilterCond filterCond) {
         PageRequest pageRequest = PageRequest.of(filterCond.getOffset(), filterCond.getLimit());
         return productRepositoryCustom.searchByFilterCond(filterCond, pageRequest);
     }

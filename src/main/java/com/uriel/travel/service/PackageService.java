@@ -12,6 +12,8 @@ import com.uriel.travel.repository.ScheduleRepository;
 import com.uriel.travel.repository.ThumbnailRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -95,8 +97,9 @@ public class PackageService {
 
     // 패키지 태그 검색
     @Transactional(readOnly = true)
-    public List<PackageFilterResponseDto> packageSearchByFilterCond(PackageRequestDto.FilterCond filterCond) {
-        List<PackageFilterResponseDto> packageFilterResponseDtos = packageRepositoryCustom.searchPackageByFilter(filterCond);
+    public Page<PackageFilterResponseDto> packageSearchByFilterCond(PackageRequestDto.FilterCond filterCond) {
+        PageRequest pageRequest = PageRequest.of(filterCond.getOffset(), filterCond.getLimit());
+        Page<PackageFilterResponseDto> packageFilterResponseDtos = packageRepositoryCustom.searchPackageByFilter(filterCond, pageRequest);
         packageFilterResponseDtos.forEach(dto -> {
             List<Thumbnail> thumbnails = thumbnailRepository.findAllByPackageId(dto.getPackageId());
 

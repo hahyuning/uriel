@@ -2,10 +2,10 @@ package com.uriel.travel.repository;
 
 import com.uriel.travel.dto.PackageFilterResponseDto;
 import com.uriel.travel.dto.PackageRequestDto;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface PackageRepositoryCustom {
 
-    List<PackageFilterResponseDto> searchPackageByFilter(PackageRequestDto.FilterCond filterCond);
+    Page<PackageFilterResponseDto> searchPackageByFilter(PackageRequestDto.FilterCond filterCond, Pageable pageable);
 }

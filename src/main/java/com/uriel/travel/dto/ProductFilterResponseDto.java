@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class ProductResponseDto {
+public class ProductFilterResponseDto {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     LocalDateTime startDate;
@@ -29,7 +29,7 @@ public class ProductResponseDto {
     ProductState productState;
 
     @QueryProjection
-    public ProductResponseDto(LocalDateTime startDate, LocalDateTime endDate, String airline, int price, int maxCount, int nowCount, ProductState productState) {
+    public ProductFilterResponseDto(LocalDateTime startDate, LocalDateTime endDate, String airline, int price, int maxCount, int nowCount, ProductState productState) {
         this.startDate = startDate;
         this.endDate = endDate;
         this.remainingQuantity = maxCount - nowCount;

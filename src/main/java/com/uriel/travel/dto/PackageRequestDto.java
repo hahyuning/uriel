@@ -78,5 +78,8 @@ public class PackageRequestDto {
         List<Long> familyList;
         int cost;
         List<Long> seasonList;
+
+        int offset;
+        int limit;
     }
 }
