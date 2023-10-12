@@ -51,6 +51,7 @@ public class PackageRequestDto {
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class Update {
 
+        int privacy;
         String packageName;
         String summary;
         int period;

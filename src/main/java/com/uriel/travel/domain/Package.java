@@ -22,6 +22,9 @@ public class Package extends BaseTimeEntity {
     @Column(name = "package_id")
     Long id;
 
+    @Builder.Default
+    int privacy = 0; // 0: 공개, 1: 비공개
+
     String packageName;
 
     String summary;
@@ -55,10 +58,11 @@ public class Package extends BaseTimeEntity {
 
     @Builder.Default
     @JsonIgnore
-    @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL)
     List<Product> productList = new ArrayList<>();
 
     public void update(PackageRequestDto.Update requestDto) {
+        this.privacy = requestDto.getPrivacy();
         this.packageName = requestDto.getPackageName();
         this.summary = requestDto.getSummary();
         this.period = requestDto.getPeriod();
