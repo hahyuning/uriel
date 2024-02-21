@@ -1,13 +1,16 @@
 package com.uriel.travel.domain;
 
-import com.querydsl.core.annotations.QueryInit;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Tagging {
 
@@ -26,12 +29,13 @@ public class Tagging {
     @Enumerated(EnumType.STRING)
     TagType tagType;
 
-    public Tagging(Tag tag) {
+    public void setTag(Tag tag) {
         this.tag = tag;
-        this.tagType = tag.getTagType();
+        tag.getTaggingList().add(this);
     }
 
     public void setPackage(Package aPackage) {
         this.aPackage = aPackage;
+        aPackage.getTaggingList().add(this);
     }
 }

@@ -32,6 +32,10 @@ public class QUsers extends EntityPathBase<Users> {
 
     public final StringPath email = createString("email");
 
+    public final StringPath enFirstName = createString("enFirstName");
+
+    public final StringPath enLastName = createString("enLastName");
+
     public final EnumPath<Gender> gender = createEnum("gender", Gender.class);
 
     public final NumberPath<Integer> headCount = createNumber("headCount", Integer.class);
@@ -44,7 +48,7 @@ public class QUsers extends EntityPathBase<Users> {
 
     public final StringPath phoneNumber = createString("phoneNumber");
 
-    public final com.uriel.travel.jwt.entity.QRefreshToken refreshToken;
+    public final com.uriel.travel.jwt.domain.QRefreshToken refreshToken;
 
     public final StringPath userName = createString("userName");
 
@@ -66,7 +70,7 @@ public class QUsers extends EntityPathBase<Users> {
 
     public QUsers(Class<? extends Users> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.refreshToken = inits.isInitialized("refreshToken") ? new com.uriel.travel.jwt.entity.QRefreshToken(forProperty("refreshToken"), inits.get("refreshToken")) : null;
+        this.refreshToken = inits.isInitialized("refreshToken") ? new com.uriel.travel.jwt.domain.QRefreshToken(forProperty("refreshToken"), inits.get("refreshToken")) : null;
     }
 
 }

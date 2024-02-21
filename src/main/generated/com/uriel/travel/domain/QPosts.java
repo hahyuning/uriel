@@ -21,6 +21,8 @@ public class QPosts extends EntityPathBase<Posts> {
 
     public final QBaseTimeEntity _super = new QBaseTimeEntity(this);
 
+    public final StringPath blogUrl = createString("blogUrl");
+
     public final StringPath content = createString("content");
 
     //inherited

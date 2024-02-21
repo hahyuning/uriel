@@ -1,6 +1,6 @@
 package com.uriel.travel.domain;
 
-import com.uriel.travel.dto.ProductRequestDto;
+import com.uriel.travel.dto.product.ProductRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -20,11 +20,13 @@ public class Product extends BaseTimeEntity {
     @Column(name = "product_id")
     Long id;
 
+    @Enumerated(EnumType.STRING)
     @Builder.Default
-    int privacy = 1; // 공개여부
+    Release isPublic = Release.TEMPORARY; // 공개여부
 
+    @Builder.Default
 //    @Column(unique = true)
-//    String productCode; // 상품코드
+    String productCode = ""; // 상품코드
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "package_id")
@@ -47,10 +49,6 @@ public class Product extends BaseTimeEntity {
 
     int price; // 가격
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
-    Order order;
-
     // 연관관계
     public void setPackage(Package aPackage) {
         this.aPackage = aPackage;
@@ -59,12 +57,12 @@ public class Product extends BaseTimeEntity {
 
     // 상품 수정
     public void update(ProductRequestDto.Update requestDto) {
-        this.privacy = requestDto.getPrivacy();
+        this.isPublic = Release.from(requestDto.getPrivacy());
         this.startDate = requestDto.getStartDate();
         this.endDate = requestDto.getEndDate();
         this.minCount = requestDto.getMinCount();
         this.maxCount = requestDto.getMaxCount();
-        this.productState = requestDto.getProductState();
+        this.productState = ProductState.from(requestDto.getProductState());
         this.airline = requestDto.getAirline();
         this.price = requestDto.getPrice();
     }
@@ -72,5 +70,9 @@ public class Product extends BaseTimeEntity {
     // id 초기화
     public void idInitialize() {
         this.id = null;
+    }
+
+    public void setPrivacy(String privacy) {
+        this.isPublic = Release.from(privacy);
     }
 }

@@ -1,17 +1,18 @@
 package com.uriel.travel.domain;
-import com.uriel.travel.domain.TagType;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.uriel.travel.dto.product.TagRequestDto;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
-import net.minidev.json.annotate.JsonIgnore;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Tag {
@@ -26,7 +27,13 @@ public class Tag {
     @Enumerated(EnumType.STRING)
     TagType tagType;
 
+    @Builder.Default
     @JsonIgnore
-    @OneToMany(mappedBy = "tag")
+    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Tagging> taggingList = new ArrayList<>();
+
+    public void update(TagRequestDto.Update requestDto) {
+        this.tagContent = requestDto.getTagContent();
+        this.tagType = TagType.from(requestDto.getTagType());
+    }
 }

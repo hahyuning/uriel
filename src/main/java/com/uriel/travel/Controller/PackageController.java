@@ -1,9 +1,10 @@
 package com.uriel.travel.Controller;
 
 import com.uriel.travel.Base.BaseResponse;
-import com.uriel.travel.dto.PackageFilterResponseDto;
-import com.uriel.travel.dto.PackageRequestDto;
-import com.uriel.travel.dto.PackageResponseDto;
+import com.uriel.travel.dto.BatchRequestDto;
+import com.uriel.travel.dto.product.PackageRequestDto;
+import com.uriel.travel.dto.product.PackageResponseDto;
+import com.uriel.travel.dto.filterCond.PackageFilter;
 import com.uriel.travel.service.PackageService;
 import com.uriel.travel.service.S3Service;
 import com.uriel.travel.service.ScheduleService;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -46,52 +46,115 @@ public class PackageController {
         tagService.taggingToPackage(requestDto.getThemeList(), packageId);
         tagService.taggingToPackage(requestDto.getFamilyList(), packageId);
         tagService.taggingToPackage(requestDto.getSeasonList(), packageId);
+        tagService.taggingToPackage(requestDto.getPriceList(), packageId);
         return BaseResponse.ok();
     }
 
-    // 패키지 수정
-    @PutMapping("/{packageId}/update")
-    public BaseResponse<Void> update(@RequestPart("data") PackageRequestDto.Update requestDto,
-                                     @RequestPart("files") List<MultipartFile> files,
-                                     @PathVariable Long packageId) {
-        packageService.update(requestDto, packageId);
-        s3Service.deleteThumbnail(packageId);
-        s3Service.uploadThumbnails(files, packageId);
+    // 패키지 임시저장
+    @PostMapping("/temp-create")
+    public BaseResponse<Void> temporarySave(@RequestPart("data") PackageRequestDto.Create requestDto,
+                                     @RequestPart("files") List<MultipartFile> files) {
 
-        scheduleService.deleteAllSchedule(packageId);
+        Long packageId = packageService.temporarySave(requestDto); // 패키지 저장
+        s3Service.uploadThumbnails(files, packageId); // 썸네일 저장
+
+        // 일정 저장
         scheduleService.create(requestDto.getScheduleList(), packageId);
 
-        tagService.deleteTagging(packageId);
+        // 태그 저장
         tagService.taggingToPackage(requestDto.getThemeList(), packageId);
         tagService.taggingToPackage(requestDto.getFamilyList(), packageId);
         tagService.taggingToPackage(requestDto.getSeasonList(), packageId);
         return BaseResponse.ok();
     }
 
+    // 패키지 수정
+    @PutMapping("/{packageId}")
+    public BaseResponse<Void> update(@RequestPart("data") PackageRequestDto.Update requestDto,
+                                     @RequestPart("files") List<MultipartFile> files,
+                                     @PathVariable Long packageId) {
+
+        // 기본정보 업데이트
+        packageService.update(requestDto, packageId);
+        // 썸네일 업데이트
+        s3Service.deleteThumbnail(packageId);
+        s3Service.uploadThumbnails(files, packageId);
+
+        //일정 업데이트
+        scheduleService.deleteAllSchedule(packageId);
+        scheduleService.create(requestDto.getScheduleList(), packageId);
+
+        // 태그 업데이트
+        tagService.deleteTagging(packageId);
+        tagService.taggingToPackage(requestDto.getThemeList(), packageId);
+        tagService.taggingToPackage(requestDto.getFamilyList(), packageId);
+        tagService.taggingToPackage(requestDto.getSeasonList(), packageId);
+        tagService.taggingToPackage(requestDto.getPriceList(), packageId);
+        return BaseResponse.ok();
+    }
+
+    // 패키지 임시저장 업데이트
+    @PutMapping("/temp-update/{packageId}")
+    public BaseResponse<Void> temporaryUpdate(@RequestPart("data") PackageRequestDto.Update requestDto,
+                                     @RequestPart("files") List<MultipartFile> files,
+                                     @PathVariable Long packageId) {
+
+        // 기본정보 업데이트
+        packageService.temporaryUpdate(requestDto, packageId);
+        // 썸네일 업데이트
+        s3Service.deleteThumbnail(packageId);
+        s3Service.uploadThumbnails(files, packageId);
+
+        //일정 업데이트
+        scheduleService.deleteAllSchedule(packageId);
+        scheduleService.create(requestDto.getScheduleList(), packageId);
+
+        // 태그 업데이트
+        tagService.deleteTagging(packageId);
+        tagService.taggingToPackage(requestDto.getThemeList(), packageId);
+        tagService.taggingToPackage(requestDto.getFamilyList(), packageId);
+        tagService.taggingToPackage(requestDto.getSeasonList(), packageId);
+        tagService.taggingToPackage(requestDto.getPriceList(), packageId);
+        return BaseResponse.ok();
+    }
+
     // 패키지 삭제
     @PostMapping("/batch-delete")
-    public BaseResponse<Void> delete(@RequestBody Map<String, List<Long>> param) {
-        List<Long> ids = param.get("ids");
+    public BaseResponse<Void> delete(@RequestBody BatchRequestDto requestDto) {
+        List<Long> ids = requestDto.getIds();
         ids.forEach(tagService::deleteTagging);
         packageService.delete(ids);
         return BaseResponse.ok();
     }
 
+    // 패키지 공개/비공개 처리
+    @PostMapping("/batch-update")
+    public BaseResponse<Void> privacyUpdate(@RequestBody BatchRequestDto requestDto) {
+        packageService.privacyUpdate(requestDto.getOperation(), requestDto.getIds());
+        return BaseResponse.ok();
+    }
+
     // 패키지 한건 조회
     @GetMapping("/{packageId}")
-    public BaseResponse<PackageResponseDto.GetPackage> getPackageById(@PathVariable Long packageId) {
+    public BaseResponse<PackageResponseDto> getPackageById(@PathVariable Long packageId) {
         return BaseResponse.ok(packageService.getPackageById(packageId));
     }
 
-    // 전체 태그 조회
-    @GetMapping("/tags")
-    public BaseResponse<PackageResponseDto.GetAllTags> getAllTags() {
-        return BaseResponse.ok(tagService.getAllTags());
+    // 패키지 태그 검색
+    @PostMapping
+    public BaseResponse<Page<PackageFilter.PackageFilterResponseDto>> packageSearch(@RequestBody PackageFilter.PackageFilterCond filterCond) {
+        return BaseResponse.ok(packageService.packageSearchByFilterCond(filterCond));
     }
 
-    // 패키지 태크 필터링
-    @PostMapping
-    public BaseResponse<Page<PackageFilterResponseDto>> packageSearch(@RequestBody PackageRequestDto.FilterCond filterCond) {
-        return BaseResponse.ok(packageService.packageSearchByFilterCond(filterCond));
+    // 관리자용 패키지 목록 조회
+    @PostMapping("/list")
+    public BaseResponse<Page<PackageFilter.PackageFilterForAdminResponseDto>> packageSearchForAdmin(@RequestBody PackageFilter.PackageFilterCondForAdmin filterCond) {
+        return BaseResponse.ok(packageService.packageByCountryForAdmin(filterCond));
+    }
+
+    // 패키지 전체 조회
+    @GetMapping
+    public BaseResponse<PackageResponseDto> getAllPackages() {
+        return BaseResponse.ok(packageService.getAllPackages());
     }
 }

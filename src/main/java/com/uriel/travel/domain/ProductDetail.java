@@ -1,6 +1,6 @@
 package com.uriel.travel.domain;
 
-import com.uriel.travel.dto.ProductRequestDto;
+import com.uriel.travel.dto.product.ProductRequestDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

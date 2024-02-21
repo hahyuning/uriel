@@ -1,6 +1,6 @@
 package com.uriel.travel.domain;
 
-import com.uriel.travel.jwt.entity.RefreshToken;
+import com.uriel.travel.jwt.domain.RefreshToken;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -24,6 +24,8 @@ public class Users {
     LocalDate createdDate;
     LocalDate modifiedDate;
     String userName;
+    String enFirstName;
+    String enLastName;
     LocalDate birth;
     String email; //=회원 아이디
     String password;

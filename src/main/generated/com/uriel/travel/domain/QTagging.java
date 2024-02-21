@@ -48,7 +48,7 @@ public class QTagging extends EntityPathBase<Tagging> {
 
     public QTagging(Class<? extends Tagging> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.aPackage = inits.isInitialized("aPackage") ? new QPackage(forProperty("aPackage")) : null;
+        this.aPackage = inits.isInitialized("aPackage") ? new QPackage(forProperty("aPackage"), inits.get("aPackage")) : null;
         this.tag = inits.isInitialized("tag") ? new QTag(forProperty("tag")) : null;
     }
 
