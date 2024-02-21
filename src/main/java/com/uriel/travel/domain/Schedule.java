@@ -1,14 +1,13 @@
 package com.uriel.travel.domain;
 
-import com.uriel.travel.dto.product.ScheduleDto;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Schedule {
@@ -25,7 +24,9 @@ public class Schedule {
     int day;
 
     @Lob
-    String dayContent;
+    String dayContentMd;
+    @Lob
+    String dayContentHtml;
 
     @Lob
     String hotel;
@@ -35,14 +36,6 @@ public class Schedule {
 
     @Lob
     String vehicle;
-
-    public Schedule(ScheduleDto dto) {
-        this.day = dto.getDay();
-        this.dayContent = dto.getDayContent();
-        this.hotel = dto.getHotel();
-        this.meal = dto.getMeal();
-        this.vehicle = dto.getVehicle();
-    }
 
     public void setPackage(Package aPackage) {
         this.aPackage = aPackage;

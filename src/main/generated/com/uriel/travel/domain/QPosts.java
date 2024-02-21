@@ -23,7 +23,9 @@ public class QPosts extends EntityPathBase<Posts> {
 
     public final StringPath blogUrl = createString("blogUrl");
 
-    public final StringPath content = createString("content");
+    public final StringPath contentHtml = createString("contentHtml");
+
+    public final StringPath contentMd = createString("contentMd");
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdDate = _super.createdDate;

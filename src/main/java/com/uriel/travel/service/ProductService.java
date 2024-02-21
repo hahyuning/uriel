@@ -2,11 +2,10 @@ package com.uriel.travel.service;
 
 import com.uriel.travel.domain.*;
 import com.uriel.travel.domain.Package;
-import com.uriel.travel.dto.editor.ImageDto;
+import com.uriel.travel.dto.ImageDto;
 import com.uriel.travel.dto.product.PackageResponseDto;
 import com.uriel.travel.dto.product.ProductDetailResponseDto;
 import com.uriel.travel.dto.product.ProductRequestDto;
-import com.uriel.travel.dto.product.ScheduleDto;
 import com.uriel.travel.dto.filterCond.ProductFilter;
 import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.ErrorCode;
@@ -208,33 +207,24 @@ public class ProductService {
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND));
 
-        PackageResponseDto.PackageInfo packageInfo = PackageResponseDto.PackageInfo.of(aPackage);
+        PackageResponseDto.PackageInfo packageInfo = PackageResponseDto.PackageInfo.of(aPackage, "detail");
 
         // 썸네일
         List<Thumbnail> thumbnails = thumbnailRepository.findAllByPackageId(aPackage.getId());
         List<ImageDto> thumbnailList = new ArrayList<>();
-        thumbnails.forEach(thumbnail -> {
-            thumbnailList.add(ImageDto.builder()
+        thumbnails.forEach(thumbnail ->
+                thumbnailList.add(ImageDto.builder()
                     .originalImageName(thumbnail.getOriginalImageName())
                     .uploadImageName(thumbnail.getUploadImageName())
                     .imagePath(thumbnail.getImagePath())
-                    .imageUrl(thumbnail.getImageUrl()).build());
-
-        });
+                    .imageUrl(thumbnail.getImageUrl()).build()));
         packageInfo.setThumbnailList(thumbnailList);
 
         // 일정
         List<Schedule> schedules = scheduleRepository.findAllByPackageId(aPackage.getId());
-        List<ScheduleDto> scheduleList = new ArrayList<>();
-        schedules.forEach(schedule -> {
-            scheduleList.add(ScheduleDto.builder()
-                    .scheduleId(schedule.getId())
-                    .day(schedule.getDay())
-                    .dayContent(schedule.getDayContent())
-                    .hotel(schedule.getHotel())
-                    .meal(schedule.getMeal())
-                    .vehicle(schedule.getVehicle()).build());
-        });
+        List<PackageResponseDto.ScheduleResponseDto> scheduleList = new ArrayList<>();
+        schedules.forEach(schedule ->
+                PackageResponseDto.ScheduleResponseDto.of(schedule, "detail"));
 
         packageInfo.setScheduleList(scheduleList);
         responseDto.setPackageInfo(packageInfo);

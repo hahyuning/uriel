@@ -1,4 +1,4 @@
-package com.uriel.travel.dto.editor;
+package com.uriel.travel.dto;
 
 import lombok.AccessLevel;
 import lombok.Builder;

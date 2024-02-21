@@ -1,7 +1,5 @@
-package com.uriel.travel.dto.editor;
+package com.uriel.travel.dto.community;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.uriel.travel.domain.PostType;
 import com.uriel.travel.domain.Posts;
 import lombok.AccessLevel;
@@ -9,32 +7,35 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-public class EditorRequestDto {
+public class CommunityRequestDto {
 
     @Getter
     @Setter
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class Create {
+    public static class Create { // html, md 같이 저장
 
         String type;
-
         String title;
-        String content;
+        String contentHtml;
+        String contentMd;
         String blogUrl;
+
 
         public Posts toEntity() {
             if (type.equals("blog")) {
                 return Posts.builder()
                         .postType(PostType.BLOG)
                         .title(title)
-                        .content(content)
+                        .contentHtml(contentHtml)
+                        .contentMd(contentMd)
                         .blogUrl(blogUrl)
                         .build();
             } else {
                 return Posts.builder()
                         .postType(PostType.NOTICE)
                         .title(title)
-                        .content(content)
+                        .contentHtml(contentHtml)
+                        .contentMd(contentMd)
                         .build();
             }
         }
@@ -49,7 +50,8 @@ public class EditorRequestDto {
         String type;
 
         String title;
-        String content;
+        String contentHtml;
+        String contentMd;
         String blogUrl;
     }
 }

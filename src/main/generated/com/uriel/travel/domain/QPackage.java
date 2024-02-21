@@ -18,20 +18,20 @@ public class QPackage extends EntityPathBase<Package> {
 
     private static final long serialVersionUID = 28194504L;
 
-    private static final PathInits INITS = PathInits.DIRECT2;
-
     public static final QPackage package$ = new QPackage("package$");
 
     public final QBaseTimeEntity _super = new QBaseTimeEntity(this);
 
-    public final QCountry country;
+    public final EnumPath<Country> country = createEnum("country", Country.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdDate = _super.createdDate;
 
     public final StringPath hashTag = createString("hashTag");
 
-    public final StringPath hotelInfo = createString("hotelInfo");
+    public final StringPath hotelInfoHtml = createString("hotelInfoHtml");
+
+    public final StringPath hotelInfoMd = createString("hotelInfoMd");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
@@ -46,7 +46,9 @@ public class QPackage extends EntityPathBase<Package> {
 
     public final ListPath<Product, QProduct> productList = this.<Product, QProduct>createList("productList", Product.class, QProduct.class, PathInits.DIRECT2);
 
-    public final StringPath regionInfo = createString("regionInfo");
+    public final StringPath regionInfoHtml = createString("regionInfoHtml");
+
+    public final StringPath regionInfoMd = createString("regionInfoMd");
 
     public final ListPath<Schedule, QSchedule> scheduleList = this.<Schedule, QSchedule>createList("scheduleList", Schedule.class, QSchedule.class, PathInits.DIRECT2);
 
@@ -54,29 +56,22 @@ public class QPackage extends EntityPathBase<Package> {
 
     public final ListPath<Tagging, QTagging> taggingList = this.<Tagging, QTagging>createList("taggingList", Tagging.class, QTagging.class, PathInits.DIRECT2);
 
-    public final StringPath terms = createString("terms");
+    public final StringPath termsHtml = createString("termsHtml");
+
+    public final StringPath termsMd = createString("termsMd");
 
     public final ListPath<Thumbnail, QThumbnail> thumbnailList = this.<Thumbnail, QThumbnail>createList("thumbnailList", Thumbnail.class, QThumbnail.class, PathInits.DIRECT2);
 
     public QPackage(String variable) {
-        this(Package.class, forVariable(variable), INITS);
+        super(Package.class, forVariable(variable));
     }
 
     public QPackage(Path<? extends Package> path) {
-        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
+        super(path.getType(), path.getMetadata());
     }
 
     public QPackage(PathMetadata metadata) {
-        this(metadata, PathInits.getFor(metadata, INITS));
-    }
-
-    public QPackage(PathMetadata metadata, PathInits inits) {
-        this(Package.class, metadata, inits);
-    }
-
-    public QPackage(Class<? extends Package> type, PathMetadata metadata, PathInits inits) {
-        super(type, metadata, inits);
-        this.country = inits.isInitialized("country") ? new QCountry(forProperty("country")) : null;
+        super(Package.class, metadata);
     }
 
 }

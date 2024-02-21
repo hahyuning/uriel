@@ -27,17 +27,13 @@ public class PackageController {
     private final S3Service s3Service;
     private final ScheduleService scheduleService;
     private final TagService tagService;
-
-//    ObjectMapper snakeMapper = new ObjectMapper()
-//            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
-
     // 패키지 등록
     @PostMapping("/create")
     public BaseResponse<Void> create(@RequestPart("data") PackageRequestDto.Create requestDto,
-                                     @RequestPart("files") List<MultipartFile> files) {
+                                     @RequestPart(value = "files", required = false) List<MultipartFile> files) {
 
         Long packageId = packageService.create(requestDto); // 패키지 저장
-        s3Service.uploadThumbnails(files, packageId); // 썸네일 저장
+//        s3Service.uploadThumbnails(files, packageId); // 썸네일 저장
 
         // 일정 저장
         scheduleService.create(requestDto.getScheduleList(), packageId);
@@ -53,7 +49,7 @@ public class PackageController {
     // 패키지 임시저장
     @PostMapping("/temp-create")
     public BaseResponse<Void> temporarySave(@RequestPart("data") PackageRequestDto.Create requestDto,
-                                     @RequestPart("files") List<MultipartFile> files) {
+                                     @RequestPart(value = "files", required = false) List<MultipartFile> files) {
 
         Long packageId = packageService.temporarySave(requestDto); // 패키지 저장
         s3Service.uploadThumbnails(files, packageId); // 썸네일 저장
@@ -71,7 +67,7 @@ public class PackageController {
     // 패키지 수정
     @PutMapping("/{packageId}")
     public BaseResponse<Void> update(@RequestPart("data") PackageRequestDto.Update requestDto,
-                                     @RequestPart("files") List<MultipartFile> files,
+                                     @RequestPart(value = "files", required = false) List<MultipartFile> files,
                                      @PathVariable Long packageId) {
 
         // 기본정보 업데이트
@@ -96,7 +92,7 @@ public class PackageController {
     // 패키지 임시저장 업데이트
     @PutMapping("/temp-update/{packageId}")
     public BaseResponse<Void> temporaryUpdate(@RequestPart("data") PackageRequestDto.Update requestDto,
-                                     @RequestPart("files") List<MultipartFile> files,
+                                     @RequestPart(value = "files", required = false) List<MultipartFile> files,
                                      @PathVariable Long packageId) {
 
         // 기본정보 업데이트
@@ -136,7 +132,7 @@ public class PackageController {
 
     // 패키지 한건 조회
     @GetMapping("/{packageId}")
-    public BaseResponse<PackageResponseDto> getPackageById(@PathVariable Long packageId) {
+    public BaseResponse<PackageResponseDto.PackageInfo> getPackageById(@PathVariable Long packageId) {
         return BaseResponse.ok(packageService.getPackageById(packageId));
     }
 
@@ -154,7 +150,7 @@ public class PackageController {
 
     // 패키지 전체 조회
     @GetMapping
-    public BaseResponse<PackageResponseDto> getAllPackages() {
+    public BaseResponse<List<PackageResponseDto.PackageInfo>> getAllPackages() {
         return BaseResponse.ok(packageService.getAllPackages());
     }
 }

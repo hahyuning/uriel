@@ -1,11 +1,9 @@
 package com.uriel.travel.domain;
 
-import com.uriel.travel.dto.editor.EditorRequestDto;
+import com.uriel.travel.dto.community.CommunityRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.Objects;
 
 @Entity
 @Builder
@@ -23,18 +21,22 @@ public class Posts extends BaseTimeEntity {
     String title;
 
     @Lob
-    String content;
+    String contentHtml;
+
+    @Lob
+    String contentMd;
 
     @Enumerated(EnumType.STRING)
     PostType postType;
 
     String blogUrl;
 
-    public void update(EditorRequestDto.Update requestDto) {
+    public void update(CommunityRequestDto.Update requestDto) {
         this.title = requestDto.getTitle();
-        this.content = requestDto.getContent();
+        this.contentHtml = requestDto.getContentHtml();
+        this.contentMd = requestDto.getContentMd();
 
-        if (Objects.equals(PostType.from(requestDto.getType()), PostType.BLOG)) {
+        if (requestDto.getType().equals("blog")) {
             this.blogUrl = requestDto.getBlogUrl();
         }
     }

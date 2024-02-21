@@ -2,7 +2,7 @@ package com.uriel.travel.service;
 
 import com.uriel.travel.domain.Package;
 import com.uriel.travel.domain.*;
-import com.uriel.travel.dto.editor.ImageDto;
+import com.uriel.travel.dto.ImageDto;
 import com.uriel.travel.dto.filterCond.PackageFilter;
 import com.uriel.travel.dto.product.*;
 import com.uriel.travel.exception.CustomNotFoundException;
@@ -27,24 +27,17 @@ public class PackageService {
 
     private final PackageRepository packageRepository;
     private final PackageRepositoryCustomImpl packageRepositoryCustom;
-    private final ThumbnailRepository thumbnailRepository;
-    private final CountryRepository countryRepository;
-    private final TagRepository tagRepository;
 
     // 패키지 임시 저장
     public Long temporarySave(PackageRequestDto.Create requestDto) {
-        Country country = countryRepository.findByCountryName(requestDto.getCountryName());
         Package aPackage = requestDto.toEntity();
-        aPackage.setCountry(country);
         return packageRepository.save(aPackage).getId();
     }
 
     // 패키지 저장
     public Long create(PackageRequestDto.Create requestDto) {
-        Country country = countryRepository.findByCountryName(requestDto.getCountryName());
         Package aPackage = requestDto.toEntity();
         aPackage.setPrivacy(requestDto.getPrivacy());
-        aPackage.setCountry(country);
         return packageRepository.save(aPackage).getId();
     }
 
@@ -54,9 +47,8 @@ public class PackageService {
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND));
 
-        Country country = countryRepository.findByCountryName(requestDto.getCountryName());
         packageById.setPrivacy(requestDto.getPrivacy());
-        packageById.update(requestDto, country);
+        packageById.update(requestDto);
     }
 
     // 패키지 임시저장 업데이트
@@ -65,8 +57,7 @@ public class PackageService {
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND));
 
-        Country country = countryRepository.findByCountryName(requestDto.getCountryName());
-        packageById.update(requestDto, country);
+        packageById.update(requestDto);
         packageById.setPrivacy(Release.TEMPORARY.getViewName());
     }
 
@@ -92,57 +83,25 @@ public class PackageService {
         });
     }
 
-    // 패키지 상세 조회
+    // 패키지 상세 조회 (수정)
     @Transactional(readOnly = true)
-    public PackageResponseDto getPackageById(Long id) {
-
-        List<PackageResponseDto.PackageInfo> packageInfos = new ArrayList<>();
-
+    public PackageResponseDto.PackageInfo getPackageById(Long packageId) {
         // 패키지 기본 정보
-        Package packageById = packageRepository.findById(id)
+        Package packageById = packageRepository.findById(packageId)
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND));
 
-        PackageResponseDto.PackageInfo packageInfo = PackageResponseDto.PackageInfo.of(packageById);
+        PackageResponseDto.PackageInfo packageInfo = PackageResponseDto.PackageInfo.of(packageById, "edit");
 
-        // 썸네일
-        List<ImageDto> thumbnailList = new ArrayList<>();
-        for (Thumbnail thumbnail : packageById.getThumbnailList()) {
-            thumbnailList.add(ImageDto.builder()
-                    .originalImageName(thumbnail.getOriginalImageName())
-                    .uploadImageName(thumbnail.getUploadImageName())
-                    .imagePath(thumbnail.getImagePath())
-                    .imageUrl(thumbnail.getImageUrl()).build());
-        }
-        packageInfo.setThumbnailList(thumbnailList);
+        packageInfo.setPrice(getMinPrice(packageById));
+        packageInfo.setThumbnailList(getThumbnailList(packageById));
 
         // 일정
-        List<ScheduleDto> scheduleList = new ArrayList<>();
+        List<PackageResponseDto.ScheduleResponseDto> scheduleList = new ArrayList<>();
         for (Schedule schedule : packageById.getScheduleList()) {
-            scheduleList.add(ScheduleDto.builder()
-                    .scheduleId(schedule.getId())
-                    .day(schedule.getDay())
-                    .dayContent(schedule.getDayContent())
-                    .hotel(schedule.getHotel())
-                    .meal(schedule.getMeal())
-                    .vehicle(schedule.getVehicle()).build());
+            scheduleList.add(PackageResponseDto.ScheduleResponseDto.of(schedule, "edit"));
         }
-
         packageInfo.setScheduleList(scheduleList);
-
-        // 최저가 계산
-        int minPrice = 0;
-        for (Product product : packageById.getProductList()) {
-
-            if (product.getStartDate().isAfter(LocalDateTime.now()) && product.getPrice() != 0) {
-
-                if (minPrice == 0 || product.getPrice() <= minPrice) {
-                    minPrice = product.getPrice();
-                }
-
-            }
-        }
-        packageInfo.setPrice(minPrice);
 
         // 체크된 태그 리스트
         List<TagResponseDto.TagInfo> checkedTagList = new ArrayList<>();
@@ -153,25 +112,7 @@ public class PackageService {
         }
         packageInfo.setCheckedTagList(checkedTagList);
 
-        packageInfos.add(packageInfo);
-
-        // 전체 나라 정보
-        List<CountryResponseDto.CountryInfo> allCountries = new ArrayList<>();
-        for (Country c : countryRepository.findAll()) {
-            allCountries.add(CountryResponseDto.CountryInfo.of(c));
-        }
-
-        TagResponseDto.GetAllTags allTags = TagResponseDto.GetAllTags.of(
-                tagRepository.findByTagType(TagType.THEME.toString()),
-                tagRepository.findByTagType(TagType.FAMILY.toString()),
-                tagRepository.findByTagType(TagType.SEASON.toString()),
-                tagRepository.findByTagType(TagType.PRICE.toString()));
-
-        return PackageResponseDto
-                .builder()
-                .packageList(packageInfos)
-                .allTags(allTags)
-                .allCountries(allCountries).build();
+        return packageInfo;
     }
 
     // 패키지 태그 검색
@@ -182,36 +123,18 @@ public class PackageService {
 
         responseDtos.forEach(dto -> {
 
-            List<Thumbnail> thumbnails = thumbnailRepository.findAllByPackageId(dto.getPackageId());
-            List<ImageDto> thumbnailList = new ArrayList<>();
-            thumbnails.forEach(thumbnail -> {
-                thumbnailList.add(ImageDto.builder()
-                        .originalImageName(thumbnail.getOriginalImageName())
-                        .uploadImageName(thumbnail.getUploadImageName())
-                        .imagePath(thumbnail.getImagePath())
-                        .imageUrl(thumbnail.getImageUrl()).build());
-
-            });
-
-            dto.setThumbnailList(thumbnailList);
+            dto.setThumbnailList(getThumbnailList(packageRepository.findById(dto.getPackageId())
+                    .orElseThrow(() ->
+                            new CustomNotFoundException(ErrorCode.NOT_FOUND))
+            ));
 
             // 최저가 계산
             Package aPackage = packageRepository.findById(dto.getPackageId())
                     .orElseThrow(() ->
                             new CustomNotFoundException(ErrorCode.NOT_FOUND));
 
-            int minPrice = 0;
-            for (Product product : aPackage.getProductList()) {
+            dto.setPrice(getMinPrice(aPackage));
 
-                if (product.getStartDate().isAfter(LocalDateTime.now()) && product.getPrice() != 0) {
-
-                    if (minPrice == 0 || product.getPrice() <= minPrice) {
-                        minPrice = product.getPrice();
-                    }
-
-                }
-            }
-            dto.setPrice(minPrice);
         });
         return responseDtos;
     }
@@ -221,50 +144,64 @@ public class PackageService {
         return packageRepositoryCustom.searchByCountryForAdmin(filterCond, pageRequest);
     }
 
-    public PackageResponseDto getAllPackages() {
+
+    // 전체 패키지 목록
+    public List<PackageResponseDto.PackageInfo> getAllPackages() {
         // 패키지 기본 정보
         List<PackageResponseDto.PackageInfo> packageDtoList = new ArrayList<>();
         List<Package> packageList = packageRepository.findAllByIsPublic();
+
         for (Package aPackage : packageList) {
-
-            PackageResponseDto.PackageInfo packageInfo = PackageResponseDto.PackageInfo.of(aPackage);
-            // 최저가 계산
-            int minPrice = 0;
-            for (Product product : aPackage.getProductList()) {
-                if (product.getStartDate().isAfter(LocalDateTime.now()) && product.getPrice() != 0 && product.getPrice() <= minPrice) {
-                    minPrice = product.getPrice();
-                }
-            }
-            packageInfo.setPrice(minPrice);
-
-            // 썸네일
-            List<ImageDto> imageDtos = new ArrayList<>();
-            for (Thumbnail thumbnail : aPackage.getThumbnailList()) {
-                imageDtos.add(ImageDto.builder()
-                        .imageUrl(thumbnail.getImageUrl())
-                        .uploadImageName(thumbnail.getUploadImageName())
-                        .imagePath(thumbnail.getImagePath())
-                        .originalImageName(thumbnail.getOriginalImageName())
-                        .build());
-            }
-            packageInfo.setThumbnailList(imageDtos);
-            packageDtoList.add(packageInfo);
+            packageDtoList.add(changeToDto(aPackage, "detail"));
         }
 
-        // 전체 나라 정보
-        List<Country> all = countryRepository.findAll();
-        List<CountryResponseDto.CountryInfo> allCountries = new ArrayList<>();
-        for (Country c : all) {
-            allCountries.add(CountryResponseDto.CountryInfo.of(c));
+        return packageDtoList;
+    }
+
+    // 여행지로 패키지 목록 조회
+    public List<PackageResponseDto.PackageInfo> getPackagesByCountry(String countryName) {
+
+        List<PackageResponseDto.PackageInfo> packageDtoList = new ArrayList<>();
+        List<Package> packageList = packageRepository.findByCountry(Country.from(countryName));
+
+        for (Package aPackage : packageList) {
+            packageDtoList.add(changeToDto(aPackage, "detail"));
         }
 
-        return PackageResponseDto.builder()
-                .packageList(packageDtoList)
-                .allTags(TagResponseDto.GetAllTags.of( // 전체 태그 정보
-                        tagRepository.findByTagType(TagType.THEME.toString()),
-                        tagRepository.findByTagType(TagType.FAMILY.toString()),
-                        tagRepository.findByTagType(TagType.SEASON.toString()),
-                        tagRepository.findByTagType(TagType.PRICE.toString())))
-                .allCountries(allCountries).build();
+        return packageDtoList;
+    }
+
+    private PackageResponseDto.PackageInfo changeToDto(Package aPackage, String operation) {
+        PackageResponseDto.PackageInfo packageInfo = PackageResponseDto.PackageInfo.of(aPackage, operation);
+
+        packageInfo.setPrice(getMinPrice(aPackage));
+        packageInfo.setThumbnailList(getThumbnailList(aPackage));
+
+        return packageInfo;
+    }
+
+    private int getMinPrice(Package aPackage) {
+        // 최저가 계산
+        int minPrice = 0;
+        for (Product product : aPackage.getProductList()) {
+            if (product.getStartDate().isAfter(LocalDateTime.now()) && product.getPrice() != 0 && product.getPrice() <= minPrice) {
+                minPrice = product.getPrice();
+            }
+        }
+        return minPrice;
+    }
+
+    private List<ImageDto> getThumbnailList(Package aPackage) {
+
+        List<ImageDto> imageDtos = new ArrayList<>();
+        for (Thumbnail thumbnail : aPackage.getThumbnailList()) {
+            imageDtos.add(ImageDto.builder()
+                    .imageUrl(thumbnail.getImageUrl())
+                    .uploadImageName(thumbnail.getUploadImageName())
+                    .imagePath(thumbnail.getImagePath())
+                    .originalImageName(thumbnail.getOriginalImageName())
+                    .build());
+        }
+        return imageDtos;
     }
 }

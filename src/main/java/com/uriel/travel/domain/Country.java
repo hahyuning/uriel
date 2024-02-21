@@ -1,30 +1,33 @@
 package com.uriel.travel.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@Entity
 @Getter
-@Builder
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@FieldDefaults(level = AccessLevel.PRIVATE)
-public class Country {
+public enum Country {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "country_id")
-    Long id;
+    EEP("동유럽"),
+    EW1("프랑스위스"),
+    EW2("스페인"),
+    EW3("이탈리아"),
+    PAE("호주"),
+    PNN("뉴질랜드"),
+    ADP("대만"),
+    JHP("일본"),
+    AAP("동남아"),
+    KID("키자니아");
 
-    @Column(unique = true)
-    String countryName;
+    private final String viewName;
 
-    @Builder.Default
-    @JsonIgnore
-    @OneToMany(mappedBy = "country", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Package> packageList = new ArrayList<>();
+    @JsonCreator
+    public static Country from(String sub) {
+        for (Country country : Country.values()) {
+            if (country.getViewName().equals(sub)) {
+                return country;
+            }
+        }
+        return null;
+    }
 }

@@ -3,10 +3,7 @@ package com.uriel.travel.repository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.uriel.travel.domain.QPackage;
-import com.uriel.travel.domain.QTagging;
-import com.uriel.travel.domain.Release;
-import com.uriel.travel.domain.TagType;
+import com.uriel.travel.domain.*;
 import com.uriel.travel.dto.filterCond.PackageFilter;
 import com.uriel.travel.dto.filterCond.QPackageFilter_PackageFilterForAdminResponseDto;
 import com.uriel.travel.dto.filterCond.QPackageFilter_PackageFilterResponseDto;
@@ -36,7 +33,7 @@ public class PackageRepositoryCustomImpl implements PackageRepositoryCustom {
                         aPackage.packageName,
                         aPackage.summary,
                         aPackage.period,
-                        aPackage.country.countryName,
+                        aPackage.country,
                         aPackage.hashTag
                 ))
                 .from(aPackage)
@@ -68,7 +65,7 @@ public class PackageRepositoryCustomImpl implements PackageRepositoryCustom {
                 .select(new QPackageFilter_PackageFilterForAdminResponseDto(
                         aPackage.id,
                         aPackage.packageName,
-                        aPackage.country.countryName,
+                        aPackage.country,
                         aPackage.period
                 ))
                 .from(aPackage)
@@ -92,7 +89,7 @@ public class PackageRepositoryCustomImpl implements PackageRepositoryCustom {
 
     public BooleanExpression countryEq(PackageFilter.PackageFilterCondForAdmin filterCond) {
         if (filterCond.getCountryName() != null) {
-            return aPackage.country.countryName.eq(filterCond.getCountryName());
+            return aPackage.country.eq(Country.from(filterCond.getCountryName()));
         }
         return null;
     }

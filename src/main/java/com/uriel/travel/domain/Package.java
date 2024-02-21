@@ -32,20 +32,22 @@ public class Package extends BaseTimeEntity {
 
     int period;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "country_id")
+    @Enumerated(EnumType.STRING)
     Country country;
 
     String hashTag;
 
     @Lob
-    String hotelInfo;
+    String hotelInfoMd;
+    String hotelInfoHtml;
 
     @Lob
-    String regionInfo;
+    String regionInfoMd;
+    String regionInfoHtml;
 
     @Lob
-    String terms;
+    String termsMd;
+    String termsHtml;
 
     @Builder.Default
     @JsonIgnore
@@ -67,25 +69,22 @@ public class Package extends BaseTimeEntity {
     @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Tagging> taggingList = new ArrayList<>();
 
-    public void update(PackageRequestDto.Update requestDto, Country country) {
+    public void update(PackageRequestDto.Update requestDto) {
         this.packageName = requestDto.getPackageName();
         this.summary = requestDto.getSummary();
         this.period = requestDto.getPeriod();
-        this.country = country;
         this.hashTag = requestDto.getHashTag();
-        this.hotelInfo = requestDto.getHotelInfo();
-        this.regionInfo = requestDto.getRegionInfo();
-        this.terms = requestDto.getTerms();
-
+        this.hotelInfoMd = requestDto.getHotelInfoMd();
+        this.hotelInfoHtml = requestDto.getHotelInfoMd();
+        this.regionInfoMd = requestDto.getRegionInfoMd();
+        this.regionInfoHtml = requestDto.getRegionInfoHtml();
+        this.termsMd = requestDto.getTermsMd();
+        this.termsHtml = requestDto.getTermsHtml();
+        this.country = Country.from(requestDto.getCountryName());
         this.isPublic = Release.from(requestDto.getPrivacy());
     }
 
     public void setPrivacy(String privacy) {
         this.isPublic = Release.from(privacy);
-    }
-
-    public void setCountry(Country country) {
-        this.country = country;
-        country.getPackageList().add(this);
     }
 }

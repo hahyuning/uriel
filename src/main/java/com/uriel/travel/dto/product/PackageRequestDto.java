@@ -1,6 +1,8 @@
 package com.uriel.travel.dto.product;
 
+import com.uriel.travel.domain.Country;
 import com.uriel.travel.domain.Package;
+import com.uriel.travel.domain.Schedule;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,20 +27,27 @@ public class PackageRequestDto {
         List<String> seasonList;
         List<String> priceList;
         String hashTag;
-        String hotelInfo;
-        String regionInfo;
-        String terms;
-        List<ScheduleDto> scheduleList;
+        String hotelInfoMd;
+        String hotelInfoHtml;
+        String regionInfoMd;
+        String regionInfoHtml;
+        String termsMd;
+        String termsHtml;
+        List<ScheduleRequestDto> scheduleList;
 
         public Package toEntity() {
             return Package.builder()
                     .packageName(packageName)
+                    .country(Country.from(countryName))
                     .summary(summary)
                     .period(period)
                     .hashTag(hashTag)
-                    .hotelInfo(hotelInfo)
-                    .regionInfo(regionInfo)
-                    .terms(terms).build();
+                    .hotelInfoMd(hotelInfoMd)
+                    .hotelInfoHtml(hotelInfoMd)
+                    .regionInfoMd(regionInfoMd)
+                    .regionInfoHtml(regionInfoHtml)
+                    .termsMd(termsMd)
+                    .termsHtml(termsHtml).build();
         }
     }
 
@@ -57,9 +66,38 @@ public class PackageRequestDto {
         List<String> seasonList;
         List<String> priceList;
         String hashTag;
-        String hotelInfo;
-        String regionInfo;
-        String terms;
-        List<ScheduleDto> scheduleList;
+        String hotelInfoMd;
+        String hotelInfoHtml;
+        String regionInfoMd;
+        String regionInfoHtml;
+        String termsMd;
+        String termsHtml;
+        List<ScheduleRequestDto> scheduleList;
+    }
+
+    @Getter
+    @Setter
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class ScheduleRequestDto {
+
+        Long scheduleId;
+        int day;
+        String dayContentMd;
+        String dayContentHtml;
+        String hotel;
+        String meal;
+        String vehicle;
+
+        public Schedule toEntity() {
+            return Schedule
+                    .builder()
+                    .day(day)
+                    .dayContentMd(dayContentMd)
+                    .dayContentHtml(dayContentHtml)
+                    .hotel(hotel)
+                    .meal(meal)
+                    .vehicle(vehicle)
+                    .build();
+        }
     }
 }

@@ -1,7 +1,8 @@
 package com.uriel.travel.dto.filterCond;
 
 import com.querydsl.core.annotations.QueryProjection;
-import com.uriel.travel.dto.editor.ImageDto;
+import com.uriel.travel.domain.Country;
+import com.uriel.travel.dto.ImageDto;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -50,12 +51,12 @@ public class PackageFilter {
         List<ImageDto> thumbnailList;
 
         @QueryProjection
-        public PackageFilterResponseDto(Long packageId, String packageName, String summary, int period, String country, String hashTag) {
+        public PackageFilterResponseDto(Long packageId, String packageName, String summary, int period, Country country, String hashTag) {
             this.packageId = packageId;
             this.packageName = packageName;
             this.summary = summary;
             this.period = period;
-            this.country = country;
+            this.country = country.getViewName();
             this.hashTag = hashTag;
         }
     }
@@ -71,11 +72,11 @@ public class PackageFilter {
         int period;
 
         @QueryProjection
-        public PackageFilterForAdminResponseDto(Long packageId, String packageName, String countryName, int period) {
+        public PackageFilterForAdminResponseDto(Long packageId, String packageName, Country country, int period) {
             this.packageId = packageId;
             this.packageName = packageName;
             this.period = period;
-            this.countryName = countryName;
+            this.countryName = country.getViewName();
         }
     }
 }

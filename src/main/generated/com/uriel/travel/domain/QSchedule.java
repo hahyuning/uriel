@@ -26,7 +26,9 @@ public class QSchedule extends EntityPathBase<Schedule> {
 
     public final NumberPath<Integer> day = createNumber("day", Integer.class);
 
-    public final StringPath dayContent = createString("dayContent");
+    public final StringPath dayContentHtml = createString("dayContentHtml");
+
+    public final StringPath dayContentMd = createString("dayContentMd");
 
     public final StringPath hotel = createString("hotel");
 
@@ -54,7 +56,7 @@ public class QSchedule extends EntityPathBase<Schedule> {
 
     public QSchedule(Class<? extends Schedule> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.aPackage = inits.isInitialized("aPackage") ? new QPackage(forProperty("aPackage"), inits.get("aPackage")) : null;
+        this.aPackage = inits.isInitialized("aPackage") ? new QPackage(forProperty("aPackage")) : null;
     }
 
 }
