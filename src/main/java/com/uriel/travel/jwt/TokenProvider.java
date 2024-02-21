@@ -3,7 +3,7 @@ package com.uriel.travel.jwt;
 import com.uriel.travel.domain.Authority;
 import com.uriel.travel.exception.CustomUnauthorizedException;
 import com.uriel.travel.exception.ErrorCode;
-import com.uriel.travel.jwt.entity.TokenResponseDto;
+import com.uriel.travel.jwt.domain.TokenResponseDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -29,14 +29,14 @@ import java.util.*;
 
 @Slf4j
 @Component
-public class TokenProvider {
+public class TokenProvider { // 사용자 정보를 받아 JWT 생성
     private final Key key;
     private static final String AUTHORITIES_KEY = "auth";
     private static final String TOKEN_TYPE = "Bearer";
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 60 * 1000L;              // 30분
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000L;    // 7일
-    public TokenProvider( @Value("${jwt.secret}") String secretKey){
-        key= Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+    public TokenProvider(@Value("${jwt.secret}") String secretKey){
+        key= Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)); // 시크릿키
     }
     public String generateToken(Authentication authentication,long tokenValid,Authority authority) {
         Date date=new Date();

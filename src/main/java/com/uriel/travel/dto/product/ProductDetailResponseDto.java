@@ -1,11 +1,8 @@
-package com.uriel.travel.dto;
+package com.uriel.travel.dto.product;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.uriel.travel.domain.Product;
 import com.uriel.travel.domain.ProductDetail;
-import com.uriel.travel.domain.ProductState;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,17 +14,15 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class ProductDetailResponseDto {
 
-    PackageResponseDto.GetPackage packageInfo;
+    PackageResponseDto.PackageInfo packageInfo;
     GetProduct productInfo;
 
     @Getter
     @Setter
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class GetProduct {
 
         Long productId;
@@ -40,7 +35,7 @@ public class ProductDetailResponseDto {
         int minCount; // 최소 출발인원
         int maxCount; // 최대 예약인원
         int nowCount; // 현재 예약인원
-        ProductState productState; // 상품 상태
+        String productState; // 상품 상태
         String airline; // 항공사
         int price; // 가격
 
@@ -70,7 +65,7 @@ public class ProductDetailResponseDto {
                     .minCount(product.getMinCount())
                     .maxCount(product.getMaxCount())
                     .nowCount(product.getNowCount())
-                    .productState(product.getProductState())
+                    .productState(product.getProductState().getViewName())
                     .airline(product.getAirline())
                     .price(product.getPrice())
                     .flagCarrier(productDetail.getFlagCarrier())

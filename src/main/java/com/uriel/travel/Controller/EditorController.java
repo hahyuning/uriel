@@ -2,8 +2,8 @@ package com.uriel.travel.Controller;
 
 import com.uriel.travel.Base.BaseResponse;
 import com.uriel.travel.domain.PostType;
-import com.uriel.travel.dto.EditorRequestDto;
-import com.uriel.travel.dto.EditorResponseDto;
+import com.uriel.travel.dto.editor.EditorRequestDto;
+import com.uriel.travel.dto.editor.EditorResponseDto;
 import com.uriel.travel.service.EditorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -46,14 +46,14 @@ public class EditorController {
     }
 
     // 공지사항 목록 조회
-    @GetMapping("/notice")
-    public BaseResponse<List<EditorResponseDto.GetPost>> getNotice() {
-        return BaseResponse.ok(editorService.getPostByPostType(PostType.NOTICE));
+    @GetMapping("/notice/{offset}")
+    public BaseResponse<List<EditorResponseDto.GetPost>> getNotice(@PathVariable int offset) {
+        return BaseResponse.ok(editorService.getPostByPostType(PostType.NOTICE, offset));
     }
 
-    // 공지사항 목록 조회
-    @GetMapping("/blog")
-    public BaseResponse<List<EditorResponseDto.GetPost>> getBlog() {
-        return BaseResponse.ok(editorService.getPostByPostType(PostType.BLOG));
+    // 여행이야기 목록 조회
+    @GetMapping("/blog/{offset}")
+    public BaseResponse<List<EditorResponseDto.GetPost>> getBlog(@PathVariable int offset) {
+        return BaseResponse.ok(editorService.getPostByPostType(PostType.BLOG, offset));
     }
 }

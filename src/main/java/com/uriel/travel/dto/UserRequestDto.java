@@ -15,6 +15,8 @@ public class UserRequestDto {
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class SignUp{
         String userName;
+        String enFirstName;
+        String enLastName;
         Gender gender;
         LocalDate birth;
         String email;
@@ -25,6 +27,8 @@ public class UserRequestDto {
         public Users toUserEntity(){
             return Users.builder()
                     .userName(userName)
+                    .enFirstName(enFirstName)
+                    .enLastName(enLastName)
                     .gender(gender)
                     .birth(birth)
                     .email(email)

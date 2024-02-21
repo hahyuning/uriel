@@ -1,7 +1,7 @@
 package com.uriel.travel.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.uriel.travel.dto.PackageRequestDto;
+import com.uriel.travel.dto.product.PackageRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -22,8 +22,9 @@ public class Package extends BaseTimeEntity {
     @Column(name = "package_id")
     Long id;
 
+    @Enumerated(EnumType.STRING)
     @Builder.Default
-    int privacy = 0; // 0: 공개, 1: 비공개
+    Release isPublic = Release.TEMPORARY;
 
     String packageName;
 
@@ -31,9 +32,9 @@ public class Package extends BaseTimeEntity {
 
     int period;
 
-    String country;
-
-    int price;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "country_id")
+    Country country;
 
     String hashTag;
 
@@ -58,19 +59,33 @@ public class Package extends BaseTimeEntity {
 
     @Builder.Default
     @JsonIgnore
-    @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Product> productList = new ArrayList<>();
 
-    public void update(PackageRequestDto.Update requestDto) {
-        this.privacy = requestDto.getPrivacy();
+    @Builder.Default
+    @JsonIgnore
+    @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Tagging> taggingList = new ArrayList<>();
+
+    public void update(PackageRequestDto.Update requestDto, Country country) {
         this.packageName = requestDto.getPackageName();
         this.summary = requestDto.getSummary();
         this.period = requestDto.getPeriod();
-        this.country = requestDto.getCountry();
+        this.country = country;
         this.hashTag = requestDto.getHashTag();
-        this.price = requestDto.getPrice();
         this.hotelInfo = requestDto.getHotelInfo();
         this.regionInfo = requestDto.getRegionInfo();
         this.terms = requestDto.getTerms();
+
+        this.isPublic = Release.from(requestDto.getPrivacy());
+    }
+
+    public void setPrivacy(String privacy) {
+        this.isPublic = Release.from(privacy);
+    }
+
+    public void setCountry(Country country) {
+        this.country = country;
+        country.getPackageList().add(this);
     }
 }

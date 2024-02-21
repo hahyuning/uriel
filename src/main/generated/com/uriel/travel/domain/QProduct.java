@@ -35,6 +35,8 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final EnumPath<Release> isPublic = createEnum("isPublic", Release.class);
+
     public final NumberPath<Integer> maxCount = createNumber("maxCount", Integer.class);
 
     public final NumberPath<Integer> minCount = createNumber("minCount", Integer.class);
@@ -44,11 +46,7 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final NumberPath<Integer> nowCount = createNumber("nowCount", Integer.class);
 
-    public final QOrder order;
-
     public final NumberPath<Integer> price = createNumber("price", Integer.class);
-
-    public final NumberPath<Integer> privacy = createNumber("privacy", Integer.class);
 
     public final StringPath productCode = createString("productCode");
 
@@ -74,8 +72,7 @@ public class QProduct extends EntityPathBase<Product> {
 
     public QProduct(Class<? extends Product> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.aPackage = inits.isInitialized("aPackage") ? new QPackage(forProperty("aPackage")) : null;
-        this.order = inits.isInitialized("order") ? new QOrder(forProperty("order"), inits.get("order")) : null;
+        this.aPackage = inits.isInitialized("aPackage") ? new QPackage(forProperty("aPackage"), inits.get("aPackage")) : null;
     }
 
 }

@@ -22,6 +22,9 @@ public enum ErrorCode {
     DUPLICATE_UNIQUE_KEY(40005,"무결성 제약조건에 위배되었습니다."),
     DUPLICATE_SOCIAL_ID(40007,"이미 소셜 로그인을 등록하셨습니다."),
     BAD_AUTHORIZATION_CODE(40006,"fail to load authorization code"),
+    DUPLICATE_COUNTRY(40007, "이미 존재하는 여행지입니다."),
+    DUPLICATE_TAG(40008, "이미 존재하는 태그입니다."),
+    BAD_TEG_TYPE(40009, "태그 타입이 올바르지 않습니다."),
 
     /**
      * 401 : 인증되지 않은 사용자
@@ -44,7 +47,10 @@ public enum ErrorCode {
     NOT_FOUND_MEMBER(40401, "존재하지 않는 사용자 정보입니다"),
     NOT_FOUND_REVIEW(40402, "존재하지 않는 리뷰입니다"),
     NOT_FOUND_ORDER(40404, "존재하지 않는 주문 번호입니다."),
-    NOT_FOUND_PRODUCT(40405,"물건을 찾지을 수 없습니다"),
+    NOT_FOUND_PRODUCT(40405,"상품을 찾을 수 없습니다."),
+    NOT_FOUND_COUNTRY(40406, "여행지를 찾을 수 없습니다."),
+    NOT_FOUND_PACKAGE(40407, "패키지를 찾을 수 없습니다."),
+    NOT_FOUND_TAG(40408, "해당 태그가 존재하지 않습니다."),
 
     /**
      * 500 서버에러

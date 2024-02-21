@@ -1,12 +1,10 @@
-package com.uriel.travel.jwt.entity;
+package com.uriel.travel.jwt.domain;
 
 import com.uriel.travel.domain.Users;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Value;
-
-import java.util.Optional;
 
 @Entity
 @Getter

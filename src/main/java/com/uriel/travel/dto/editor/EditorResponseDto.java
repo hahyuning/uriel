@@ -1,7 +1,8 @@
-package com.uriel.travel.dto;
+package com.uriel.travel.dto.editor;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.uriel.travel.domain.PostType;
 import com.uriel.travel.domain.Posts;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -15,7 +16,6 @@ public class EditorResponseDto {
     @Setter
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class Create {
 
         Long postId;
@@ -31,7 +31,6 @@ public class EditorResponseDto {
     @Setter
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class Update {
 
         Long postId;
@@ -47,19 +46,25 @@ public class EditorResponseDto {
     @Setter
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class GetPost {
 
         Long postId;
         String title;
         String content;
+        String blogUrl;
 
         public static GetPost of(Posts posts) {
-            return GetPost.builder()
+            GetPost post = GetPost.builder()
                     .postId(posts.getId())
                     .title(posts.getTitle())
                     .content(posts.getContent())
                     .build();
+
+            if (posts.getPostType().equals(PostType.BLOG)) {
+                post.setBlogUrl(posts.getBlogUrl());
+            }
+
+            return post;
         }
     }
 }

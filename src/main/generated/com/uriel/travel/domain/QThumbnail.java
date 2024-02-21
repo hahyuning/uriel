@@ -52,7 +52,7 @@ public class QThumbnail extends EntityPathBase<Thumbnail> {
 
     public QThumbnail(Class<? extends Thumbnail> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.aPackage = inits.isInitialized("aPackage") ? new QPackage(forProperty("aPackage")) : null;
+        this.aPackage = inits.isInitialized("aPackage") ? new QPackage(forProperty("aPackage"), inits.get("aPackage")) : null;
     }
 
 }

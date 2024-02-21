@@ -18,6 +18,8 @@ public class UserResponseDto {
     public static class SignUp{
         Long id;
         String userName;
+        String enFirstName;
+        String enLastName;
         LocalDate birth;
         String email;
         String password;
@@ -29,6 +31,8 @@ public class UserResponseDto {
             return SignUp.builder()
                     .id(users.getId())
                     .userName(users.getUserName())
+                    .enFirstName(users.getEnFirstName())
+                    .enLastName(users.getEnLastName())
                     .birth(users.getBirth())
                     .email(users.getEmail())
                     .password(users.getPassword())

@@ -1,6 +1,6 @@
 package com.uriel.travel.domain;
 
-import com.uriel.travel.dto.ScheduleDto;
+import com.uriel.travel.dto.product.ScheduleDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Schedule extends BaseTimeEntity {
+public class Schedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

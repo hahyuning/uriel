@@ -1,4 +1,4 @@
-package com.uriel.travel.feign;
+package com.uriel.travel.exception.feign;
 
 import com.uriel.travel.config.FeignConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;

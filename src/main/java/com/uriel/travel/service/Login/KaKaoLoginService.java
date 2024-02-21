@@ -1,7 +1,6 @@
 package com.uriel.travel.service.Login;
 
 import com.nimbusds.jose.shaded.gson.Gson;
-import com.nimbusds.jose.shaded.gson.JsonObject;
 import com.uriel.travel.Base.GsonLocalDateTimeAdapter;
 import com.uriel.travel.domain.SocialType;
 import com.uriel.travel.dto.SocialLogin.SocialLoginResponseDto;
@@ -9,10 +8,8 @@ import com.uriel.travel.dto.SocialLogin.SocialTokenResponseDto;
 import com.uriel.travel.dto.UserResponseDto;
 import com.uriel.travel.exception.CustomBadRequestException;
 import com.uriel.travel.exception.ErrorCode;
-import com.uriel.travel.feign.KakaoApi;
-import com.uriel.travel.feign.KakaoUserApi;
-import com.uriel.travel.feign.NaverApi;
-import com.uriel.travel.feign.NaverUserApi;
+import com.uriel.travel.exception.feign.KakaoApi;
+import com.uriel.travel.exception.feign.KakaoUserApi;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;

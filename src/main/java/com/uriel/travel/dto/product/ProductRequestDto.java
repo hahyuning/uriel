@@ -1,4 +1,4 @@
-package com.uriel.travel.dto;
+package com.uriel.travel.dto.product;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -17,7 +17,6 @@ public class ProductRequestDto {
     @Getter
     @Setter
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class Create {
 
         Long packageId;
@@ -29,8 +28,9 @@ public class ProductRequestDto {
 
         int minCount;
         int maxCount;
-        ProductState productState;
+        String productState;
         String airline;
+        String privacy;
         int price;
 
         int flagCarrier; // 비행기 국적
@@ -55,7 +55,7 @@ public class ProductRequestDto {
                     .endDate(endDate)
                     .minCount(minCount)
                     .maxCount(maxCount)
-                    .productState(productState)
+                    .productState(ProductState.from(productState))
                     .airline(airline)
                     .price(price)
                     .build();
@@ -65,10 +65,9 @@ public class ProductRequestDto {
     @Getter
     @Setter
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class Update {
 
-        int privacy;
+        String privacy;
         Long packageId;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
@@ -78,7 +77,7 @@ public class ProductRequestDto {
 
         int minCount;
         int maxCount;
-        ProductState productState;
+        String productState;
         String airline;
         int price;
 
@@ -97,19 +96,5 @@ public class ProductRequestDto {
         String excludedProduct; // 불포함 내역
         String reservationNotice; // 예약 유의사항
         String travelRegion; // 여행지역
-    }
-
-    @Getter
-    @Setter
-    @FieldDefaults(level = AccessLevel.PRIVATE)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-    public static class FilterCond {
-
-        Long packageId;
-        ProductState productState;
-        LocalDateTime startDateMin;
-        LocalDateTime startDateMax;
-        int offset;
-        int limit;
     }
 }

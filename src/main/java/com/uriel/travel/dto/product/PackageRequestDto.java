@@ -1,7 +1,5 @@
-package com.uriel.travel.dto;
+package com.uriel.travel.dto.product;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.uriel.travel.domain.Package;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -15,17 +13,17 @@ public class PackageRequestDto {
     @Getter
     @Setter
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class Create {
 
         String packageName;
         String summary;
         int period;
-        int price;
-        String country;
+        String privacy;
+        String countryName;
         List<String> themeList;
         List<String> familyList;
         List<String> seasonList;
+        List<String> priceList;
         String hashTag;
         String hotelInfo;
         String regionInfo;
@@ -37,8 +35,6 @@ public class PackageRequestDto {
                     .packageName(packageName)
                     .summary(summary)
                     .period(period)
-                    .price(price)
-                    .country(country)
                     .hashTag(hashTag)
                     .hotelInfo(hotelInfo)
                     .regionInfo(regionInfo)
@@ -49,37 +45,21 @@ public class PackageRequestDto {
     @Getter
     @Setter
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class Update {
 
-        int privacy;
+        String privacy;
         String packageName;
         String summary;
         int period;
-        int price;
-        String country;
+        String countryName;
         List<String> themeList;
         List<String> familyList;
         List<String> seasonList;
+        List<String> priceList;
         String hashTag;
         String hotelInfo;
         String regionInfo;
         String terms;
         List<ScheduleDto> scheduleList;
-    }
-
-    @Getter
-    @Setter
-    @FieldDefaults(level = AccessLevel.PRIVATE)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-    public static class FilterCond {
-
-        List<Long> themeList;
-        List<Long> familyList;
-        int cost;
-        List<Long> seasonList;
-
-        int offset;
-        int limit;
     }
 }

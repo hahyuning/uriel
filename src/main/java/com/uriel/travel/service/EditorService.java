@@ -2,13 +2,14 @@ package com.uriel.travel.service;
 
 import com.uriel.travel.domain.PostType;
 import com.uriel.travel.domain.Posts;
-import com.uriel.travel.dto.EditorRequestDto;
-import com.uriel.travel.dto.EditorResponseDto;
+import com.uriel.travel.dto.editor.EditorRequestDto;
+import com.uriel.travel.dto.editor.EditorResponseDto;
 import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.repository.PostsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,8 +58,11 @@ public class EditorService {
 
     // 게시글 목록 조회 (공지사항, 블로그)
     @Transactional(readOnly = true)
-    public List<EditorResponseDto.GetPost> getPostByPostType(PostType postType) {
-        List<Posts> allByPostType = postsRepository.findAllByPostType(postType);
+    public List<EditorResponseDto.GetPost> getPostByPostType(PostType postType, int offset) {
+
+        PageRequest pageRequest = PageRequest.of(offset, 10);
+
+        List<Posts> allByPostType = postsRepository.findAllByPostType(postType, pageRequest);
         List<EditorResponseDto.GetPost> postList = new ArrayList<>();
 
         allByPostType.forEach(posts -> {
