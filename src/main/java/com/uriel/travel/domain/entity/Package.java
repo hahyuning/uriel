@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.uriel.travel.domain.Country;
 import com.uriel.travel.domain.Release;
 import com.uriel.travel.domain.SaveState;
-import com.uriel.travel.domain.dto.product.PackageRequestDto;
+import com.uriel.travel.domain.dto.travelPackage.PackageRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;

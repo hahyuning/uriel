@@ -4,7 +4,7 @@ import com.querydsl.core.annotations.QueryProjection;
 import com.uriel.travel.domain.Country;
 import com.uriel.travel.domain.Release;
 import com.uriel.travel.domain.SaveState;
-import com.uriel.travel.domain.dto.community.ImageDto;
+import com.uriel.travel.domain.dto.ImageDto;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;

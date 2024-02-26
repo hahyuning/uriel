@@ -2,7 +2,7 @@ package com.uriel.travel.service;
 
 import com.uriel.travel.domain.entity.Package;
 import com.uriel.travel.domain.entity.Schedule;
-import com.uriel.travel.domain.dto.product.PackageRequestDto;
+import com.uriel.travel.domain.dto.travelPackage.PackageRequestDto;
 import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.repository.PackageRepository;

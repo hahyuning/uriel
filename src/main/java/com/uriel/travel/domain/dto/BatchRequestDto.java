@@ -1,4 +1,4 @@
-package com.uriel.travel.domain.dto.product;
+package com.uriel.travel.domain.dto;
 
 import lombok.AccessLevel;
 import lombok.Builder;

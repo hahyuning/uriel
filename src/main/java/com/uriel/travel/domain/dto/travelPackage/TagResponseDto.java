@@ -1,4 +1,4 @@
-package com.uriel.travel.domain.dto.product;
+package com.uriel.travel.domain.dto.travelPackage;
 
 import com.uriel.travel.domain.entity.Tag;
 import lombok.*;

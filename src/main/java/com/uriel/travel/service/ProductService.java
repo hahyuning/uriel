@@ -1,9 +1,9 @@
 package com.uriel.travel.service;
 
 import com.uriel.travel.domain.SaveState;
-import com.uriel.travel.domain.dto.community.ImageDto;
+import com.uriel.travel.domain.dto.ImageDto;
 import com.uriel.travel.domain.dto.filterCond.ProductFilter;
-import com.uriel.travel.domain.dto.product.PackageResponseDto;
+import com.uriel.travel.domain.dto.travelPackage.PackageResponseDto;
 import com.uriel.travel.domain.dto.product.ProductDetailResponseDto;
 import com.uriel.travel.domain.dto.product.ProductRequestDto;
 import com.uriel.travel.domain.entity.Package;

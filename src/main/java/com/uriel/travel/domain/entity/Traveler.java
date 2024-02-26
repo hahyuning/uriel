@@ -8,8 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDate;
-
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -28,7 +26,7 @@ public class Traveler {
     @Enumerated
     Gender gender;
 
-    LocalDate birthDate;
+    String birthDate;
 
     String phoneNumber;
 

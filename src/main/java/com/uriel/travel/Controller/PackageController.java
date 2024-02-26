@@ -2,9 +2,9 @@ package com.uriel.travel.Controller;
 
 import com.uriel.travel.Base.BaseResponse;
 import com.uriel.travel.domain.dto.filterCond.PackageFilter;
-import com.uriel.travel.domain.dto.product.BatchRequestDto;
-import com.uriel.travel.domain.dto.product.PackageRequestDto;
-import com.uriel.travel.domain.dto.product.PackageResponseDto;
+import com.uriel.travel.domain.dto.BatchRequestDto;
+import com.uriel.travel.domain.dto.travelPackage.PackageRequestDto;
+import com.uriel.travel.domain.dto.travelPackage.PackageResponseDto;
 import com.uriel.travel.service.PackageService;
 import com.uriel.travel.service.S3Service;
 import com.uriel.travel.service.ScheduleService;

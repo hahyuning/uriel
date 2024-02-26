@@ -6,7 +6,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.uriel.travel.domain.entity.Banner;
 import com.uriel.travel.domain.entity.Package;
 import com.uriel.travel.domain.entity.Thumbnail;
-import com.uriel.travel.domain.dto.community.ImageDto;
+import com.uriel.travel.domain.dto.ImageDto;
 import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.repository.BannerRepository;
