@@ -1,12 +1,13 @@
 package com.uriel.travel.service;
 
-import com.uriel.travel.domain.*;
-import com.uriel.travel.domain.Package;
-import com.uriel.travel.dto.ImageDto;
-import com.uriel.travel.dto.product.PackageResponseDto;
-import com.uriel.travel.dto.product.ProductDetailResponseDto;
-import com.uriel.travel.dto.product.ProductRequestDto;
-import com.uriel.travel.dto.filterCond.ProductFilter;
+import com.uriel.travel.domain.SaveState;
+import com.uriel.travel.domain.dto.community.ImageDto;
+import com.uriel.travel.domain.dto.filterCond.ProductFilter;
+import com.uriel.travel.domain.dto.product.PackageResponseDto;
+import com.uriel.travel.domain.dto.product.ProductDetailResponseDto;
+import com.uriel.travel.domain.dto.product.ProductRequestDto;
+import com.uriel.travel.domain.entity.Package;
+import com.uriel.travel.domain.entity.*;
 import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.repository.*;
@@ -40,9 +41,6 @@ public class ProductService {
     public Long create(ProductRequestDto.Create requestDto) {
         Product product = requestDto.toEntity();
 
-        // TODO: 상품코드 중복 검사 및 코드 부여
-
-
         // 패키지 연관관계
         Package packageById = packageRepository.findById(requestDto.getPackageId())
                 .orElseThrow(() ->
@@ -51,59 +49,36 @@ public class ProductService {
 
         // 상품 저장
         product.setPrivacy(requestDto.getPrivacy());
+        product.setSaveState(SaveState.SAVED);
         Product savedProduct = productRepository.save(product);
 
         // 상품 디테일 등록
         ProductDetail productDetail = new ProductDetail(requestDto, savedProduct);
         productDetailRepository.save(productDetail);
 
+        // 상품 코드 생성
+        savedProduct.setProductCode();
+
         return savedProduct.getId();
     }
 
     // 상품 임시저장
-    public void temporarySave(ProductRequestDto.Create requestDto) {
+    public void temporaryCreate(ProductRequestDto.Create requestDto) {
         Product product = requestDto.toEntity();
 
         // 패키지 연관관계
         Package packageById = packageRepository.findById(requestDto.getPackageId())
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND));
-        product.setPackage(packageById);
 
+        product.setPackage(packageById);
+        product.setPrivacy(requestDto.getPrivacy());
+        product.setSaveState(SaveState.TEMPORARY);
         Product savedProduct = productRepository.save(product);
 
         // 상품 디테일 등록
         ProductDetail productDetail = new ProductDetail(requestDto, savedProduct);
         productDetailRepository.save(productDetail);
-    }
-
-    // 상품 임시저장 수정
-    public void temporaryUpdate(ProductRequestDto.Update requestDto, Long productId) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
-
-        // 패키지 수정
-        if (!Objects.equals(product.getAPackage().getId(), requestDto.getPackageId())) {
-            // 기존 패키지에서 삭제
-            Package oldPackage = packageRepository.findById(product.getAPackage().getId())
-                    .orElseThrow(() ->
-                            new CustomNotFoundException(ErrorCode.NOT_FOUND));
-
-            oldPackage.getProductList().remove(product);
-
-            // 새로운 패키지에 등록
-            Package newPackage = packageRepository.findById(requestDto.getPackageId())
-                    .orElseThrow(() ->
-                            new CustomNotFoundException(ErrorCode.NOT_FOUND));
-
-            product.setPackage(newPackage);
-        }
-        product.update(requestDto);
-        product.setPrivacy(Release.TEMPORARY.getViewName());
-
-        ProductDetail productDetail = productDetailRepository.findByProductId(productId);
-        productDetail.update(requestDto);
     }
 
     // 상품 수정
@@ -114,32 +89,41 @@ public class ProductService {
 
         // 패키지 수정
         if (!Objects.equals(product.getAPackage().getId(), requestDto.getPackageId())) {
-            // 기존 패키지에서 삭제
-            Package oldPackage = packageRepository.findById(product.getAPackage().getId())
-                    .orElseThrow(() ->
-                            new CustomNotFoundException(ErrorCode.NOT_FOUND));
-
-            oldPackage.getProductList().remove(product);
-
-            // 새로운 패키지에 등록
-            Package newPackage = packageRepository.findById(requestDto.getPackageId())
-                    .orElseThrow(() ->
-                            new CustomNotFoundException(ErrorCode.NOT_FOUND));
-
+            Package newPackage = updatePackage(product, requestDto.getPackageId());
             product.setPackage(newPackage);
         }
+
         product.update(requestDto);
 
         ProductDetail productDetail = productDetailRepository.findByProductId(productId);
         productDetail.update(requestDto);
     }
 
+    // 상품 임시저장 -> 저장
+    public void changeToSaveState(ProductRequestDto.Update requestDto, Long productId) {
+        Product product = getProductByProductId(productId);
+
+        // 패키지 수정
+        if (!Objects.equals(product.getAPackage().getId(), requestDto.getPackageId())) {
+            Package newPackage = updatePackage(product, requestDto.getPackageId());
+            product.setPackage(newPackage);
+        }
+
+        product.update(requestDto);
+        product.setSaveState(SaveState.SAVED);
+
+        // 상품코드 부여
+        product.setProductCode();
+
+        ProductDetail productDetail = productDetailRepository.findByProductId(productId);
+        productDetail.update(requestDto);
+    }
+
+
     // 상품 일괄 삭제
     public void delete(List<Long> ids) {
         ids.forEach(productId -> {
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(() ->
-                            new CustomNotFoundException(ErrorCode.NOT_FOUND));
+            Product product = getProductByProductId(productId);
 
             Package aPackage = packageRepository.findById(product.getAPackage().getId())
                     .orElseThrow(() ->
@@ -167,9 +151,7 @@ public class ProductService {
     // 상품 복사
     public void duplicate(Long productId) {
 
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+        Product product = getProductByProductId(productId);
 
         entityManager.detach(product);
         product.idInitialize();
@@ -192,9 +174,7 @@ public class ProductService {
     // 상품 상세 조회
     public ProductDetailResponseDto productDetail(Long productId) {
         // 상품 조회
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+        Product product = getProductByProductId(productId);
 
         // 상품 디테일 조회
         ProductDetail productDetail = productDetailRepository.findByProductId(productId);
@@ -224,7 +204,7 @@ public class ProductService {
         List<Schedule> schedules = scheduleRepository.findAllByPackageId(aPackage.getId());
         List<PackageResponseDto.ScheduleResponseDto> scheduleList = new ArrayList<>();
         schedules.forEach(schedule ->
-                PackageResponseDto.ScheduleResponseDto.of(schedule, "detail"));
+                scheduleList.add(PackageResponseDto.ScheduleResponseDto.of(schedule, "detail")));
 
         packageInfo.setScheduleList(scheduleList);
         responseDto.setPackageInfo(packageInfo);
@@ -232,4 +212,31 @@ public class ProductService {
         return responseDto;
     }
 
+    // 관리자용 상품 목록 조회
+    public Page<ProductFilter.ProductFilterForAdminResponseDto> searchForAdmin(ProductFilter.ProductFilterCond filterCond) {
+        PageRequest pageRequest = PageRequest.of(filterCond.getOffset(), filterCond.getLimit());
+        log.info(filterCond.getPrivacyOrder() + "");
+        return productRepositoryCustom.searchForAdmin(filterCond, pageRequest);
+    }
+
+    // 아이디로 패키지 조회
+    private Product getProductByProductId(Long productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+    }
+
+    // 패키지 정보 수정
+    private Package updatePackage(Product product, Long packageId) {
+        // 기존 패키지에서 삭제
+        Package oldPackage = packageRepository.findById(product.getAPackage().getId())
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+
+        oldPackage.getProductList().remove(product);
+
+        return packageRepository.findById(packageId)
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+    }
 }

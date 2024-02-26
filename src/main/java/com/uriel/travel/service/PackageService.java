@@ -1,13 +1,18 @@
 package com.uriel.travel.service;
 
-import com.uriel.travel.domain.Package;
-import com.uriel.travel.domain.*;
-import com.uriel.travel.dto.ImageDto;
-import com.uriel.travel.dto.filterCond.PackageFilter;
-import com.uriel.travel.dto.product.*;
+import com.uriel.travel.domain.Country;
+import com.uriel.travel.domain.SaveState;
+import com.uriel.travel.domain.dto.community.ImageDto;
+import com.uriel.travel.domain.dto.filterCond.PackageFilter;
+import com.uriel.travel.domain.dto.product.PackageRequestDto;
+import com.uriel.travel.domain.dto.product.PackageResponseDto;
+import com.uriel.travel.domain.dto.product.TagResponseDto;
+import com.uriel.travel.domain.entity.Package;
+import com.uriel.travel.domain.entity.*;
 import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.repository.*;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -25,12 +30,20 @@ import java.util.List;
 @Slf4j
 public class PackageService {
 
+    private final EntityManager entityManager;
+
     private final PackageRepository packageRepository;
     private final PackageRepositoryCustomImpl packageRepositoryCustom;
+
+    private final ThumbnailRepository thumbnailRepository;
+    private final ScheduleRepository scheduleRepository;
+    private final TaggingRepository taggingRepository;
 
     // 패키지 임시 저장
     public Long temporarySave(PackageRequestDto.Create requestDto) {
         Package aPackage = requestDto.toEntity();
+        aPackage.setSaveState(SaveState.TEMPORARY);
+        aPackage.setPrivacy(requestDto.getPrivacy());
         return packageRepository.save(aPackage).getId();
     }
 
@@ -38,46 +51,82 @@ public class PackageService {
     public Long create(PackageRequestDto.Create requestDto) {
         Package aPackage = requestDto.toEntity();
         aPackage.setPrivacy(requestDto.getPrivacy());
+        aPackage.setSaveState(SaveState.SAVED);
         return packageRepository.save(aPackage).getId();
     }
 
     // 패키지 수정
-    public void update(PackageRequestDto.Update requestDto, Long id) {
-        Package packageById = packageRepository.findById(id)
-                .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+    public void update(PackageRequestDto.Update requestDto, Long packageId) {
+        Package packageById = getPackageByPackageId(packageId);
 
         packageById.setPrivacy(requestDto.getPrivacy());
         packageById.update(requestDto);
     }
 
-    // 패키지 임시저장 업데이트
-    public void temporaryUpdate(PackageRequestDto.Update requestDto, Long id) {
-        Package packageById = packageRepository.findById(id)
-                .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+    // 패키지 수정
+    public void changeToSaveState(PackageRequestDto.Update requestDto, Long packageId) {
+        Package packageById = getPackageByPackageId(packageId);
 
+        packageById.setPrivacy(requestDto.getPrivacy());
+        packageById.setSaveState(SaveState.SAVED);
         packageById.update(requestDto);
-        packageById.setPrivacy(Release.TEMPORARY.getViewName());
     }
 
     // 패키지 삭제
     public void delete(List<Long> ids) {
         ids.forEach(id -> {
-            Package aPackage = packageRepository.findById(id)
-                    .orElseThrow(() ->
-                            new CustomNotFoundException(ErrorCode.NOT_FOUND));
-
+            Package aPackage = getPackageByPackageId(id);
             packageRepository.delete(aPackage);
         });
+    }
+
+    // 패키지 복사
+    public void duplicatePackage(Long packageId) {
+
+        Package aPackage = getPackageByPackageId(packageId);
+        List<Thumbnail> thumbnailList = aPackage.getThumbnailList();
+        List<Schedule> scheduleList = aPackage.getScheduleList();
+        List<Tagging> taggingList = aPackage.getTaggingList();
+
+        // 엔티티 새로 생성
+        Package newPackage = aPackage.duplicate(aPackage);
+        packageRepository.save(newPackage);
+
+//        // 썸네일
+//        thumbnailList
+//                .forEach(thumbnail -> {
+//                    entityManager.detach(thumbnail);
+//                    thumbnail.idInit();
+//                    thumbnail.setPackage(newPackage);
+//                    thumbnailRepository.save(thumbnail);
+//            }
+//        );
+
+        // 일정
+        scheduleList
+                .forEach(schedule -> {
+                    entityManager.detach(schedule);
+                    schedule.idInit();
+                    schedule.setPackage(newPackage);
+                    scheduleRepository.save(schedule);
+                }
+        );
+
+        // 태깅
+        taggingList
+                .forEach(tagging -> {
+                    entityManager.detach(tagging);
+                    tagging.idInit();
+                    tagging.setPackage(newPackage);
+                    taggingRepository.save(tagging);
+                }
+        );
     }
 
     // 패키지 공개/비공개 처리
     public void privacyUpdate(String privacy, List<Long> ids) {
         ids.forEach(id -> {
-            Package aPackage = packageRepository.findById(id)
-                    .orElseThrow(() ->
-                            new CustomNotFoundException(ErrorCode.NOT_FOUND));
+            Package aPackage = getPackageByPackageId(id);
 
             aPackage.setPrivacy(privacy);
         });
@@ -87,9 +136,7 @@ public class PackageService {
     @Transactional(readOnly = true)
     public PackageResponseDto.PackageInfo getPackageById(Long packageId) {
         // 패키지 기본 정보
-        Package packageById = packageRepository.findById(packageId)
-                .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+        Package packageById = getPackageByPackageId(packageId);
 
         PackageResponseDto.PackageInfo packageInfo = PackageResponseDto.PackageInfo.of(packageById, "edit");
 
@@ -141,7 +188,7 @@ public class PackageService {
 
     public Page<PackageFilter.PackageFilterForAdminResponseDto> packageByCountryForAdmin(PackageFilter.PackageFilterCondForAdmin filterCond) {
         PageRequest pageRequest = PageRequest.of(filterCond.getOffset(), filterCond.getLimit());
-        return packageRepositoryCustom.searchByCountryForAdmin(filterCond, pageRequest);
+        return packageRepositoryCustom.searchPackageForAdmin(filterCond, pageRequest);
     }
 
 
@@ -165,7 +212,10 @@ public class PackageService {
         List<Package> packageList = packageRepository.findByCountry(Country.from(countryName));
 
         for (Package aPackage : packageList) {
-            packageDtoList.add(changeToDto(aPackage, "detail"));
+            PackageResponseDto.PackageInfo dto = changeToDto(aPackage, "detail");
+            dto.setPrice(getMinPrice(aPackage));
+            dto.setThumbnailList(getThumbnailList(aPackage));
+            packageDtoList.add(dto);
         }
 
         return packageDtoList;
@@ -184,8 +234,13 @@ public class PackageService {
         // 최저가 계산
         int minPrice = 0;
         for (Product product : aPackage.getProductList()) {
-            if (product.getStartDate().isAfter(LocalDateTime.now()) && product.getPrice() != 0 && product.getPrice() <= minPrice) {
-                minPrice = product.getPrice();
+            log.info(product.getPrice() + "가겨각겨가격ㄱ");
+            if (product.getStartDate().isAfter(LocalDateTime.now())) {
+                if (minPrice == 0) {
+                    minPrice = product.getPrice();
+                } else if (product.getPrice() <= minPrice) {
+                    minPrice = product.getPrice();
+                }
             }
         }
         return minPrice;
@@ -203,5 +258,11 @@ public class PackageService {
                     .build());
         }
         return imageDtos;
+    }
+
+    private Package getPackageByPackageId(Long packageId) {
+        return packageRepository.findById(packageId)
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
     }
 }

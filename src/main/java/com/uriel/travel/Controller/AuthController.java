@@ -3,8 +3,8 @@ package com.uriel.travel.Controller;
 
 import com.uriel.travel.Base.BaseResponse;
 import com.uriel.travel.domain.SocialType;
-import com.uriel.travel.dto.UserRequestDto;
-import com.uriel.travel.dto.UserResponseDto;
+import com.uriel.travel.domain.dto.user.UserRequestDto;
+import com.uriel.travel.domain.dto.user.UserResponseDto;
 import com.uriel.travel.jwt.domain.TokenResponseDto;
 import com.uriel.travel.service.Login.AuthService;
 import jakarta.servlet.http.HttpServletRequest;

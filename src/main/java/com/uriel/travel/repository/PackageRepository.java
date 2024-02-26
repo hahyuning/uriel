@@ -1,7 +1,7 @@
 package com.uriel.travel.repository;
 
 import com.uriel.travel.domain.Country;
-import com.uriel.travel.domain.Package;
+import com.uriel.travel.domain.entity.Package;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

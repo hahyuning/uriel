@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum Country {
+public enum Country implements CodedEnum<String> {
 
     EEP("동유럽"),
     EW1("프랑스위스"),
@@ -29,5 +29,12 @@ public enum Country {
             }
         }
         return null;
+    }
+
+    @jakarta.persistence.Converter(autoApply = true)
+    static class Converter extends AbstractCodedEnumConverter<Country, String> {
+        public Converter() {
+            super(Country.class);
+        }
     }
 }

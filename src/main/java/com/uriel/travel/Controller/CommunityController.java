@@ -2,8 +2,8 @@ package com.uriel.travel.Controller;
 
 import com.uriel.travel.Base.BaseResponse;
 import com.uriel.travel.domain.PostType;
-import com.uriel.travel.dto.community.CommunityRequestDto;
-import com.uriel.travel.dto.community.CommunityResponseDto;
+import com.uriel.travel.domain.dto.community.CommunityRequestDto;
+import com.uriel.travel.domain.dto.community.CommunityResponseDto;
 import com.uriel.travel.service.EditorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

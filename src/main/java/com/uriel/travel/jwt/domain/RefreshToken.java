@@ -1,6 +1,6 @@
 package com.uriel.travel.jwt.domain;
 
-import com.uriel.travel.domain.Users;
+import com.uriel.travel.domain.entity.Users;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;

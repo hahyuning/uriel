@@ -1,9 +1,5 @@
 package com.uriel.travel.service.Login;
 
-import com.uriel.travel.domain.Users;
-import com.uriel.travel.exception.CustomNotFoundException;
-import com.uriel.travel.exception.ErrorCode;
-import com.uriel.travel.repository.RefreshTokenRepository;
 import com.uriel.travel.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;

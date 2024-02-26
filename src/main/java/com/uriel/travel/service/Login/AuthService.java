@@ -2,10 +2,10 @@ package com.uriel.travel.service.Login;
 
 import com.uriel.travel.domain.Authority;
 import com.uriel.travel.domain.SocialType;
-import com.uriel.travel.domain.Users;
-import com.uriel.travel.dto.SocialLogin.SocialTokenResponseDto;
-import com.uriel.travel.dto.UserRequestDto;
-import com.uriel.travel.dto.UserResponseDto;
+import com.uriel.travel.domain.entity.Users;
+import com.uriel.travel.domain.dto.socialLogin.SocialTokenResponseDto;
+import com.uriel.travel.domain.dto.user.UserRequestDto;
+import com.uriel.travel.domain.dto.user.UserResponseDto;
 import com.uriel.travel.exception.*;
 import com.uriel.travel.jwt.TokenProvider;
 import com.uriel.travel.jwt.domain.TokenResponseDto;

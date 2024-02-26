@@ -1,9 +1,9 @@
 package com.uriel.travel.service;
 
 import com.uriel.travel.domain.PostType;
-import com.uriel.travel.domain.Posts;
-import com.uriel.travel.dto.community.CommunityRequestDto;
-import com.uriel.travel.dto.community.CommunityResponseDto;
+import com.uriel.travel.domain.entity.Posts;
+import com.uriel.travel.domain.dto.community.CommunityRequestDto;
+import com.uriel.travel.domain.dto.community.CommunityResponseDto;
 import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.repository.PostsRepository;

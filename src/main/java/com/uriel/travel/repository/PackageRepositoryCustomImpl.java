@@ -1,12 +1,18 @@
 package com.uriel.travel.repository;
 
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.uriel.travel.domain.*;
-import com.uriel.travel.dto.filterCond.PackageFilter;
-import com.uriel.travel.dto.filterCond.QPackageFilter_PackageFilterForAdminResponseDto;
-import com.uriel.travel.dto.filterCond.QPackageFilter_PackageFilterResponseDto;
+import com.uriel.travel.domain.Country;
+import com.uriel.travel.domain.Release;
+import com.uriel.travel.domain.SaveState;
+import com.uriel.travel.domain.TagType;
+import com.uriel.travel.domain.dto.filterCond.PackageFilter;
+import com.uriel.travel.domain.dto.filterCond.QPackageFilter_PackageFilterForAdminResponseDto;
+import com.uriel.travel.domain.dto.filterCond.QPackageFilter_PackageFilterResponseDto;
+import com.uriel.travel.domain.entity.QPackage;
+import com.uriel.travel.domain.entity.QTagging;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -60,17 +66,27 @@ public class PackageRepositoryCustomImpl implements PackageRepositoryCustom {
     }
 
     @Override
-    public Page<PackageFilter.PackageFilterForAdminResponseDto> searchByCountryForAdmin(PackageFilter.PackageFilterCondForAdmin filterCond, Pageable pageable) {
+    public Page<PackageFilter.PackageFilterForAdminResponseDto> searchPackageForAdmin(PackageFilter.PackageFilterCondForAdmin filterCond, Pageable pageable) {
         List<PackageFilter.PackageFilterForAdminResponseDto> packageList = jpaQueryFactory
                 .select(new QPackageFilter_PackageFilterForAdminResponseDto(
                         aPackage.id,
                         aPackage.packageName,
                         aPackage.country,
-                        aPackage.period
+                        aPackage.period,
+                        aPackage.saveState,
+                        aPackage.isPublic
                 ))
                 .from(aPackage)
                 .where(
-                        countryEq(filterCond)
+                        countryEq(filterCond),
+                        privacyEq(filterCond),
+                        saveStateEq(filterCond)
+                )
+                .orderBy(
+                        countryOder(filterCond),
+                        periodOrder(filterCond),
+                        saveStateOrder(filterCond),
+                        privacyOrder(filterCond)
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -80,7 +96,9 @@ public class PackageRepositoryCustomImpl implements PackageRepositoryCustom {
                 .select(aPackage.count())
                 .from(aPackage)
                 .where(
-                        countryEq(filterCond)
+                        countryEq(filterCond),
+                        privacyEq(filterCond),
+                        saveStateEq(filterCond)
                 )
                 .fetchOne();
 
@@ -90,6 +108,20 @@ public class PackageRepositoryCustomImpl implements PackageRepositoryCustom {
     public BooleanExpression countryEq(PackageFilter.PackageFilterCondForAdmin filterCond) {
         if (filterCond.getCountryName() != null) {
             return aPackage.country.eq(Country.from(filterCond.getCountryName()));
+        }
+        return null;
+    }
+
+    public BooleanExpression privacyEq(PackageFilter.PackageFilterCondForAdmin filterCond) {
+        if (filterCond.getPrivacy() != null) {
+            return aPackage.isPublic.eq(Release.from(filterCond.getPrivacy()));
+        }
+        return null;
+    }
+
+    public BooleanExpression saveStateEq(PackageFilter.PackageFilterCondForAdmin filterCond) {
+        if (filterCond.getSaveState() != null) {
+            return aPackage.saveState.eq(SaveState.from(filterCond.getSaveState()));
         }
         return null;
     }
@@ -122,4 +154,47 @@ public class PackageRepositoryCustomImpl implements PackageRepositoryCustom {
         return null;
     }
 
+    public OrderSpecifier<Country> countryOder(PackageFilter.PackageFilterCondForAdmin filterCond) {
+        if (filterCond.getCountryOrder() != null) {
+            if (filterCond.getCountryOrder() == 0) {
+                return aPackage.country.asc();
+            } else {
+                return aPackage.country.desc();
+            }
+        }
+        return aPackage.country.asc();
+    }
+
+    public OrderSpecifier<Integer> periodOrder(PackageFilter.PackageFilterCondForAdmin filterCond) {
+        if (filterCond.getPeriodOrder() != null) {
+            if (filterCond.getPeriodOrder() == 0) {
+                return aPackage.period.asc();
+            } else {
+                return aPackage.period.desc();
+            }
+        }
+        return aPackage.period.asc();
+    }
+
+    public OrderSpecifier<SaveState> saveStateOrder(PackageFilter.PackageFilterCondForAdmin filterCond) {
+        if (filterCond.getSaveStateOrder() != null) {
+            if (filterCond.getSaveStateOrder() == 0) {
+                return aPackage.saveState.asc();
+            } else {
+                return aPackage.saveState.desc();
+            }
+        }
+        return aPackage.saveState.asc();
+    }
+
+    public OrderSpecifier<Release> privacyOrder(PackageFilter.PackageFilterCondForAdmin filterCond) {
+        if (filterCond.getPrivacyOrder() != null) {
+            if (filterCond.getPrivacyOrder() == 0) {
+                return aPackage.isPublic.asc();
+            } else {
+                return aPackage.isPublic.desc();
+            }
+        }
+        return aPackage.isPublic.asc();
+    }
 }
