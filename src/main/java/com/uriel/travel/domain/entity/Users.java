@@ -1,5 +1,6 @@
 package com.uriel.travel.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.uriel.travel.domain.Authority;
 import com.uriel.travel.domain.Gender;
 import com.uriel.travel.jwt.domain.RefreshToken;
@@ -10,6 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -38,6 +41,11 @@ public class Users {
     @OneToOne
     RefreshToken refreshToken;
     Authority authority;
+
+    @Builder.Default
+    @JsonIgnore
+    @OneToMany(mappedBy = "reserveUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Order> orderList = new ArrayList<>();
 
 //    @OneToMany(mappedBy = "users")
 //    List <Reservation> reservationList=new ArrayList<>();
