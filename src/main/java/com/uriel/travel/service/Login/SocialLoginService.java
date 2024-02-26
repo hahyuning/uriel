@@ -1,8 +1,8 @@
 package com.uriel.travel.service.Login;
 
 import com.uriel.travel.domain.SocialType;
-import com.uriel.travel.dto.SocialLogin.SocialTokenResponseDto;
-import com.uriel.travel.dto.UserResponseDto;
+import com.uriel.travel.domain.dto.socialLogin.SocialTokenResponseDto;
+import com.uriel.travel.domain.dto.user.UserResponseDto;
 import org.springframework.stereotype.Service;
 
 @Service

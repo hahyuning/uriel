@@ -6,11 +6,10 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum Release {
+public enum Release implements CodedEnum<String> {
 
     PUBLIC("공개"),
-    PRIVATE("비공개"),
-    TEMPORARY("임시저장");
+    PRIVATE("비공개");
 
     private final String viewName;
 
@@ -22,5 +21,12 @@ public enum Release {
             }
         }
         return null;
+    }
+
+    @jakarta.persistence.Converter(autoApply = true)
+    static class Converter extends AbstractCodedEnumConverter<Release, String> {
+        public Converter() {
+            super(Release.class);
+        }
     }
 }

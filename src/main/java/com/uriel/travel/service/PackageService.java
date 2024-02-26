@@ -1,13 +1,18 @@
 package com.uriel.travel.service;
 
-import com.uriel.travel.domain.Package;
-import com.uriel.travel.domain.*;
-import com.uriel.travel.dto.editor.ImageDto;
-import com.uriel.travel.dto.filterCond.PackageFilter;
-import com.uriel.travel.dto.product.*;
+import com.uriel.travel.domain.Country;
+import com.uriel.travel.domain.SaveState;
+import com.uriel.travel.domain.dto.community.ImageDto;
+import com.uriel.travel.domain.dto.filterCond.PackageFilter;
+import com.uriel.travel.domain.dto.product.PackageRequestDto;
+import com.uriel.travel.domain.dto.product.PackageResponseDto;
+import com.uriel.travel.domain.dto.product.TagResponseDto;
+import com.uriel.travel.domain.entity.Package;
+import com.uriel.travel.domain.entity.*;
 import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.repository.*;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -25,124 +30,125 @@ import java.util.List;
 @Slf4j
 public class PackageService {
 
+    private final EntityManager entityManager;
+
     private final PackageRepository packageRepository;
     private final PackageRepositoryCustomImpl packageRepositoryCustom;
+
     private final ThumbnailRepository thumbnailRepository;
-    private final CountryRepository countryRepository;
-    private final TagRepository tagRepository;
+    private final ScheduleRepository scheduleRepository;
+    private final TaggingRepository taggingRepository;
 
     // 패키지 임시 저장
     public Long temporarySave(PackageRequestDto.Create requestDto) {
-        Country country = countryRepository.findByCountryName(requestDto.getCountryName());
         Package aPackage = requestDto.toEntity();
-        aPackage.setCountry(country);
+        aPackage.setSaveState(SaveState.TEMPORARY);
+        aPackage.setPrivacy(requestDto.getPrivacy());
         return packageRepository.save(aPackage).getId();
     }
 
     // 패키지 저장
     public Long create(PackageRequestDto.Create requestDto) {
-        Country country = countryRepository.findByCountryName(requestDto.getCountryName());
         Package aPackage = requestDto.toEntity();
         aPackage.setPrivacy(requestDto.getPrivacy());
-        aPackage.setCountry(country);
+        aPackage.setSaveState(SaveState.SAVED);
         return packageRepository.save(aPackage).getId();
     }
 
     // 패키지 수정
-    public void update(PackageRequestDto.Update requestDto, Long id) {
-        Package packageById = packageRepository.findById(id)
-                .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+    public void update(PackageRequestDto.Update requestDto, Long packageId) {
+        Package packageById = getPackageByPackageId(packageId);
 
-        Country country = countryRepository.findByCountryName(requestDto.getCountryName());
         packageById.setPrivacy(requestDto.getPrivacy());
-        packageById.update(requestDto, country);
+        packageById.update(requestDto);
     }
 
-    // 패키지 임시저장 업데이트
-    public void temporaryUpdate(PackageRequestDto.Update requestDto, Long id) {
-        Package packageById = packageRepository.findById(id)
-                .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+    // 패키지 수정
+    public void changeToSaveState(PackageRequestDto.Update requestDto, Long packageId) {
+        Package packageById = getPackageByPackageId(packageId);
 
-        Country country = countryRepository.findByCountryName(requestDto.getCountryName());
-        packageById.update(requestDto, country);
-        packageById.setPrivacy(Release.TEMPORARY.getViewName());
+        packageById.setPrivacy(requestDto.getPrivacy());
+        packageById.setSaveState(SaveState.SAVED);
+        packageById.update(requestDto);
     }
 
     // 패키지 삭제
     public void delete(List<Long> ids) {
         ids.forEach(id -> {
-            Package aPackage = packageRepository.findById(id)
-                    .orElseThrow(() ->
-                            new CustomNotFoundException(ErrorCode.NOT_FOUND));
-
+            Package aPackage = getPackageByPackageId(id);
             packageRepository.delete(aPackage);
         });
+    }
+
+    // 패키지 복사
+    public void duplicatePackage(Long packageId) {
+
+        Package aPackage = getPackageByPackageId(packageId);
+        List<Thumbnail> thumbnailList = aPackage.getThumbnailList();
+        List<Schedule> scheduleList = aPackage.getScheduleList();
+        List<Tagging> taggingList = aPackage.getTaggingList();
+
+        // 엔티티 새로 생성
+        Package newPackage = aPackage.duplicate(aPackage);
+        packageRepository.save(newPackage);
+
+//        // 썸네일
+//        thumbnailList
+//                .forEach(thumbnail -> {
+//                    entityManager.detach(thumbnail);
+//                    thumbnail.idInit();
+//                    thumbnail.setPackage(newPackage);
+//                    thumbnailRepository.save(thumbnail);
+//            }
+//        );
+
+        // 일정
+        scheduleList
+                .forEach(schedule -> {
+                    entityManager.detach(schedule);
+                    schedule.idInit();
+                    schedule.setPackage(newPackage);
+                    scheduleRepository.save(schedule);
+                }
+        );
+
+        // 태깅
+        taggingList
+                .forEach(tagging -> {
+                    entityManager.detach(tagging);
+                    tagging.idInit();
+                    tagging.setPackage(newPackage);
+                    taggingRepository.save(tagging);
+                }
+        );
     }
 
     // 패키지 공개/비공개 처리
     public void privacyUpdate(String privacy, List<Long> ids) {
         ids.forEach(id -> {
-            Package aPackage = packageRepository.findById(id)
-                    .orElseThrow(() ->
-                            new CustomNotFoundException(ErrorCode.NOT_FOUND));
+            Package aPackage = getPackageByPackageId(id);
 
             aPackage.setPrivacy(privacy);
         });
     }
 
-    // 패키지 상세 조회
+    // 패키지 상세 조회 (수정)
     @Transactional(readOnly = true)
-    public PackageResponseDto getPackageById(Long id) {
-
-        List<PackageResponseDto.PackageInfo> packageInfos = new ArrayList<>();
-
+    public PackageResponseDto.PackageInfo getPackageById(Long packageId) {
         // 패키지 기본 정보
-        Package packageById = packageRepository.findById(id)
-                .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+        Package packageById = getPackageByPackageId(packageId);
 
-        PackageResponseDto.PackageInfo packageInfo = PackageResponseDto.PackageInfo.of(packageById);
+        PackageResponseDto.PackageInfo packageInfo = PackageResponseDto.PackageInfo.of(packageById, "edit");
 
-        // 썸네일
-        List<ImageDto> thumbnailList = new ArrayList<>();
-        for (Thumbnail thumbnail : packageById.getThumbnailList()) {
-            thumbnailList.add(ImageDto.builder()
-                    .originalImageName(thumbnail.getOriginalImageName())
-                    .uploadImageName(thumbnail.getUploadImageName())
-                    .imagePath(thumbnail.getImagePath())
-                    .imageUrl(thumbnail.getImageUrl()).build());
-        }
-        packageInfo.setThumbnailList(thumbnailList);
+        packageInfo.setPrice(getMinPrice(packageById));
+        packageInfo.setThumbnailList(getThumbnailList(packageById));
 
         // 일정
-        List<ScheduleDto> scheduleList = new ArrayList<>();
+        List<PackageResponseDto.ScheduleResponseDto> scheduleList = new ArrayList<>();
         for (Schedule schedule : packageById.getScheduleList()) {
-            scheduleList.add(ScheduleDto.builder()
-                    .scheduleId(schedule.getId())
-                    .day(schedule.getDay())
-                    .dayContent(schedule.getDayContent())
-                    .hotel(schedule.getHotel())
-                    .meal(schedule.getMeal())
-                    .vehicle(schedule.getVehicle()).build());
+            scheduleList.add(PackageResponseDto.ScheduleResponseDto.of(schedule, "edit"));
         }
-
         packageInfo.setScheduleList(scheduleList);
-
-        // 최저가 계산
-        int minPrice = 0;
-        for (Product product : packageById.getProductList()) {
-
-            if (product.getStartDate().isAfter(LocalDateTime.now()) && product.getPrice() != 0) {
-
-                if (minPrice == 0 || product.getPrice() <= minPrice) {
-                    minPrice = product.getPrice();
-                }
-
-            }
-        }
-        packageInfo.setPrice(minPrice);
 
         // 체크된 태그 리스트
         List<TagResponseDto.TagInfo> checkedTagList = new ArrayList<>();
@@ -153,25 +159,7 @@ public class PackageService {
         }
         packageInfo.setCheckedTagList(checkedTagList);
 
-        packageInfos.add(packageInfo);
-
-        // 전체 나라 정보
-        List<CountryResponseDto.CountryInfo> allCountries = new ArrayList<>();
-        for (Country c : countryRepository.findAll()) {
-            allCountries.add(CountryResponseDto.CountryInfo.of(c));
-        }
-
-        TagResponseDto.GetAllTags allTags = TagResponseDto.GetAllTags.of(
-                tagRepository.findByTagType(TagType.THEME.toString()),
-                tagRepository.findByTagType(TagType.FAMILY.toString()),
-                tagRepository.findByTagType(TagType.SEASON.toString()),
-                tagRepository.findByTagType(TagType.PRICE.toString()));
-
-        return PackageResponseDto
-                .builder()
-                .packageList(packageInfos)
-                .allTags(allTags)
-                .allCountries(allCountries).build();
+        return packageInfo;
     }
 
     // 패키지 태그 검색
@@ -182,89 +170,99 @@ public class PackageService {
 
         responseDtos.forEach(dto -> {
 
-            List<Thumbnail> thumbnails = thumbnailRepository.findAllByPackageId(dto.getPackageId());
-            List<ImageDto> thumbnailList = new ArrayList<>();
-            thumbnails.forEach(thumbnail -> {
-                thumbnailList.add(ImageDto.builder()
-                        .originalImageName(thumbnail.getOriginalImageName())
-                        .uploadImageName(thumbnail.getUploadImageName())
-                        .imagePath(thumbnail.getImagePath())
-                        .imageUrl(thumbnail.getImageUrl()).build());
-
-            });
-
-            dto.setThumbnailList(thumbnailList);
+            dto.setThumbnailList(getThumbnailList(packageRepository.findById(dto.getPackageId())
+                    .orElseThrow(() ->
+                            new CustomNotFoundException(ErrorCode.NOT_FOUND))
+            ));
 
             // 최저가 계산
             Package aPackage = packageRepository.findById(dto.getPackageId())
                     .orElseThrow(() ->
                             new CustomNotFoundException(ErrorCode.NOT_FOUND));
 
-            int minPrice = 0;
-            for (Product product : aPackage.getProductList()) {
+            dto.setPrice(getMinPrice(aPackage));
 
-                if (product.getStartDate().isAfter(LocalDateTime.now()) && product.getPrice() != 0) {
-
-                    if (minPrice == 0 || product.getPrice() <= minPrice) {
-                        minPrice = product.getPrice();
-                    }
-
-                }
-            }
-            dto.setPrice(minPrice);
         });
         return responseDtos;
     }
 
     public Page<PackageFilter.PackageFilterForAdminResponseDto> packageByCountryForAdmin(PackageFilter.PackageFilterCondForAdmin filterCond) {
         PageRequest pageRequest = PageRequest.of(filterCond.getOffset(), filterCond.getLimit());
-        return packageRepositoryCustom.searchByCountryForAdmin(filterCond, pageRequest);
+        return packageRepositoryCustom.searchPackageForAdmin(filterCond, pageRequest);
     }
 
-    public PackageResponseDto getAllPackages() {
+
+    // 전체 패키지 목록
+    public List<PackageResponseDto.PackageInfo> getAllPackages() {
         // 패키지 기본 정보
         List<PackageResponseDto.PackageInfo> packageDtoList = new ArrayList<>();
         List<Package> packageList = packageRepository.findAllByIsPublic();
-        for (Package aPackage : packageList) {
 
-            PackageResponseDto.PackageInfo packageInfo = PackageResponseDto.PackageInfo.of(aPackage);
-            // 최저가 계산
-            int minPrice = 0;
-            for (Product product : aPackage.getProductList()) {
-                if (product.getStartDate().isAfter(LocalDateTime.now()) && product.getPrice() != 0 && product.getPrice() <= minPrice) {
+        for (Package aPackage : packageList) {
+            packageDtoList.add(changeToDto(aPackage, "detail"));
+        }
+
+        return packageDtoList;
+    }
+
+    // 여행지로 패키지 목록 조회
+    public List<PackageResponseDto.PackageInfo> getPackagesByCountry(String countryName) {
+
+        List<PackageResponseDto.PackageInfo> packageDtoList = new ArrayList<>();
+        List<Package> packageList = packageRepository.findByCountry(Country.from(countryName));
+
+        for (Package aPackage : packageList) {
+            PackageResponseDto.PackageInfo dto = changeToDto(aPackage, "detail");
+            dto.setPrice(getMinPrice(aPackage));
+            dto.setThumbnailList(getThumbnailList(aPackage));
+            packageDtoList.add(dto);
+        }
+
+        return packageDtoList;
+    }
+
+    private PackageResponseDto.PackageInfo changeToDto(Package aPackage, String operation) {
+        PackageResponseDto.PackageInfo packageInfo = PackageResponseDto.PackageInfo.of(aPackage, operation);
+
+        packageInfo.setPrice(getMinPrice(aPackage));
+        packageInfo.setThumbnailList(getThumbnailList(aPackage));
+
+        return packageInfo;
+    }
+
+    private int getMinPrice(Package aPackage) {
+        // 최저가 계산
+        int minPrice = 0;
+        for (Product product : aPackage.getProductList()) {
+            log.info(product.getPrice() + "가겨각겨가격ㄱ");
+            if (product.getStartDate().isAfter(LocalDateTime.now())) {
+                if (minPrice == 0) {
+                    minPrice = product.getPrice();
+                } else if (product.getPrice() <= minPrice) {
                     minPrice = product.getPrice();
                 }
             }
-            packageInfo.setPrice(minPrice);
-
-            // 썸네일
-            List<ImageDto> imageDtos = new ArrayList<>();
-            for (Thumbnail thumbnail : aPackage.getThumbnailList()) {
-                imageDtos.add(ImageDto.builder()
-                        .imageUrl(thumbnail.getImageUrl())
-                        .uploadImageName(thumbnail.getUploadImageName())
-                        .imagePath(thumbnail.getImagePath())
-                        .originalImageName(thumbnail.getOriginalImageName())
-                        .build());
-            }
-            packageInfo.setThumbnailList(imageDtos);
-            packageDtoList.add(packageInfo);
         }
+        return minPrice;
+    }
 
-        // 전체 나라 정보
-        List<Country> all = countryRepository.findAll();
-        List<CountryResponseDto.CountryInfo> allCountries = new ArrayList<>();
-        for (Country c : all) {
-            allCountries.add(CountryResponseDto.CountryInfo.of(c));
+    private List<ImageDto> getThumbnailList(Package aPackage) {
+
+        List<ImageDto> imageDtos = new ArrayList<>();
+        for (Thumbnail thumbnail : aPackage.getThumbnailList()) {
+            imageDtos.add(ImageDto.builder()
+                    .imageUrl(thumbnail.getImageUrl())
+                    .uploadImageName(thumbnail.getUploadImageName())
+                    .imagePath(thumbnail.getImagePath())
+                    .originalImageName(thumbnail.getOriginalImageName())
+                    .build());
         }
+        return imageDtos;
+    }
 
-        return PackageResponseDto.builder()
-                .packageList(packageDtoList)
-                .allTags(TagResponseDto.GetAllTags.of( // 전체 태그 정보
-                        tagRepository.findByTagType(TagType.THEME.toString()),
-                        tagRepository.findByTagType(TagType.FAMILY.toString()),
-                        tagRepository.findByTagType(TagType.SEASON.toString()),
-                        tagRepository.findByTagType(TagType.PRICE.toString())))
-                .allCountries(allCountries).build();
+    private Package getPackageByPackageId(Long packageId) {
+        return packageRepository.findById(packageId)
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
     }
 }

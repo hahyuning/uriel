@@ -1,8 +1,8 @@
 package com.uriel.travel.service;
 
-import com.uriel.travel.domain.Package;
-import com.uriel.travel.domain.Schedule;
-import com.uriel.travel.dto.product.ScheduleDto;
+import com.uriel.travel.domain.entity.Package;
+import com.uriel.travel.domain.entity.Schedule;
+import com.uriel.travel.domain.dto.product.PackageRequestDto;
 import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.repository.PackageRepository;
@@ -24,16 +24,14 @@ public class ScheduleService {
     private final PackageRepository packageRepository;
 
     // 일정 등록
-    public void create(List<ScheduleDto> scheduleDtoList, Long packageId) {
-        Package aPackage  = packageRepository.findById(packageId)
-                .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+    public void create(List<PackageRequestDto.ScheduleRequestDto> scheduleDtoList, Long packageId) {
 
         scheduleDtoList.forEach(scheduleDto -> {
-            Schedule schedule = new Schedule(scheduleDto);
-            scheduleRepository.save(schedule);
+            Schedule schedule = scheduleRepository.save(scheduleDto.toEntity());
 
-            schedule.setPackage(aPackage);
+            schedule.setPackage(packageRepository.findById(packageId)
+                    .orElseThrow(() ->
+                            new CustomNotFoundException(ErrorCode.NOT_FOUND)));
         });
     }
 

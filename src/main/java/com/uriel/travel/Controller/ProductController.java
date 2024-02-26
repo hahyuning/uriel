@@ -1,10 +1,10 @@
 package com.uriel.travel.Controller;
 
 import com.uriel.travel.Base.BaseResponse;
-import com.uriel.travel.dto.BatchRequestDto;
-import com.uriel.travel.dto.product.ProductDetailResponseDto;
-import com.uriel.travel.dto.product.ProductRequestDto;
-import com.uriel.travel.dto.filterCond.ProductFilter;
+import com.uriel.travel.domain.dto.filterCond.ProductFilter;
+import com.uriel.travel.domain.dto.product.BatchRequestDto;
+import com.uriel.travel.domain.dto.product.ProductDetailResponseDto;
+import com.uriel.travel.domain.dto.product.ProductRequestDto;
 import com.uriel.travel.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,15 +22,7 @@ public class ProductController {
     // 상품 임시저장
     @PostMapping("/temp-create")
     public BaseResponse<Void> temporarySave(@RequestBody ProductRequestDto.Create requestDto) {
-        productService.temporarySave(requestDto);
-
-        return BaseResponse.ok();
-    }
-
-    // 상품 임시저장 업데이트
-    @PutMapping("/temp-update/{productId}")
-    public BaseResponse<Void> temporaryUpdate(@RequestBody ProductRequestDto.Update requestDto, @PathVariable Long productId) {
-        productService.temporaryUpdate(requestDto, productId);
+        productService.temporaryCreate(requestDto);
 
         return BaseResponse.ok();
     }
@@ -47,6 +39,14 @@ public class ProductController {
     @PutMapping("/{productId}")
     public BaseResponse<Void> update(@RequestBody ProductRequestDto.Update requestDto, @PathVariable Long productId) {
         productService.update(requestDto, productId);
+
+        return BaseResponse.ok();
+    }
+
+    // 상품 임시저장 -> 저장
+    @PutMapping("/save/{productId}")
+    public BaseResponse<Void> changeToSaveState(@RequestBody ProductRequestDto.Update requestDto, @PathVariable Long productId) {
+        productService.changeToSaveState(requestDto, productId);
 
         return BaseResponse.ok();
     }
@@ -86,4 +86,11 @@ public class ProductController {
     public BaseResponse<ProductDetailResponseDto> productDetail(@PathVariable Long productId) {
         return BaseResponse.ok(productService.productDetail(productId));
     }
+
+    // 상품 상세확인
+    @PostMapping
+    public BaseResponse<Page<ProductFilter.ProductFilterForAdminResponseDto>> searchForAdmin(@RequestBody ProductFilter.ProductFilterCond filterCond) {
+        return BaseResponse.ok(productService.searchForAdmin(filterCond));
+    }
+
 }

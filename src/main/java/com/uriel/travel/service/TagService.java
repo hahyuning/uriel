@@ -1,11 +1,11 @@
 package com.uriel.travel.service;
 
-import com.uriel.travel.domain.Package;
-import com.uriel.travel.domain.Tag;
+import com.uriel.travel.domain.entity.Package;
+import com.uriel.travel.domain.entity.Tag;
 import com.uriel.travel.domain.TagType;
-import com.uriel.travel.domain.Tagging;
-import com.uriel.travel.dto.product.TagRequestDto;
-import com.uriel.travel.dto.product.TagResponseDto;
+import com.uriel.travel.domain.entity.Tagging;
+import com.uriel.travel.domain.dto.product.TagRequestDto;
+import com.uriel.travel.domain.dto.product.TagResponseDto;
 import com.uriel.travel.exception.CustomBadRequestException;
 import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.ErrorCode;

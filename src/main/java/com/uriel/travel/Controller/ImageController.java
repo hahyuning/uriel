@@ -1,7 +1,7 @@
 package com.uriel.travel.Controller;
 
 import com.uriel.travel.Base.BaseResponse;
-import com.uriel.travel.dto.editor.ImageDto;
+import com.uriel.travel.domain.dto.community.ImageDto;
 import com.uriel.travel.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
