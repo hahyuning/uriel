@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.uriel.travel.domain.Country;
 import com.uriel.travel.domain.Release;
 import com.uriel.travel.domain.SaveState;
-import com.uriel.travel.domain.dto.product.PackageRequestDto;
+import com.uriel.travel.domain.dto.travelPackage.PackageRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -70,6 +70,11 @@ public class Package extends BaseTimeEntity {
     @JsonIgnore
     @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Tagging> taggingList = new ArrayList<>();
+
+    @Builder.Default
+    @JsonIgnore
+    @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Order> orderList = new ArrayList<>();
 
     public void update(PackageRequestDto.Update requestDto) {
         this.packageName = requestDto.getPackageName();

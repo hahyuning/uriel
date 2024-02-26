@@ -1,4 +1,4 @@
-package com.uriel.travel.domain.dto.product;
+package com.uriel.travel.domain.dto.travelPackage;
 
 import com.uriel.travel.domain.Country;
 import com.uriel.travel.domain.entity.Package;

@@ -2,7 +2,7 @@ package com.uriel.travel.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.uriel.travel.domain.TagType;
-import com.uriel.travel.domain.dto.product.TagRequestDto;
+import com.uriel.travel.domain.dto.travelPackage.TagRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;

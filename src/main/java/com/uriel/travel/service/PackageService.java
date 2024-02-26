@@ -2,11 +2,11 @@ package com.uriel.travel.service;
 
 import com.uriel.travel.domain.Country;
 import com.uriel.travel.domain.SaveState;
-import com.uriel.travel.domain.dto.community.ImageDto;
+import com.uriel.travel.domain.dto.ImageDto;
 import com.uriel.travel.domain.dto.filterCond.PackageFilter;
-import com.uriel.travel.domain.dto.product.PackageRequestDto;
-import com.uriel.travel.domain.dto.product.PackageResponseDto;
-import com.uriel.travel.domain.dto.product.TagResponseDto;
+import com.uriel.travel.domain.dto.travelPackage.PackageRequestDto;
+import com.uriel.travel.domain.dto.travelPackage.PackageResponseDto;
+import com.uriel.travel.domain.dto.travelPackage.TagResponseDto;
 import com.uriel.travel.domain.entity.Package;
 import com.uriel.travel.domain.entity.*;
 import com.uriel.travel.exception.CustomNotFoundException;
@@ -234,7 +234,6 @@ public class PackageService {
         // 최저가 계산
         int minPrice = 0;
         for (Product product : aPackage.getProductList()) {
-            log.info(product.getPrice() + "가겨각겨가격ㄱ");
             if (product.getStartDate().isAfter(LocalDateTime.now())) {
                 if (minPrice == 0) {
                     minPrice = product.getPrice();

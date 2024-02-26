@@ -1,6 +1,7 @@
 package com.uriel.travel.domain.dto.product;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.uriel.travel.domain.dto.travelPackage.PackageResponseDto;
 import com.uriel.travel.domain.entity.Product;
 import com.uriel.travel.domain.entity.ProductDetail;
 import lombok.AccessLevel;
