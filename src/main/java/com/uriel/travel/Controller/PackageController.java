@@ -1,8 +1,8 @@
 package com.uriel.travel.Controller;
 
 import com.uriel.travel.Base.BaseResponse;
-import com.uriel.travel.domain.dto.filterCond.PackageFilter;
 import com.uriel.travel.domain.dto.BatchRequestDto;
+import com.uriel.travel.domain.dto.filterCond.PackageFilter;
 import com.uriel.travel.domain.dto.travelPackage.PackageRequestDto;
 import com.uriel.travel.domain.dto.travelPackage.PackageResponseDto;
 import com.uriel.travel.service.PackageService;
@@ -10,7 +10,6 @@ import com.uriel.travel.service.S3Service;
 import com.uriel.travel.service.ScheduleService;
 import com.uriel.travel.service.TagService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -141,7 +140,7 @@ public class PackageController {
 
     // 패키지 태그 검색
     @PostMapping("/tags")
-    public BaseResponse<Page<PackageFilter.PackageFilterResponseDto>> packageSearch(@RequestBody PackageFilter.PackageFilterCond filterCond) {
+    public BaseResponse<List<PackageFilter.PackageFilterResponseDto>> packageSearch(@RequestBody PackageFilter.PackageFilterCond filterCond) {
         return BaseResponse.ok(packageService.packageSearchByFilterCond(filterCond));
     }
 

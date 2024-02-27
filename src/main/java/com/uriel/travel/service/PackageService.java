@@ -164,9 +164,8 @@ public class PackageService {
 
     // 패키지 태그 검색
     @Transactional(readOnly = true)
-    public Page<PackageFilter.PackageFilterResponseDto> packageSearchByFilterCond(PackageFilter.PackageFilterCond filterCond) {
-        PageRequest pageRequest = PageRequest.of(filterCond.getOffset(), filterCond.getLimit());
-        Page<PackageFilter.PackageFilterResponseDto> responseDtos = packageRepositoryCustom.searchPackageByFilter(filterCond, pageRequest);
+    public List<PackageFilter.PackageFilterResponseDto> packageSearchByFilterCond(PackageFilter.PackageFilterCond filterCond) {
+        List<PackageFilter.PackageFilterResponseDto> responseDtos = packageRepositoryCustom.searchPackageByFilter(filterCond);
 
         responseDtos.forEach(dto -> {
 

@@ -18,7 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final TokenProvider tokenProvider;
-//    private final CorsFilter corsFilter;
+    private final CorsConfig corsConfig;
 //    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 //    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
@@ -33,7 +33,7 @@ public class SecurityConfig {
         // CSRF 설정 Disable
         return http.csrf().disable()
                 .httpBasic().disable()
-                .cors().disable()
+                .addFilter(corsConfig.corsFilter())
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()

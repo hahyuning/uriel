@@ -32,7 +32,7 @@ public class PackageRepositoryCustomImpl implements PackageRepositoryCustom {
     QTagging tagging = QTagging.tagging;
 
     @Override
-    public Page<PackageFilter.PackageFilterResponseDto> searchPackageByFilter(PackageFilter.PackageFilterCond filterCond, Pageable pageable) {
+    public List<PackageFilter.PackageFilterResponseDto> searchPackageByFilter(PackageFilter.PackageFilterCond filterCond) {
         List<PackageFilter.PackageFilterResponseDto> packageList = jpaQueryFactory
                 .select(new QPackageFilter_PackageFilterResponseDto(
                         aPackage.id,
@@ -48,8 +48,6 @@ public class PackageRepositoryCustomImpl implements PackageRepositoryCustom {
                         .and(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(familyIn(filterCond))))
                         .and(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(seasonIn(filterCond))))
                         .and(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(priceIn(filterCond)))))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
                 .fetch();
 
         Long count = jpaQueryFactory
@@ -62,7 +60,7 @@ public class PackageRepositoryCustomImpl implements PackageRepositoryCustom {
                         .and(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(priceIn(filterCond)))))
                 .fetchOne();
 
-        return new PageImpl<>(packageList, pageable, count);
+        return packageList;
     }
 
     @Override
