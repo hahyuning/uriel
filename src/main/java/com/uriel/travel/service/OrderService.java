@@ -38,7 +38,7 @@ public class OrderService {
 //    }
 
     // 주문 정보 상세 조회
-    public OrderResponseDto.OrderInfo getOrderInfo(Long orderId) {
+    public OrderResponseDto.OrderInfo getOrderInfo(String orderId) {
         OrderResponseDto.OrderInfo orderResponseDto = OrderResponseDto.OrderInfo.of(orderRepository.findByOrderId(orderId));
 
         List<Traveler> travelerList = travelerRepository.findByOrderId(orderId);

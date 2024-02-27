@@ -15,10 +15,10 @@ public enum Gender implements CodedEnum<String> {
     private final String viewName;
 
     @JsonCreator
-    public static Country from(String sub) {
-        for (Country country : Country.values()) {
-            if (country.getViewName().equals(sub)) {
-                return country;
+    public static Gender from(String sub) {
+        for (Gender gender : Gender.values()) {
+            if (gender.getViewName().equals(sub)) {
+                return gender;
             }
         }
         return null;
@@ -35,9 +35,9 @@ public enum Gender implements CodedEnum<String> {
     }
 
     @jakarta.persistence.Converter(autoApply = true)
-    static class Converter extends AbstractCodedEnumConverter<Country, String> {
+    static class Converter extends AbstractCodedEnumConverter<Gender, String> {
         public Converter() {
-            super(Country.class);
+            super(Gender.class);
         }
     }
 }

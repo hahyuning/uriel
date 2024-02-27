@@ -6,7 +6,6 @@ import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TravelerInfo {
 
@@ -15,7 +14,7 @@ public class TravelerInfo {
     String enLastName;
 
     String gender;
-    String birthDate;
+    String birth;
     String phoneNumber;
 
     boolean isRepresentative;
@@ -25,7 +24,7 @@ public class TravelerInfo {
         this.enFirstName = traveler.getEnFirstName();
         this.enLastName = traveler.getEnLastName();
         this.gender = traveler.getGender().toString();
-        this.birthDate = traveler.getGender().getViewName();
+        this.birth = traveler.getBirth();
         this.phoneNumber = traveler.getPhoneNumber();
         this.isRepresentative = traveler.isRepresentative();
     }

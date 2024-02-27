@@ -2,15 +2,13 @@ package com.uriel.travel.Controller;
 
 import com.uriel.travel.Base.BaseResponse;
 import com.uriel.travel.domain.dto.order.OrderResponseDto;
-import com.uriel.travel.service.Login.UserService;
 import com.uriel.travel.service.OrderService;
+import com.uriel.travel.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,14 +27,14 @@ public class OrderController {
     // 주문 정보 수정
 
     // 사용자 주문 목록 조회
-    @GetMapping("/{offset}")
-    public BaseResponse<List<OrderResponseDto.MyOrder>> getMyOrders(@PathVariable int offset) {
-        return BaseResponse.ok(orderService.getMyOrders(userService.getLoginMemberId(), offset));
-    }
+//    @GetMapping("/{offset}")
+//    public BaseResponse<List<OrderResponseDto.MyOrder>> getMyOrders(@PathVariable int offset) {
+//        return BaseResponse.ok(orderService.getMyOrders(userService.getLoginMemberId(), offset));
+//    }
 
     // 주문 정보 상세 조회
     @GetMapping("/detail/{orderId}")
-    public BaseResponse<OrderResponseDto.OrderInfo> getOrderInfo(@PathVariable Long orderId) {
+    public BaseResponse<OrderResponseDto.OrderInfo> getOrderInfo(@PathVariable String orderId) {
         return BaseResponse.ok(orderService.getOrderInfo(orderId));
     }
 }

@@ -34,7 +34,7 @@ public enum ErrorCode {
     LOGIN_REQUIRED(40103, "토큰이 존재하지 않습니다. 로그인 이후 요청해주세요"),
     REFRESH_TOKEN_NOT_EXIST(40104, "리프레쉬 토큰이 존재하지 않습니다"),
     REFRESH_TOKEN_NULL(40105,"리프레쉬 토큰 값이 비었습니다."),
-
+    MEMBER_ROLE_INVALID(40106,"MEMBER_ROLE_INVALID"),
     /**
      * 403: 권한 없음
      */

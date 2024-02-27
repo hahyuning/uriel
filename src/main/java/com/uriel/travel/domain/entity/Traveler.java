@@ -2,14 +2,13 @@ package com.uriel.travel.domain.entity;
 
 import com.uriel.travel.domain.Gender;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Traveler {
@@ -26,7 +25,7 @@ public class Traveler {
     @Enumerated
     Gender gender;
 
-    String birthDate;
+    String birth;
 
     String phoneNumber;
 
