@@ -100,4 +100,8 @@ public class User implements UserDetails {
         this.headCount = requestDto.getHeadCount();
         this.childName = requestDto.getChildName();
     }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
 }

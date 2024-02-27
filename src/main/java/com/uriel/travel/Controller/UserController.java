@@ -1,8 +1,10 @@
 package com.uriel.travel.Controller;
 
 import com.uriel.travel.Base.BaseResponse;
+import com.uriel.travel.domain.dto.user.MailDto;
 import com.uriel.travel.domain.dto.user.UserRequestDto;
 import com.uriel.travel.domain.dto.user.UserResponseDto;
+import com.uriel.travel.service.MailService;
 import com.uriel.travel.service.UserService;
 import com.uriel.travel.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final MailService mailService;
 
     // 이메일 중복 확인
     @PostMapping("/email")
@@ -41,15 +44,22 @@ public class UserController {
         return BaseResponse.ok(userService.updateUserInfo(userRequestDto));
     }
 
-    // 아이디 찾기
+    // 이름 + 핸드폰 번호로 이메일 찾기
     @PostMapping("/find-id")
     private BaseResponse<UserResponseDto.EmailInfo> findEmail(@RequestBody UserRequestDto.FindEmail userRequestDto) {
         return BaseResponse.ok(userService.findEmail(userRequestDto));
     }
 
     // 비밀번호 재설정 링크 메일 전송
-//    @PostMapping("/send-mail")
-//    private BaseResponse<Void> sendEmail(@RequestBody MailDto mailDto) {
-//
-//    }
+    @PostMapping("/send-mail")
+    private BaseResponse<MailDto> sendEmail(@RequestBody MailDto mailDto) {
+        return BaseResponse.ok(mailService.sendMailAndChangePw(mailDto.getEmail()));
+    }
+
+    // 비밀번호 재설정
+    @PostMapping("/reset-pw")
+    private BaseResponse<Void> updatePassword(@RequestBody UserRequestDto.NewPassword passwordDto) {
+        userService.updatePassword(SecurityUtil.getCurrentUsername(), passwordDto.getPassword());
+        return BaseResponse.ok();
+    }
 }

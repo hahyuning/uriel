@@ -70,4 +70,12 @@ public class UserRequestDto {
         String userName;
         String phoneNumber;
     }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class NewPassword {
+        String password;
+    }
 }
