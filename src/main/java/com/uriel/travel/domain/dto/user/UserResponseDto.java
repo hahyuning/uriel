@@ -25,6 +25,8 @@ public class UserResponseDto {
     public static class UserInfo {
         String email;
         String userName;
+        String enFirstName;
+        String enLastName;
         String gender;
         LocalDate birth;
         String phoneNumber;
@@ -35,6 +37,8 @@ public class UserResponseDto {
             return UserInfo.builder()
                     .email(user.getEmail())
                     .userName(user.getKrName())
+                    .enFirstName(user.getEnFirstName())
+                    .enLastName(user.getEnLastName())
                     .gender(user.getGender().getViewName())
                     .birth(user.getBirth())
                     .phoneNumber(user.getPhoneNumber())

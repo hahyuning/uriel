@@ -59,6 +59,7 @@ public class UserService {
                 .build();
     }
 
+    // 회원정보 수정
     public UserResponseDto.UserInfo updateUserInfo(UserRequestDto.Update userRequestDto) {
         User user = userRepository.findByEmail(userRequestDto.getEmail())
                 .orElseThrow(() ->
@@ -69,6 +70,7 @@ public class UserService {
         return UserResponseDto.UserInfo.of(user);
     }
 
+    // 이름 + 핸드폰 번호로 이메일 찾기
     public UserResponseDto.EmailInfo findEmail(UserRequestDto.FindEmail userRequestDto) {
         User user = userRepository.findByPhoneNumber(userRequestDto.getPhoneNumber())
                 .orElseThrow(() ->
@@ -81,5 +83,12 @@ public class UserService {
         return UserResponseDto.EmailInfo
                 .builder()
                 .email(user.getEmail()).build();
+    }
+
+    public void updatePassword(String email, String password) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
+        user.updatePassword(password);
     }
 }
