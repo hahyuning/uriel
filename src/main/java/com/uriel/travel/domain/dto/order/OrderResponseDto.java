@@ -49,7 +49,7 @@ public class OrderResponseDto {
             return OrderInfo.builder()
                     .orderId(order.getOrderId())
                     .orderedDate(order.getOrderedDate())
-                    .reserveUser(order.getReserveUser().getUserName())
+                    .reserveUser(order.getReserveUser().getKrName())
                     .packageName(order.getAPackage().getPackageName())
                     .productCode(order.getProduct().getProductCode())
                     .startDate(order.getProduct().getStartDate())

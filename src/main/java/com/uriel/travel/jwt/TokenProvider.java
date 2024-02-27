@@ -1,19 +1,11 @@
 package com.uriel.travel.jwt;
 
-import com.uriel.travel.domain.Authority;
-import com.uriel.travel.exception.CustomUnauthorizedException;
-import com.uriel.travel.exception.ErrorCode;
-import com.uriel.travel.jwt.domain.TokenResponseDto;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.uriel.travel.domain.dto.user.TokenDto;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -21,126 +13,100 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-import java.security.Key;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
 
+import java.security.Key;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class TokenProvider { // 사용자 정보를 받아 JWT 생성
-    private final Key key;
-    private static final String AUTHORITIES_KEY = "auth";
-    private static final String TOKEN_TYPE = "Bearer";
-    private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 60 * 1000L;              // 30분
-    private static final long REFRESH_TOKEN_EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000L;    // 7일
-    public TokenProvider(@Value("${jwt.secret}") String secretKey){
-        key= Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)); // 시크릿키
-    }
-    public String generateToken(Authentication authentication,long tokenValid,Authority authority) {
-        Date date=new Date();
-        return Jwts.builder()
-                .setIssuer("uriel")
-                .setSubject(authentication.getName())
-                .claim(AUTHORITIES_KEY,authority)
-                .setIssuedAt(date)
-                .setExpiration(new Date(date.getTime() + tokenValid))
-                .signWith(key,SignatureAlgorithm.HS256)
-                .compact();
-    }
-    public String generateToken(Long id,long tokenValid,Authority authority) {
-        Date date=new Date();
-        return Jwts.builder()
-                .setIssuer("uriel")
-                .setSubject(id.toString())
-                .claim(AUTHORITIES_KEY,authority)
-                .setIssuedAt(date)
-                .setExpiration(new Date(date.getTime() + tokenValid))
-                .signWith(key,SignatureAlgorithm.HS256)
-                .compact();
-    }
-    //access token 생성
-    public String createAccessToken(Authentication authentication,Authority authority) {
-       return this.generateToken(authentication,ACCESS_TOKEN_EXPIRE_TIME,authority);
-    }
-//    public String createAccessToken(Long id,Authority authority) {
-//        return this.generateToken(id,ACCESS_TOKEN_EXPIRE_TIME,authority); }
+public class TokenProvider {
 
-//    public String createRefreshToken(Long id, Authority authority){
-//        return this.generateToken(id,REFRESH_TOKEN_EXPIRE_TIME,authority);
-//    }
-    public String createRefreshToken(Authentication authentication,Authority authority){
-        return this.generateToken(authentication,REFRESH_TOKEN_EXPIRE_TIME,authority);
+    private static final String AUTHORITIES_KEY = "auth";
+    private static final String BEARER_TYPE = "Bearer";
+    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30;            // 30분
+    private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 7;  // 7일
+
+    private final Key key;
+
+    public TokenProvider(@Value("${spring.jwt.secret}") String secretKey) {
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        this.key = Keys.hmacShaKeyFor(keyBytes);
     }
-    public TokenResponseDto createTokenDto(String at, String rt){
-        return TokenResponseDto.builder()
-                .accessToken(at)
-                .refreshToken(rt)
-                .grantType(TOKEN_TYPE)
+
+    public TokenDto generateTokenDto(Authentication authentication) {
+        // 권한들 가져오기
+        String authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
+        long now = (new Date()).getTime();
+
+        // Access Token 생성
+        Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
+        String accessToken = Jwts.builder()
+                .setSubject(authentication.getName())       // payload "sub": "name"
+                .claim(AUTHORITIES_KEY, authorities)        // payload "auth": "ROLE_USER"
+                .setExpiration(accessTokenExpiresIn)        // payload "exp": 151621022 (ex)
+                .signWith(key, SignatureAlgorithm.HS512)    // header "alg": "HS512"
+                .compact();
+
+        // Refresh Token 생성
+        String refreshToken = Jwts.builder()
+                .setExpiration(new Date(now + REFRESH_TOKEN_EXPIRE_TIME))
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
+
+        return TokenDto.builder()
+                .grantType(BEARER_TYPE)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
-    //jwt 토큰 안에 있는 정보를 꺼내는 메서드
-    public Authentication getAuthentication(String accessToken){
+
+    public Authentication getAuthentication(String accessToken) {
+        // 토큰 복호화
         Claims claims = parseClaims(accessToken);
-        if(claims.get(AUTHORITIES_KEY) == null){
-            throw new CustomUnauthorizedException(ErrorCode.INVALID_TOKEN);
+
+        if (claims.get(AUTHORITIES_KEY) == null) {
+            throw new RuntimeException("권한 정보가 없는 토큰입니다.");
         }
-        //클레임에서 권한 정보 가져오기
+
+        // 클레임에서 권한 정보 가져오기
         Collection<? extends GrantedAuthority> authorities =
                 Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
                         .map(SimpleGrantedAuthority::new)
-                        .toList();
+                        .collect(Collectors.toList());
+
+        // UserDetails 객체를 만들어서 Authentication 리턴
         UserDetails principal = new User(claims.getSubject(), "", authorities);
+
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
-    public boolean validateToken(String token){
-       try{
-           Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-           return true;
-       }catch (CustomUnauthorizedException customUnauthorizedException){
-           throw new CustomUnauthorizedException(ErrorCode.INVALID_TOKEN);
-       }
-    }
-    public String getAccessToken(HttpServletRequest request) {
-        String token = Optional.ofNullable(request.getHeader(HttpHeaders.AUTHORIZATION)).orElseThrow(() ->
-                new CustomUnauthorizedException(ErrorCode.LOGIN_REQUIRED));
 
-        if (!StringUtils.hasText(token) || !StringUtils.startsWithIgnoreCase(token, TOKEN_TYPE)) {
-            throw new CustomUnauthorizedException(ErrorCode.INVALID_TOKEN);
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return true;
+        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+            log.info("잘못된 JWT 서명입니다.");
+        } catch (ExpiredJwtException e) {
+            log.info("만료된 JWT 토큰입니다.");
+        } catch (UnsupportedJwtException e) {
+            log.info("지원되지 않는 JWT 토큰입니다.");
+        } catch (IllegalArgumentException e) {
+            log.info("JWT 토큰이 잘못되었습니다.");
         }
-
-        return token.substring(7);
+        return false;
     }
-    public String getRefreshToken(HttpServletRequest request) {
-        String token = getCookieByName(request).orElseThrow(() ->
-                new CustomUnauthorizedException(ErrorCode.REFRESH_TOKEN_NOT_EXIST)
-        );
 
-        if (!StringUtils.hasText(token) || !StringUtils.startsWithIgnoreCase(token, TOKEN_TYPE)) {
-            throw new CustomUnauthorizedException(ErrorCode.INVALID_TOKEN);
-        }
-
-        return token.substring(7);
-    }
-    private Optional<String> getCookieByName(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("Refresh-Token")) {
-                    return Optional.of(cookie.getValue());
-                }
-            }
-        }
-        return Optional.empty();
-    }
-    private Claims parseClaims(String accessToken){
-        try{
+    private Claims parseClaims(String accessToken) {
+        try {
             return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
-        } catch (ExpiredJwtException e){
+        } catch (ExpiredJwtException e) {
             return e.getClaims();
         }
     }
-
-
 }

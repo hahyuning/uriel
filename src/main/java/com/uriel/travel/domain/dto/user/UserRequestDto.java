@@ -1,85 +1,73 @@
 package com.uriel.travel.domain.dto.user;
 
-import com.uriel.travel.domain.Gender;
-import com.uriel.travel.domain.entity.Users;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 
 public class UserRequestDto {
+
     @Getter
     @Setter
+    @NoArgsConstructor
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class SignUp{
+    public static class Login {
+        String email;
+        String password;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class SignUp {
         String userName;
         String enFirstName;
         String enLastName;
-        Gender gender;
         LocalDate birth;
-        String email;
+        String gender;
+
+        String email; //회원 아이디
         String password;
+
         String phoneNumber;
-        int headCount;
+
+        int headCount; //가족 인원수
         String childName;
-        public Users toUserEntity(){
-            return Users.builder()
-                    .userName(userName)
-                    .enFirstName(enFirstName)
-                    .enLastName(enLastName)
-                    .gender(gender)
-                    .birth(birth)
-                    .email(email)
-                    .password(password)
-                    .phoneNumber(phoneNumber)
-                    .headCount(headCount)
-                    .childName(childName)
-                    .build();
-        }
-    }
-    @Getter
-    @Setter
-    @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class login{
-        String email;
-        String password;
-    }
-    @Getter
-    @Setter
-    @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class FindId {
-        String userName;
-        String phoneNumber;
-    }
-    @Getter
-    @Setter
-    @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class FindPw {
-        String userName;
-        String email;
-        String password;
     }
 
     @Getter
     @Setter
+    @NoArgsConstructor
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class Profile {
+    public static class EmailCheck {
         String email;
-        String password;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class Update {
         String userName;
-        Gender gender;
+        String enFirstName;
+        String enLastName;
         LocalDate birth;
+        String gender;
+
+        String email; //회원 아이디
+
         String phoneNumber;
-        int headCount;
+        int headCount; //가족 인원수
         String childName;
     }
-//    @Getter
-//    @Setter
-//    @FieldDefaults(level = AccessLevel.PRIVATE)
-//    public static class ChangePassword {
-//        String password;
-//    }
 
+    @Getter
+    @Setter
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class FindEmail {
+        String userName;
+        String phoneNumber;
+    }
 }

@@ -20,7 +20,6 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/packages")
-@Slf4j
 public class PackageController {
 
     private final PackageService packageService;
@@ -30,7 +29,7 @@ public class PackageController {
     // 패키지 등록
     @PostMapping("/create")
     public BaseResponse<Void> create(@RequestPart("data") PackageRequestDto.Create requestDto,
-                                     @RequestPart(value = "files", required = false) List<MultipartFile> files) {
+                                     @RequestPart(value = "File", required = false) List<MultipartFile> files) {
 
         Long packageId = packageService.create(requestDto); // 패키지 저장
         if (files != null) {

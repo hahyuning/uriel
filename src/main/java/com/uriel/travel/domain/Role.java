@@ -7,13 +7,14 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum Authority {
-    AUTH_ADMIN("ADMIN"), AUTH_USER("USER");
+public enum Role {
+    ROLE_ADMIN("ADMIN"), ROLE_USER("USER");
+
     private final String viewName;
 
     @JsonCreator
-    public static Authority from(String sub) {
-        for (Authority authority : Authority.values()) {
+    public static Role from(String sub) {
+        for (Role authority : Role.values()) {
             if (authority.getViewName().equals(sub)) {
                 return authority;
             }
