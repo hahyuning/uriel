@@ -42,6 +42,7 @@ public class AuthService {
                 .gender(Gender.from(userRequestDto.getGender()))
                 .phoneNumber(userRequestDto.getPhoneNumber())
                 .headCount(userRequestDto.getHeadCount())
+                .childName(userRequestDto.getChildName())
                 .build();
 
         userRepository.save(user);

@@ -1,7 +1,5 @@
 package com.uriel.travel.config;
 
-import com.uriel.travel.jwt.JwtAccessDeniedHandler;
-import com.uriel.travel.jwt.JwtAuthenticationEntryPoint;
 import com.uriel.travel.jwt.JwtFilter;
 import com.uriel.travel.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +11,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.filter.CorsFilter;
 
 @EnableWebSecurity
 @Configuration
@@ -21,9 +18,9 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig {
 
     private final TokenProvider tokenProvider;
-    private final CorsFilter corsFilter;
-    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+//    private final CorsFilter corsFilter;
+//    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+//    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
     // 패스워드 인코더
     @Bean
@@ -36,6 +33,7 @@ public class SecurityConfig {
         // CSRF 설정 Disable
         return http.csrf().disable()
                 .httpBasic().disable()
+                .cors().disable()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()

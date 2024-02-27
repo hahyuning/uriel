@@ -3,6 +3,7 @@ package com.uriel.travel.domain.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.uriel.travel.domain.Gender;
 import com.uriel.travel.domain.Role;
+import com.uriel.travel.domain.dto.user.UserRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -87,5 +88,16 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public void update(UserRequestDto.Update requestDto) {
+        this.krName = requestDto.getUserName();
+        this.enFirstName = requestDto.getEnFirstName();
+        this.enLastName = requestDto.getEnLastName();
+        this.gender = Gender.from(requestDto.getGender());
+        this.birth = requestDto.getBirth();
+        this.phoneNumber = requestDto.getPhoneNumber();
+        this.headCount = requestDto.getHeadCount();
+        this.childName = requestDto.getChildName();
     }
 }
