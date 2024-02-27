@@ -58,6 +58,9 @@ public class Order extends BaseTimeEntity {
     User reserveUser;
 
     @Builder.Default
+    int totalPrice = 0;
+
+    @Builder.Default
     int deposit = 0;
 
     @Builder.Default
@@ -67,4 +70,44 @@ public class Order extends BaseTimeEntity {
     @JsonIgnore
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Traveler> travelerList = new ArrayList<>();
+
+    public void setMapping(Product product, Package aPackage) {
+        this.product = product;
+
+        this.aPackage = aPackage;
+        aPackage.getOrderList().add(this);
+
+        this.country = aPackage.getCountry();
+    }
+
+    public void partialPayment(int totalPrice) {
+        this.totalPrice = totalPrice;
+        this.deposit = (totalPrice / 100) * 10;
+        this.balance = totalPrice - (totalPrice / 100) * 10;
+        this.orderState = OrderState.COMPLETE;
+    }
+
+    public void setReserveUser(User user) {
+        this.reserveUser = user;
+        user.getOrderList().add(this);
+    }
+
+    public void fullPayment() {
+        this.balance = 0;
+        this.totalPrice = this.deposit + this.balance;
+
+        this.orderState = OrderState.FULL_PAYMENT;
+    }
+
+    public void updateBalance(int balance) {
+        this.balance = balance;
+
+        if (this.balance == 0) {
+            this.orderState = OrderState.FULL_PAYMENT;
+        }
+    }
+
+    public void updateOrderState(String orderState) {
+        this.orderState = OrderState.from(orderState);
+    }
 }

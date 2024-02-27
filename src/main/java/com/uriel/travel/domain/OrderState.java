@@ -15,10 +15,10 @@ public enum OrderState implements CodedEnum<String> {
     private final String viewName;
 
     @JsonCreator
-    public static PostType from(String sub) {
-        for (PostType postType : PostType.values()) {
-            if (postType.getViewName().equals(sub)) {
-                return postType;
+    public static OrderState from(String sub) {
+        for (OrderState orderState : OrderState.values()) {
+            if (orderState.getViewName().equals(sub)) {
+                return orderState;
             }
         }
         return null;

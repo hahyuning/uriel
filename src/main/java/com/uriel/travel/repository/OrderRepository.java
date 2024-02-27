@@ -13,6 +13,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     Order findByOrderId(String orderId);
 
-    @Query("select o from Order o where o.reserveUser.id =:userId")
-    List<Order> findByReserveUser(Long userId, Pageable pageable);
+    @Query("select o from Order o where o.reserveUser.email =:email")
+    List<Order> findByReserveUser(String email, Pageable pageable);
+
+
 }
