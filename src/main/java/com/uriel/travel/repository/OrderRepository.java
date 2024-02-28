@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    Order findByOrderId(String orderId);
+    Order findByOrderNumber(String orderNumber);
 
     @Query("select o from Order o where o.reserveUser.email =:email")
     List<Order> findByReserveUser(String email, Pageable pageable);

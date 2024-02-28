@@ -19,7 +19,7 @@ public class OrderResponseDto {
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class OrderInfo {
-        String orderId;
+        String orderNumber;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime orderedDate;
@@ -29,6 +29,10 @@ public class OrderResponseDto {
         String packageName;
 
         String productCode;
+
+        String orderState;
+
+        String method;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime startDate;
@@ -40,26 +44,28 @@ public class OrderResponseDto {
         int infantCount;
         int totalCount;
 
-        int deposit;
+        int payedPrice;
         int balance;
 
         List<TravelerInfo> travelerInfos;
 
         public static OrderInfo of(Order order) {
             return OrderInfo.builder()
-                    .orderId(order.getOrderId())
+                    .orderNumber(order.getOrderNumber())
                     .orderedDate(order.getOrderedDate())
                     .reserveUser(order.getReserveUser().getKrName())
-                    .packageName(order.getAPackage().getPackageName())
+                    .packageName(order.getProduct().getAPackage().getPackageName())
                     .productCode(order.getProduct().getProductCode())
+                    .orderState(order.getOrderState().getViewName())
+                    .method(order.getMethod())
                     .startDate(order.getProduct().getStartDate())
                     .endDate(order.getProduct().getEndDate())
                     .adultCount(order.getAdultCount())
                     .childCount(order.getChildCount())
                     .infantCount(order.getInfantCount())
                     .totalCount(order.getAdultCount() + order.getChildCount() + order.getInfantCount())
-                    .deposit(order.getDeposit())
-                    .balance(order.getBalance())
+                    .payedPrice(order.getPayedPrice())
+                    .balance(order.getTotalPrice() - order.getPayedPrice())
                     .build();
         }
     }
@@ -69,7 +75,7 @@ public class OrderResponseDto {
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class MyOrder {
-        String orderId;
+        String orderNumber;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime orderedDate;
@@ -88,9 +94,9 @@ public class OrderResponseDto {
 
         public static MyOrder of(Order order) {
             return MyOrder.builder()
-                    .orderId(order.getOrderId())
+                    .orderNumber(order.getOrderNumber())
                     .orderedDate(order.getOrderedDate())
-                    .packageName(order.getAPackage().getPackageName())
+                    .packageName(order.getProduct().getAPackage().getPackageName())
                     .startDate(order.getProduct().getStartDate())
                     .endDate(order.getProduct().getEndDate())
                     .totalCount(order.getAdultCount() + order.getChildCount() + order.getInfantCount())

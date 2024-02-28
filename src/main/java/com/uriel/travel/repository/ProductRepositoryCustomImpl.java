@@ -188,18 +188,18 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
         if (filterCond.getEndDateOrder() != null) {
             orderSpecifiers.add(new OrderSpecifier(filterCond.getEndDateOrder() == 0 ? Order.ASC : Order.DESC, product.endDate));
         }
-
-        if (filterCond.getPrivacyOrder() != null) {
-            orderSpecifiers.add(new OrderSpecifier(filterCond.getPrivacyOrder() == 0 ? Order.ASC : Order.DESC, product.isPublic));
-        }
-
-        if (filterCond.getSaveStateOrder() != null) {
-            orderSpecifiers.add(new OrderSpecifier(filterCond.getSaveStateOrder() == 0 ? Order.ASC : Order.DESC, product.saveState));
-        }
-
-        if (filterCond.getProductStateOrder() != null) {
-            orderSpecifiers.add(new OrderSpecifier(filterCond.getProductStateOrder() == 0 ? Order.ASC : Order.DESC, product.productState));
-        }
+//
+//        if (filterCond.getPrivacyOrder() != null) {
+//            orderSpecifiers.add(new OrderSpecifier(filterCond.getPrivacyOrder() == 0 ? Order.ASC : Order.DESC, product.isPublic));
+//        }
+//
+//        if (filterCond.getSaveStateOrder() != null) {
+//            orderSpecifiers.add(new OrderSpecifier(filterCond.getSaveStateOrder() == 0 ? Order.ASC : Order.DESC, product.saveState));
+//        }
+//
+//        if (filterCond.getProductStateOrder() != null) {
+//            orderSpecifiers.add(new OrderSpecifier(filterCond.getProductStateOrder() == 0 ? Order.ASC : Order.DESC, product.productState));
+//        }
 
         return orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]);
     }

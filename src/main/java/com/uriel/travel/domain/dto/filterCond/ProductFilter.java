@@ -30,9 +30,6 @@ public class ProductFilter {
 
         Integer startDateOrder;
         Integer endDateOrder;
-        Integer privacyOrder;
-        Integer saveStateOrder;
-        Integer productStateOrder;
 
         int offset;
         int limit;

@@ -1,7 +1,6 @@
 package com.uriel.travel.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.uriel.travel.domain.Country;
 import com.uriel.travel.domain.OrderState;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,21 +24,17 @@ public class Order extends BaseTimeEntity {
     @Column(name = "order_id")
     Long id;
 
-    @Column(name = "toss_order_id")
-    String orderId;
+    String paymentKey; // 결제 키 (toss 요청용)
 
-    LocalDateTime orderedDate;
+    String orderNumber;  // toss 응답 -> orderId
+
+    LocalDateTime orderedDate; // toss 응답 -> approveAt
+
+    String method; // 결제 방법
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     Product product;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pacakge_id")
-    Package aPackage;
-
-    @Enumerated
-    Country country;
 
     @Builder.Default
     int adultCount = 0;
@@ -50,7 +45,12 @@ public class Order extends BaseTimeEntity {
     @Builder.Default
     int infantCount = 0;
 
-    @Enumerated
+    @Builder.Default
+    int totalPrice = 0; // 상품 수정 시 변경되어야 함
+
+    @Builder.Default
+    int payedPrice = 0; // 결제 완료한 금액
+
     OrderState orderState;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -58,33 +58,18 @@ public class Order extends BaseTimeEntity {
     User reserveUser;
 
     @Builder.Default
-    int totalPrice = 0;
-
-    @Builder.Default
-    int deposit = 0;
-
-    @Builder.Default
-    int balance = 0;
-
-    @Builder.Default
     @JsonIgnore
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Traveler> travelerList = new ArrayList<>();
 
-    public void setMapping(Product product, Package aPackage) {
+    public void setProduct(Product product) {
         this.product = product;
-
-        this.aPackage = aPackage;
-        aPackage.getOrderList().add(this);
-
-        this.country = aPackage.getCountry();
     }
 
+    // 예약금 10% 결제
     public void partialPayment(int totalPrice) {
         this.totalPrice = totalPrice;
-        this.deposit = (totalPrice / 100) * 10;
-        this.balance = totalPrice - (totalPrice / 100) * 10;
-        this.orderState = OrderState.COMPLETE;
+        this.orderState = OrderState.PARTIAL_PAYMENT;
     }
 
     public void setReserveUser(User user) {
@@ -92,19 +77,17 @@ public class Order extends BaseTimeEntity {
         user.getOrderList().add(this);
     }
 
+    // 예약금 완납
     public void fullPayment() {
-        this.balance = 0;
-        this.totalPrice = this.deposit + this.balance;
-
         this.orderState = OrderState.FULL_PAYMENT;
     }
 
-    public void updateBalance(int balance) {
-        this.balance = balance;
+    // 전체 환불
+    public void fullRefund() {
+    }
 
-        if (this.balance == 0) {
-            this.orderState = OrderState.FULL_PAYMENT;
-        }
+    // 부분 환불
+    public void partialRefund() {
     }
 
     public void updateOrderState(String orderState) {

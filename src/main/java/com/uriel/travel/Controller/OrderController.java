@@ -1,6 +1,7 @@
 package com.uriel.travel.Controller;
 
 import com.uriel.travel.Base.BaseResponse;
+import com.uriel.travel.domain.dto.filterCond.OrderFilter;
 import com.uriel.travel.domain.dto.order.OrderRequestDto;
 import com.uriel.travel.domain.dto.order.OrderResponseDto;
 import com.uriel.travel.service.OrderService;
@@ -20,25 +21,13 @@ public class OrderController {
     // 주문 정보 등록 (테스트용)
     @PostMapping("/test/create")
     public BaseResponse<OrderResponseDto.OrderInfo> testCreateOrder(@RequestBody OrderRequestDto.Create requestDto) {
-        return BaseResponse.ok(orderService.testCreateOrder(SecurityUtil.getCurrentUsername(), requestDto));
-    }
-
-    // 잔금 수정
-    @PostMapping("/update/balance")
-    public BaseResponse<OrderResponseDto.OrderInfo> updateBalance(@RequestBody OrderRequestDto.Update requestDto) {
-        return BaseResponse.ok(orderService.updateBalance(requestDto));
-    }
-
-    // 주문상태 변경
-    @PostMapping("/update/orderstate")
-    public BaseResponse<OrderResponseDto.OrderInfo> updateOrderState(@RequestBody OrderRequestDto.Update requestDto) {
-        return BaseResponse.ok(orderService.updateOrderState(requestDto));
+        return BaseResponse.ok(orderService.testCreateOrder(requestDto));
     }
 
     // 사용자 주문 목록 조회
     @GetMapping("/{offset}")
-    public BaseResponse<List<OrderResponseDto.MyOrder>> getMyOrders(@PathVariable int offset) {
-        return BaseResponse.ok(orderService.getMyOrders(SecurityUtil.getCurrentUsername(), offset));
+    public BaseResponse<List<OrderResponseDto.MyOrder>> getMyOrders(@ModelAttribute OrderFilter.OrderFilterCond filterCond) {
+        return BaseResponse.ok(orderService.getMyOrders(SecurityUtil.getCurrentUsername(), filterCond));
     }
 
     // 주문 정보 상세 조회
@@ -47,5 +36,6 @@ public class OrderController {
         return BaseResponse.ok(orderService.getOrderInfo(orderId));
     }
 
+    // 관리자 주문 목록 조회
 
 }

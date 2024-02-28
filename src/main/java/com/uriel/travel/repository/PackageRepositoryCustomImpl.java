@@ -81,10 +81,10 @@ public class PackageRepositoryCustomImpl implements PackageRepositoryCustom {
                         saveStateEq(filterCond)
                 )
                 .orderBy(
-                        countryOder(filterCond),
-                        periodOrder(filterCond),
-                        saveStateOrder(filterCond),
-                        privacyOrder(filterCond)
+//                        countryOder(filterCond),
+                        periodOrder(filterCond)
+//                        saveStateOrder(filterCond),
+//                        privacyOrder(filterCond)
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -152,16 +152,16 @@ public class PackageRepositoryCustomImpl implements PackageRepositoryCustom {
         return null;
     }
 
-    public OrderSpecifier<Country> countryOder(PackageFilter.PackageFilterCondForAdmin filterCond) {
-        if (filterCond.getCountryOrder() != null) {
-            if (filterCond.getCountryOrder() == 0) {
-                return aPackage.country.asc();
-            } else {
-                return aPackage.country.desc();
-            }
-        }
-        return aPackage.country.asc();
-    }
+//    public OrderSpecifier<Country> countryOder(PackageFilter.PackageFilterCondForAdmin filterCond) {
+//        if (filterCond.getCountryOrder() != null) {
+//            if (filterCond.getCountryOrder() == 0) {
+//                return aPackage.country.asc();
+//            } else {
+//                return aPackage.country.desc();
+//            }
+//        }
+//        return aPackage.country.asc();
+//    }
 
     public OrderSpecifier<Integer> periodOrder(PackageFilter.PackageFilterCondForAdmin filterCond) {
         if (filterCond.getPeriodOrder() != null) {
@@ -174,25 +174,25 @@ public class PackageRepositoryCustomImpl implements PackageRepositoryCustom {
         return aPackage.period.asc();
     }
 
-    public OrderSpecifier<SaveState> saveStateOrder(PackageFilter.PackageFilterCondForAdmin filterCond) {
-        if (filterCond.getSaveStateOrder() != null) {
-            if (filterCond.getSaveStateOrder() == 0) {
-                return aPackage.saveState.asc();
-            } else {
-                return aPackage.saveState.desc();
-            }
-        }
-        return aPackage.saveState.asc();
-    }
-
-    public OrderSpecifier<Release> privacyOrder(PackageFilter.PackageFilterCondForAdmin filterCond) {
-        if (filterCond.getPrivacyOrder() != null) {
-            if (filterCond.getPrivacyOrder() == 0) {
-                return aPackage.isPublic.asc();
-            } else {
-                return aPackage.isPublic.desc();
-            }
-        }
-        return aPackage.isPublic.asc();
-    }
+//    public OrderSpecifier<SaveState> saveStateOrder(PackageFilter.PackageFilterCondForAdmin filterCond) {
+//        if (filterCond.getSaveStateOrder() != null) {
+//            if (filterCond.getSaveStateOrder() == 0) {
+//                return aPackage.saveState.asc();
+//            } else {
+//                return aPackage.saveState.desc();
+//            }
+//        }
+//        return aPackage.saveState.asc();
+//    }
+//
+//    public OrderSpecifier<Release> privacyOrder(PackageFilter.PackageFilterCondForAdmin filterCond) {
+//        if (filterCond.getPrivacyOrder() != null) {
+//            if (filterCond.getPrivacyOrder() == 0) {
+//                return aPackage.isPublic.asc();
+//            } else {
+//                return aPackage.isPublic.desc();
+//            }
+//        }
+//        return aPackage.isPublic.asc();
+//    }
 }

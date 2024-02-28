@@ -14,9 +14,13 @@ public class OrderRequestDto {
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class Create {
 
-        String orderId;
+        String paymentKey;
+
+        String orderNumber;
 
         LocalDateTime orderedDate;
+
+        String method;
 
         Long productId;
 
@@ -24,21 +28,11 @@ public class OrderRequestDto {
         int childCount;
         int infantCount;
 
-        String orderState;
-
         int totalPrice;
+        int payedPrice;
+
+        String orderState;
 
         List<TravelerInfo> travelerInfoList;
-    }
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class Update {
-
-        String orderId;
-        int balance;
-        String orderState;
     }
 }

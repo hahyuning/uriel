@@ -1,5 +1,6 @@
 package com.uriel.travel.service;
 
+import com.uriel.travel.domain.dto.filterCond.OrderFilter;
 import com.uriel.travel.domain.dto.order.OrderRequestDto;
 import com.uriel.travel.domain.dto.order.OrderResponseDto;
 import com.uriel.travel.domain.dto.order.TravelerInfo;
@@ -38,28 +39,27 @@ public class OrderService {
 
     // TODO: 실제 주문 등록 처리
 
-
     // 주문 정보 등록 (테스트용)
-    public OrderResponseDto.OrderInfo testCreateOrder(String email, OrderRequestDto.Create requestDto) {
+    public OrderResponseDto.OrderInfo testCreateOrder(OrderRequestDto.Create requestDto) {
         Date date = new Date();
         Product product = productRepository.findById(requestDto.getProductId())
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND_PACKAGE));
 
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmail("hahyuning@naver.com")
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
 
         Order order = Order
                 .builder()
-                .orderId(requestDto.getOrderId())
+                .orderNumber(requestDto.getOrderNumber())
                 .orderedDate(date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
                 .adultCount(requestDto.getAdultCount())
                 .childCount(requestDto.getChildCount())
                 .infantCount(requestDto.getInfantCount())
                 .build();
 
-        order.setMapping(product, product.getAPackage());
+        order.setProduct(product);
         order.partialPayment(requestDto.getTotalPrice());
         order.setReserveUser(user);
 
@@ -75,67 +75,25 @@ public class OrderService {
         return OrderResponseDto.OrderInfo.of(order);
     }
 
-    // 잔금 수정
-    public OrderResponseDto.OrderInfo updateBalance(OrderRequestDto.Update requestDto) {
-        Order order = orderRepository.findByOrderId(requestDto.getOrderId());
-        order.updateBalance(requestDto.getBalance());
-
-        OrderResponseDto.OrderInfo orderInfo = OrderResponseDto.OrderInfo.of(order);
-
-        List<TravelerInfo> travelerInfoList = new ArrayList<>();
-        order.getTravelerList()
-                .forEach(traveler -> {
-                    travelerInfoList.add(new TravelerInfo(traveler));
-                });
-        orderInfo.setTravelerInfos(travelerInfoList);
-        return orderInfo;
-    }
-
-    // 주문상태 변경
-    public OrderResponseDto.OrderInfo updateOrderState(OrderRequestDto.Update requestDto) {
-        Order order = orderRepository.findByOrderId(requestDto.getOrderId());
-        order.updateOrderState(requestDto.getOrderState());
-
-        OrderResponseDto.OrderInfo orderInfo = OrderResponseDto.OrderInfo.of(order);
-
-        List<TravelerInfo> travelerInfoList = new ArrayList<>();
-        order.getTravelerList()
-                .forEach(traveler -> {
-                    travelerInfoList.add(new TravelerInfo(traveler));
-                });
-        orderInfo.setTravelerInfos(travelerInfoList);
-        return orderInfo;
-    }
-
     // 사용자 주문 목록 조회
     @Transactional(readOnly = true)
-    public List<OrderResponseDto.MyOrder> getMyOrders(String loginUserId, int offset) {
+    public List<OrderResponseDto.MyOrder> getMyOrders(String loginUserId, OrderFilter.OrderFilterCond filterCond) {
         List<OrderResponseDto.MyOrder> myOrderList = new ArrayList<>();
 
-        PageRequest pageRequest = PageRequest.of(offset, 10);
+        PageRequest pageRequest = PageRequest.of(filterCond.getOffset(), 10);
         orderRepository.findByReserveUser(loginUserId, pageRequest)
                 .forEach(order -> {
-                    myOrderList.add(OrderResponseDto.MyOrder
-                            .builder()
-                            .orderId(order.getOrderId())
-                            .orderedDate(order.getOrderedDate())
-                            .packageName(order.getAPackage().getPackageName())
-                            .startDate(order.getProduct().getStartDate())
-                            .endDate(order.getProduct().getEndDate())
-                            .totalCount(order.getAdultCount() + order.getChildCount() + order.getInfantCount())
-                            .productState(order.getProduct().getProductState().getViewName())
-                            .orderState(order.getOrderState().getViewName())
-                            .build());
+                    myOrderList.add(OrderResponseDto.MyOrder.of(order));
                 });
         return myOrderList;
     }
 
     // 주문 정보 상세 조회
     @Transactional(readOnly = true)
-    public OrderResponseDto.OrderInfo getOrderInfo(String orderId) {
-        OrderResponseDto.OrderInfo orderResponseDto = OrderResponseDto.OrderInfo.of(orderRepository.findByOrderId(orderId));
+    public OrderResponseDto.OrderInfo getOrderInfo(String orderNumber) {
+        OrderResponseDto.OrderInfo orderResponseDto = OrderResponseDto.OrderInfo.of(orderRepository.findByOrderNumber(orderNumber));
 
-        List<Traveler> travelerList = travelerRepository.findByOrderId(orderId);
+        List<Traveler> travelerList = travelerRepository.findByorderNumber(orderNumber);
         List<TravelerInfo> travelerInfos = travelerList.stream().map(TravelerInfo::new).collect(Collectors.toList());
         orderResponseDto.setTravelerInfos(travelerInfos);
 

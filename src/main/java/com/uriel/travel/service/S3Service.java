@@ -1,12 +1,15 @@
 package com.uriel.travel.service;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.uriel.travel.domain.dto.ImageDto;
 import com.uriel.travel.domain.entity.Banner;
 import com.uriel.travel.domain.entity.Package;
 import com.uriel.travel.domain.entity.Thumbnail;
-import com.uriel.travel.domain.dto.ImageDto;
 import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.repository.BannerRepository;
@@ -40,9 +43,16 @@ public class S3Service {
     private String bucket;
 
     // 배너 업로드
-    // TODO: 배너 3개 유지
     public List<ImageDto> uploadBanners(List<MultipartFile> files) {
         List<ImageDto> banners = upload(files, "banners");
+
+        // 이전 배너 삭제
+        List<Banner> allBanners = bannerRepository.findAll();
+        allBanners.forEach( banner -> {
+                delete(banner.getImagePath(), banner.getUploadImageName());
+                bannerRepository.delete(banner);
+            }
+        );
 
         // 배너 저장
         banners.forEach(banner -> {
@@ -53,38 +63,6 @@ public class S3Service {
         });
 
         return banners;
-    }
-
-    // 썸네일 업로드
-    public void uploadThumbnails(List<MultipartFile> files, Long id) {
-        List<ImageDto> dtoList = upload(files, "thumbnails");
-
-        Package aPackage = packageRepository.findById(id)
-                .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
-
-        dtoList.forEach(dto -> {
-            Thumbnail thumbnail = new Thumbnail(dto.getOriginalImageName(),
-                    dto.getUploadImageName(),
-                    dto.getImagePath(),
-                    dto.getImageUrl());
-
-            thumbnailRepository.save(thumbnail);
-            thumbnail.setPackage(aPackage);
-        });
-    }
-
-    // 기존 썸네일 삭제
-    public void deleteThumbnail(Long id) {
-        List<Thumbnail> thumbnailList = thumbnailRepository.findAllByPackageId(id);
-        Package aPackage = packageRepository.findById(id)
-                .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
-
-        thumbnailList.forEach(thumbnail -> {
-            delete(thumbnail.getImagePath(), thumbnail.getUploadImageName());
-            aPackage.getThumbnailList().remove(thumbnail);
-        });
     }
 
     // s3 이미지 삭제
@@ -164,7 +142,7 @@ public class S3Service {
         return imageList;
     }
 
-    // 파일 1개 업로드
+    // 파일 1개 업로드 (에디터)
     public ImageDto upload(MultipartFile file) {
 
         String imagePath = "image/" + getFoldername();
@@ -196,5 +174,62 @@ public class S3Service {
                     .imagePath(imagePath)
                     .imageUrl(imageUrl).build();
 
+    }
+
+    // 썸네일 업로드
+    public void uploadThumbnails(List<MultipartFile> files, Long id) {
+        List<ImageDto> dtoList = upload(files, "thumbnails");
+
+        Package aPackage = packageRepository.findById(id)
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+
+        dtoList.forEach(dto -> {
+            Thumbnail thumbnail = new Thumbnail(dto.getOriginalImageName(),
+                    dto.getUploadImageName(),
+                    dto.getImagePath(),
+                    dto.getImageUrl());
+
+            thumbnailRepository.save(thumbnail);
+            thumbnail.setPackage(aPackage);
+        });
+    }
+
+    // 기존 썸네일 삭제
+    public void deleteThumbnail(Long id) {
+        List<Thumbnail> thumbnailList = thumbnailRepository.findAllByPackageId(id);
+        Package aPackage = packageRepository.findById(id)
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+
+        thumbnailList.forEach(thumbnail -> {
+            delete(thumbnail.getImagePath(), thumbnail.getUploadImageName());
+            aPackage.getThumbnailList().remove(thumbnail);
+        });
+    }
+
+    // 썸네일 복사
+    public void duplicateThumbnail(String originalImageName) {
+
+        String newOriginalImageName = "";
+
+        try {
+            //Copy 객체 생성
+            CopyObjectRequest copyObjRequest = new CopyObjectRequest(
+                    this.bucket,
+                    originalImageName,
+                    this.bucket,
+                    newOriginalImageName
+            );
+            //Copy
+            this.amazonS3Client.copyObject(copyObjRequest);
+
+            System.out.println(String.format("Finish copying [%s] to [%s]", originalImageName, newOriginalImageName));
+
+        } catch (AmazonServiceException e) {
+            e.printStackTrace();
+        } catch (SdkClientException e) {
+            e.printStackTrace();
+        }
     }
 }
