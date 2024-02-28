@@ -23,18 +23,18 @@ public class Schedule {
 
     int day;
 
-    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     String dayContentMd;
-    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     String dayContentHtml;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     String hotel;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     String meal;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     String vehicle;
 
     public void setPackage(Package aPackage) {
