@@ -24,13 +24,9 @@ public class Order extends BaseTimeEntity {
     @Column(name = "order_id")
     Long id;
 
-    String paymentKey; // 결제 키 (toss 요청용)
-
     String orderNumber;  // toss 응답 -> orderId
 
     LocalDateTime orderDate; // toss 응답 -> approveAt
-
-    String method; // 결제 방법
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
@@ -65,35 +61,12 @@ public class Order extends BaseTimeEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Traveler> travelerList = new ArrayList<>();
 
+    @Builder.Default
+    @JsonIgnore
+    @OneToMany(mappedBy = "order")
+    List<Payment> payments = new ArrayList<>();
+
     public void setProduct(Product product) {
         this.product = product;
-    }
-
-    // 예약금 10% 결제
-    public void partialPayment(int totalPrice) {
-        this.totalPrice = totalPrice;
-        this.orderState = OrderState.PARTIAL_PAYMENT;
-    }
-
-    public void setReserveUser(User user) {
-        this.reserveUser = user;
-        user.getOrderList().add(this);
-    }
-
-    // 예약금 완납
-    public void fullPayment() {
-        this.orderState = OrderState.FULL_PAYMENT;
-    }
-
-    // 전체 환불
-    public void fullRefund() {
-    }
-
-    // 부분 환불
-    public void partialRefund() {
-    }
-
-    public void updateOrderState(String orderState) {
-        this.orderState = OrderState.from(orderState);
     }
 }

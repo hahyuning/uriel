@@ -1,6 +1,6 @@
 package com.uriel.travel.repository;
 
-import com.uriel.travel.domain.dto.filterCond.PackageFilter;
+import com.uriel.travel.domain.dto.travelPackage.PackageFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

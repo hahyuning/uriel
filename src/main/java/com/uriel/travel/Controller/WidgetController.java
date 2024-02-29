@@ -1,23 +1,31 @@
 package com.uriel.travel.Controller;
 
+import com.uriel.travel.service.OrderService;
+import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 @Controller
+@RequiredArgsConstructor
 public class WidgetController {
+
+    private final OrderService orderService;
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -67,10 +75,9 @@ public class WidgetController {
 
         // 결제 성공 및 실패 비즈니스 로직을 구현하세요.
         Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
-        JSONObject jsonObject = (JSONObject) parser.parse(reader);
+        JSONObject jsonObject = (JSONObject) parser.parse(reader); // payment 객체?????
         responseStream.close();
 
         return ResponseEntity.status(code).body(jsonObject);
     }
-
 }

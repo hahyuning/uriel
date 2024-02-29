@@ -1,5 +1,6 @@
-package com.uriel.travel.domain.dto.filterCond;
+package com.uriel.travel.domain.dto.order;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.querydsl.core.annotations.QueryProjection;
 import com.uriel.travel.domain.OrderState;
 import com.uriel.travel.domain.ProductState;
@@ -47,10 +48,14 @@ public class OrderFilter {
     public static class OrderFilterResponseDtoForAdmin {
 
         String orderNumber;
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
         LocalDateTime orderDate;
         String orderState;
 
         String packageName;
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
         LocalDateTime startDate;
 
         String reserveUserName;
@@ -84,10 +89,14 @@ public class OrderFilter {
     public static class OrderFilterResponseDto {
 
         String orderNumber;
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
         LocalDateTime orderDate;
         String orderState;
 
         String packageName;
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
         LocalDateTime startDate;
 
         int totalCount;

@@ -1,6 +1,6 @@
 package com.uriel.travel.service;
 
-import com.uriel.travel.domain.dto.user.MailDto;
+import com.uriel.travel.domain.dto.MailDto;
 import com.uriel.travel.domain.entity.User;
 import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.ErrorCode;

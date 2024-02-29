@@ -1,4 +1,4 @@
-package com.uriel.travel.domain.dto.filterCond;
+package com.uriel.travel.domain.dto.travelPackage;
 
 import com.querydsl.core.annotations.QueryProjection;
 import com.uriel.travel.domain.Country;

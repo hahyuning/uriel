@@ -3,10 +3,10 @@ package com.uriel.travel.service;
 import com.uriel.travel.domain.Country;
 import com.uriel.travel.domain.SaveState;
 import com.uriel.travel.domain.dto.ImageDto;
-import com.uriel.travel.domain.dto.filterCond.PackageFilter;
+import com.uriel.travel.domain.dto.travelPackage.PackageFilter;
 import com.uriel.travel.domain.dto.travelPackage.PackageRequestDto;
 import com.uriel.travel.domain.dto.travelPackage.PackageResponseDto;
-import com.uriel.travel.domain.dto.travelPackage.TagResponseDto;
+import com.uriel.travel.domain.dto.tag.TagResponseDto;
 import com.uriel.travel.domain.entity.Package;
 import com.uriel.travel.domain.entity.*;
 import com.uriel.travel.exception.CustomNotFoundException;
@@ -94,12 +94,14 @@ public class PackageService {
         Package newPackage = aPackage.duplicate(aPackage);
         packageRepository.save(newPackage);
 
-//        // 썸네일
-//        thumbnailList
-//                .forEach(thumbnail -> {
-//                    s3Service.upload()
-//            }
-//        );
+        // 썸네일
+        thumbnailList
+                .forEach(thumbnail -> {
+                    Thumbnail newThumbnail = s3Service.duplicateThumbnail(thumbnail);
+                    newThumbnail.setPackage(newPackage);
+                    thumbnailRepository.save(newThumbnail);
+                }
+        );
 
         // 일정
         scheduleList

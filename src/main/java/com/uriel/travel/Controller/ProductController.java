@@ -1,7 +1,7 @@
 package com.uriel.travel.Controller;
 
 import com.uriel.travel.Base.BaseResponse;
-import com.uriel.travel.domain.dto.filterCond.ProductFilter;
+import com.uriel.travel.domain.dto.product.ProductFilter;
 import com.uriel.travel.domain.dto.BatchRequestDto;
 import com.uriel.travel.domain.dto.product.ProductDetailResponseDto;
 import com.uriel.travel.domain.dto.product.ProductRequestDto;
