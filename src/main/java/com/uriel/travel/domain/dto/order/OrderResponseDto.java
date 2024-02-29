@@ -22,7 +22,7 @@ public class OrderResponseDto {
         String orderNumber;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-        LocalDateTime orderedDate;
+        LocalDateTime orderDate;
 
         String reserveUser;
 
@@ -52,7 +52,7 @@ public class OrderResponseDto {
         public static OrderInfo of(Order order) {
             return OrderInfo.builder()
                     .orderNumber(order.getOrderNumber())
-                    .orderedDate(order.getOrderedDate())
+                    .orderDate(order.getOrderDate())
                     .reserveUser(order.getReserveUser().getKrName())
                     .packageName(order.getProduct().getAPackage().getPackageName())
                     .productCode(order.getProduct().getProductCode())
@@ -63,7 +63,7 @@ public class OrderResponseDto {
                     .adultCount(order.getAdultCount())
                     .childCount(order.getChildCount())
                     .infantCount(order.getInfantCount())
-                    .totalCount(order.getAdultCount() + order.getChildCount() + order.getInfantCount())
+                    .totalCount(order.getTotalCount())
                     .payedPrice(order.getPayedPrice())
                     .balance(order.getTotalPrice() - order.getPayedPrice())
                     .build();
@@ -78,7 +78,7 @@ public class OrderResponseDto {
         String orderNumber;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-        LocalDateTime orderedDate;
+        LocalDateTime orderDate;
 
         String packageName;
 
@@ -95,11 +95,11 @@ public class OrderResponseDto {
         public static MyOrder of(Order order) {
             return MyOrder.builder()
                     .orderNumber(order.getOrderNumber())
-                    .orderedDate(order.getOrderedDate())
+                    .orderDate(order.getOrderDate())
                     .packageName(order.getProduct().getAPackage().getPackageName())
                     .startDate(order.getProduct().getStartDate())
                     .endDate(order.getProduct().getEndDate())
-                    .totalCount(order.getAdultCount() + order.getChildCount() + order.getInfantCount())
+                    .totalCount(order.getTotalCount())
                     .productState(order.getProduct().getProductState().getViewName())
                     .orderState(order.getOrderState().getViewName())
                     .build();

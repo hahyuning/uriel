@@ -28,7 +28,7 @@ public class Order extends BaseTimeEntity {
 
     String orderNumber;  // toss 응답 -> orderId
 
-    LocalDateTime orderedDate; // toss 응답 -> approveAt
+    LocalDateTime orderDate; // toss 응답 -> approveAt
 
     String method; // 결제 방법
 
@@ -44,6 +44,9 @@ public class Order extends BaseTimeEntity {
 
     @Builder.Default
     int infantCount = 0;
+
+    @Builder.Default
+    int totalCount = 0; // 여행자 변경 시 변경 필요
 
     @Builder.Default
     int totalPrice = 0; // 상품 수정 시 변경되어야 함

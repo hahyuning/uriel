@@ -10,18 +10,15 @@ import com.uriel.travel.domain.entity.Traveler;
 import com.uriel.travel.domain.entity.User;
 import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.ErrorCode;
-import com.uriel.travel.repository.OrderRepository;
-import com.uriel.travel.repository.ProductRepository;
-import com.uriel.travel.repository.TravelerRepository;
-import com.uriel.travel.repository.UserRepository;
+import com.uriel.travel.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,6 +33,8 @@ public class OrderService {
     private final TravelerRepository travelerRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+
+    private final OrderRepositoryCustomImpl orderRepositoryCustom;
 
     // TODO: 실제 주문 등록 처리
 
@@ -53,7 +52,7 @@ public class OrderService {
         Order order = Order
                 .builder()
                 .orderNumber(requestDto.getOrderNumber())
-                .orderedDate(date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
+                .orderDate(date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
                 .adultCount(requestDto.getAdultCount())
                 .childCount(requestDto.getChildCount())
                 .infantCount(requestDto.getInfantCount())
@@ -77,15 +76,9 @@ public class OrderService {
 
     // 사용자 주문 목록 조회
     @Transactional(readOnly = true)
-    public List<OrderResponseDto.MyOrder> getMyOrders(String loginUserId, OrderFilter.OrderFilterCond filterCond) {
-        List<OrderResponseDto.MyOrder> myOrderList = new ArrayList<>();
-
+    public List<OrderFilter.OrderFilterResponseDto> getMyOrders(String loginUserId, OrderFilter.OrderFilterCond filterCond) {
         PageRequest pageRequest = PageRequest.of(filterCond.getOffset(), 10);
-        orderRepository.findByReserveUser(loginUserId, pageRequest)
-                .forEach(order -> {
-                    myOrderList.add(OrderResponseDto.MyOrder.of(order));
-                });
-        return myOrderList;
+        return orderRepositoryCustom.findByReserveUser(filterCond, loginUserId, pageRequest);
     }
 
     // 주문 정보 상세 조회
@@ -98,5 +91,19 @@ public class OrderService {
         orderResponseDto.setTravelerInfos(travelerInfos);
 
         return orderResponseDto;
+    }
+
+    // 관리자용 주문 목록 조회
+    @Transactional(readOnly = true)
+    public Page<OrderFilter.OrderFilterResponseDtoForAdmin> getOrderListForAdmin(OrderFilter.OrderFilterCond filterCond) {
+        PageRequest pageRequest = PageRequest.of(filterCond.getOffset(), 10);
+        return orderRepositoryCustom.ordersByFilter(filterCond, pageRequest);
+    }
+
+    // 주문 목록 검색
+    @Transactional(readOnly = true)
+    public Page<OrderFilter.OrderFilterResponseDtoForAdmin> orderSearch(OrderFilter.OrderSearchCond searchCond) {
+        PageRequest pageRequest = PageRequest.of(searchCond.getOffset(), 10);
+        return orderRepositoryCustom.searchOrder(searchCond, pageRequest);
     }
 }

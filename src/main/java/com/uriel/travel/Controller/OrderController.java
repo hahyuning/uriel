@@ -7,6 +7,7 @@ import com.uriel.travel.domain.dto.order.OrderResponseDto;
 import com.uriel.travel.service.OrderService;
 import com.uriel.travel.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,8 +26,8 @@ public class OrderController {
     }
 
     // 사용자 주문 목록 조회
-    @GetMapping("/{offset}")
-    public BaseResponse<List<OrderResponseDto.MyOrder>> getMyOrders(@ModelAttribute OrderFilter.OrderFilterCond filterCond) {
+    @GetMapping
+    public BaseResponse<List<OrderFilter.OrderFilterResponseDto>> getMyOrders(@ModelAttribute OrderFilter.OrderFilterCond filterCond) {
         return BaseResponse.ok(orderService.getMyOrders(SecurityUtil.getCurrentUsername(), filterCond));
     }
 
@@ -37,5 +38,14 @@ public class OrderController {
     }
 
     // 관리자 주문 목록 조회
+    @PostMapping
+    public BaseResponse<Page<OrderFilter.OrderFilterResponseDtoForAdmin>> getOrderListForAdmin(@RequestBody OrderFilter.OrderFilterCond filterCond) {
+        return BaseResponse.ok(orderService.getOrderListForAdmin(filterCond));
+    }
 
+    // 주문 정보 검색
+    @GetMapping("/search")
+    public BaseResponse<Page<OrderFilter.OrderFilterResponseDtoForAdmin>> orderSearchForAdmin(@ModelAttribute OrderFilter.OrderSearchCond searchCond) {
+        return BaseResponse.ok(orderService.orderSearch(searchCond));
+    }
 }

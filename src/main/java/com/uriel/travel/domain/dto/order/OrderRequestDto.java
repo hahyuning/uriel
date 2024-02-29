@@ -18,7 +18,7 @@ public class OrderRequestDto {
 
         String orderNumber;
 
-        LocalDateTime orderedDate;
+        LocalDateTime orderDate;
 
         String method;
 
