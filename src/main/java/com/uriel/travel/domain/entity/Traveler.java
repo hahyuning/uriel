@@ -29,10 +29,14 @@ public class Traveler {
 
     String phoneNumber;
 
-    @Builder.Default
-    boolean isRepresentative = false;
+    boolean isRepresentative;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
     Order order;
+
+    public void setOrder(Order order) {
+        this.order = order;
+        order.getTravelerList().add(this);
+    }
 }

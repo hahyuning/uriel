@@ -28,7 +28,7 @@ public class PackageController {
     // 패키지 등록
     @PostMapping("/create")
     public BaseResponse<Void> create(@RequestPart("data") PackageRequestDto.Create requestDto,
-                                     @RequestPart(value = "File", required = false) List<MultipartFile> files) {
+                                     @RequestPart(value = "files", required = false) List<MultipartFile> files) {
 
         Long packageId = packageService.create(requestDto); // 패키지 저장
         if (files != null) {
@@ -120,7 +120,13 @@ public class PackageController {
     @PostMapping("/batch-delete")
     public BaseResponse<Void> delete(@RequestBody BatchRequestDto requestDto) {
         List<Long> ids = requestDto.getIds();
+
+        // 태그 삭제
         ids.forEach(tagService::deleteTagging);
+
+        // 썸네일 삭제
+        ids.forEach(s3Service::deleteThumbnail);
+
         packageService.delete(ids);
         return BaseResponse.ok();
     }

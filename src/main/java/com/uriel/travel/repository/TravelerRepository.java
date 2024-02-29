@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface TravelerRepository extends JpaRepository<Traveler, Long> {
 
-    @Query("select t from Traveler t where t.order.orderId =:orderId")
-    List<Traveler> findByOrderId(String orderId);
+    @Query("select t from Traveler t where t.order.orderNumber =:orderNumber")
+    List<Traveler> findByorderNumber(String orderNumber);
 }

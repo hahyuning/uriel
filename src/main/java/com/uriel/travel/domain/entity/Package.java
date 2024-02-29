@@ -39,16 +39,22 @@ public class Package extends BaseTimeEntity {
 
     String hashTag;
 
-    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     String hotelInfoMd;
+
+    @Column(columnDefinition = "LONGTEXT")
     String hotelInfoHtml;
 
-    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     String regionInfoMd;
+
+    @Column(columnDefinition = "LONGTEXT")
     String regionInfoHtml;
 
-    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     String termsMd;
+
+    @Column(columnDefinition = "LONGTEXT")
     String termsHtml;
 
     @Builder.Default
@@ -70,11 +76,6 @@ public class Package extends BaseTimeEntity {
     @JsonIgnore
     @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Tagging> taggingList = new ArrayList<>();
-
-    @Builder.Default
-    @JsonIgnore
-    @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Order> orderList = new ArrayList<>();
 
     public void update(PackageRequestDto.Update requestDto) {
         this.packageName = requestDto.getPackageName();

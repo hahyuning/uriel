@@ -37,10 +37,7 @@ public class PackageFilter {
         String privacy;
         String saveState;
 
-        Integer countryOrder;
         Integer periodOrder;
-        Integer saveStateOrder;
-        Integer privacyOrder;
 
         int offset;
         int limit;

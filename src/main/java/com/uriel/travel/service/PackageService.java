@@ -39,6 +39,8 @@ public class PackageService {
     private final ScheduleRepository scheduleRepository;
     private final TaggingRepository taggingRepository;
 
+    private final S3Service s3Service;
+
     // 패키지 임시 저장
     public Long temporarySave(PackageRequestDto.Create requestDto) {
         Package aPackage = requestDto.toEntity();
@@ -95,10 +97,7 @@ public class PackageService {
 //        // 썸네일
 //        thumbnailList
 //                .forEach(thumbnail -> {
-//                    entityManager.detach(thumbnail);
-//                    thumbnail.idInit();
-//                    thumbnail.setPackage(newPackage);
-//                    thumbnailRepository.save(thumbnail);
+//                    s3Service.upload()
 //            }
 //        );
 

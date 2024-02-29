@@ -8,17 +8,19 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum OrderState implements CodedEnum<String> {
 
-    COMPLETE("예약 완료"),
-    FULL_PAYMENT("완납"),
-    CANCELED("취소");
+    NEEDED_PAYMENT("결제 대기"),
+    PARTIAL_PAYMENT("예약금 납부 완료"),
+    FULL_PAYMENT("전액 납부 완료"),
+    REFUND_NEEDED("환불 필요"),
+    REFUND_COMPLETED("전액 환불 완료");
 
     private final String viewName;
 
     @JsonCreator
-    public static PostType from(String sub) {
-        for (PostType postType : PostType.values()) {
-            if (postType.getViewName().equals(sub)) {
-                return postType;
+    public static OrderState from(String sub) {
+        for (OrderState orderState : OrderState.values()) {
+            if (orderState.getViewName().equals(sub)) {
+                return orderState;
             }
         }
         return null;

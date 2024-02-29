@@ -21,10 +21,10 @@ public class Posts extends BaseTimeEntity {
 
     String title;
 
-    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     String contentHtml;
 
-    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     String contentMd;
 
     @Enumerated(EnumType.STRING)

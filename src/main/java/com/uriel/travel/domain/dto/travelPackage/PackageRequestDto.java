@@ -43,7 +43,7 @@ public class PackageRequestDto {
                     .period(period)
                     .hashTag(hashTag)
                     .hotelInfoMd(hotelInfoMd)
-                    .hotelInfoHtml(hotelInfoMd)
+                    .hotelInfoHtml(hotelInfoHtml)
                     .regionInfoMd(regionInfoMd)
                     .regionInfoHtml(regionInfoHtml)
                     .termsMd(termsMd)

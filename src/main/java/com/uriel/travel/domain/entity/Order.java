@@ -1,7 +1,6 @@
 package com.uriel.travel.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.uriel.travel.domain.Country;
 import com.uriel.travel.domain.OrderState;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,21 +24,17 @@ public class Order extends BaseTimeEntity {
     @Column(name = "order_id")
     Long id;
 
-    @Column(name = "toss_order_id")
-    String orderId;
+    String paymentKey; // 결제 키 (toss 요청용)
 
-    LocalDateTime orderedDate;
+    String orderNumber;  // toss 응답 -> orderId
+
+    LocalDateTime orderDate; // toss 응답 -> approveAt
+
+    String method; // 결제 방법
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     Product product;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pacakge_id")
-    Package aPackage;
-
-    @Enumerated
-    Country country;
 
     @Builder.Default
     int adultCount = 0;
@@ -50,7 +45,15 @@ public class Order extends BaseTimeEntity {
     @Builder.Default
     int infantCount = 0;
 
-    @Enumerated
+    @Builder.Default
+    int totalCount = 0; // 여행자 변경 시 변경 필요
+
+    @Builder.Default
+    int totalPrice = 0; // 상품 수정 시 변경되어야 함
+
+    @Builder.Default
+    int payedPrice = 0; // 결제 완료한 금액
+
     OrderState orderState;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -58,13 +61,39 @@ public class Order extends BaseTimeEntity {
     User reserveUser;
 
     @Builder.Default
-    int deposit = 0;
-
-    @Builder.Default
-    int balance = 0;
-
-    @Builder.Default
     @JsonIgnore
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Traveler> travelerList = new ArrayList<>();
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    // 예약금 10% 결제
+    public void partialPayment(int totalPrice) {
+        this.totalPrice = totalPrice;
+        this.orderState = OrderState.PARTIAL_PAYMENT;
+    }
+
+    public void setReserveUser(User user) {
+        this.reserveUser = user;
+        user.getOrderList().add(this);
+    }
+
+    // 예약금 완납
+    public void fullPayment() {
+        this.orderState = OrderState.FULL_PAYMENT;
+    }
+
+    // 전체 환불
+    public void fullRefund() {
+    }
+
+    // 부분 환불
+    public void partialRefund() {
+    }
+
+    public void updateOrderState(String orderState) {
+        this.orderState = OrderState.from(orderState);
+    }
 }

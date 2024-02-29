@@ -215,7 +215,6 @@ public class ProductService {
     // 관리자용 상품 목록 조회
     public Page<ProductFilter.ProductFilterForAdminResponseDto> searchForAdmin(ProductFilter.ProductFilterCond filterCond) {
         PageRequest pageRequest = PageRequest.of(filterCond.getOffset(), filterCond.getLimit());
-        log.info(filterCond.getPrivacyOrder() + "");
         return productRepositoryCustom.searchForAdmin(filterCond, pageRequest);
     }
 
