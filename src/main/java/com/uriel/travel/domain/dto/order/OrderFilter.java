@@ -54,6 +54,7 @@ public class OrderFilter {
         String orderState;
 
         String packageName;
+        String productCode;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
         LocalDateTime startDate;
@@ -67,12 +68,13 @@ public class OrderFilter {
         int balance;
 
         @QueryProjection
-        public OrderFilterResponseDtoForAdmin(String orderNumber, LocalDateTime orderDate, OrderState orderState, String packageName, LocalDateTime startDate,
+        public OrderFilterResponseDtoForAdmin(String orderNumber, LocalDateTime orderDate, OrderState orderState, String packageName, String productCode, LocalDateTime startDate,
                                               String reserveUserName, String phoneNumber, String email, int totalCount, int totalPrice, int payedPrice) {
             this.orderNumber = orderNumber;
             this.orderDate = orderDate;
             this.orderState = orderState.getViewName();
             this.packageName = packageName;
+            this.productCode = productCode;
             this.startDate = startDate;
             this.reserveUserName = reserveUserName;
             this.phoneNumber = phoneNumber;

@@ -69,4 +69,21 @@ public class Order extends BaseTimeEntity {
     public void setProduct(Product product) {
         this.product = product;
     }
+
+    public void setReserveUser(User user) {
+        this.reserveUser = user;
+        user.getOrderList().add(this);
+    }
+
+    public void fullPayment(int totalAmount) {
+        this.payedPrice += totalAmount;
+
+        if (this.payedPrice > this.totalPrice) {
+            this.orderState = OrderState.REFUND_NEEDED;
+        } else if (this.payedPrice < this.totalPrice) {
+            this.orderState = OrderState.NEEDED_ADDITIONAL_PAYMENT;
+        } else {
+            this.orderState = OrderState.FULL_PAYMENT;
+        }
+    }
 }

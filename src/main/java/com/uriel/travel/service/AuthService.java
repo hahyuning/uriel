@@ -50,7 +50,6 @@ public class AuthService {
 
     public TokenDto login(UserRequestDto.Login userRequestDto) {
         // 1. Login ID/PW 를 기반으로 AuthenticationToken 생성
-        log.info(encoder.encode(userRequestDto.getPassword()));
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userRequestDto.getEmail(), userRequestDto.getPassword());
 
         // 2. 실제로 검증 (사용자 비밀번호 체크) 이 이루어지는 부분

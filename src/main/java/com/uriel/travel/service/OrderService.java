@@ -1,17 +1,27 @@
 package com.uriel.travel.service;
 
+import com.uriel.travel.domain.OrderState;
 import com.uriel.travel.domain.dto.order.OrderFilter;
+import com.uriel.travel.domain.dto.order.OrderRequestDto;
 import com.uriel.travel.domain.dto.order.OrderResponseDto;
 import com.uriel.travel.domain.dto.order.TravelerInfo;
+import com.uriel.travel.domain.entity.Order;
+import com.uriel.travel.domain.entity.Product;
 import com.uriel.travel.domain.entity.Traveler;
+import com.uriel.travel.domain.entity.User;
+import com.uriel.travel.exception.CustomNotFoundException;
+import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.simple.JSONObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,42 +37,6 @@ public class OrderService {
     private final UserRepository userRepository;
 
     private final OrderRepositoryCustomImpl orderRepositoryCustom;
-
-    // TODO: 실제 주문 등록 처리
-
-    // 주문 정보 등록 (테스트용)
-//    public OrderResponseDto.OrderInfo testCreateOrder(OrderRequestDto.Create requestDto) {
-//        Date date = new Date();
-//        Product product = productRepository.findById(requestDto.getProductId())
-//                .orElseThrow(() ->
-//                        new CustomNotFoundException(ErrorCode.NOT_FOUND_PACKAGE));
-//
-//        User user = userRepository.findByEmail("hahyuning@naver.com")
-//                .orElseThrow(() ->
-//                        new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
-//
-//        Order order = Order
-//                .builder()
-//                .orderNumber(requestDto.getOrderNumber())
-//                .orderDate(date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
-//                .adultCount(requestDto.getAdultCount())
-//                .childCount(requestDto.getChildCount())
-//                .infantCount(requestDto.getInfantCount())
-//                .build();
-//
-//        order.setProduct(product);
-//
-//        orderRepository.save(order);
-//
-//        requestDto.getTravelerInfoList()
-//                .forEach(travelerInfo -> {
-//                    Traveler traveler = travelerInfo.toEntity();
-//                    traveler.setOrder(order);
-//                    travelerRepository.save(traveler);
-//                });
-//
-//        return OrderResponseDto.OrderInfo.of(order);
-//    }
 
     // 사용자 주문 목록 조회
     @Transactional(readOnly = true)
@@ -95,5 +69,50 @@ public class OrderService {
     public Page<OrderFilter.OrderFilterResponseDtoForAdmin> orderSearch(OrderFilter.OrderSearchCond searchCond) {
         PageRequest pageRequest = PageRequest.of(searchCond.getOffset(), 10);
         return orderRepositoryCustom.searchOrder(searchCond, pageRequest);
+    }
+
+    // 주문 등록 (토스 연동)
+    public String createOrder(JSONObject jsonObject, OrderRequestDto.Create requestDto, String email) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        Order order = Order.builder()
+                .orderNumber(jsonObject.get("orderId").toString())
+                .orderDate(LocalDateTime.parse(jsonObject.get("approvedAt").toString(), formatter))
+                .adultCount(requestDto.getAdultCount())
+                .childCount(requestDto.getChildCount())
+                .infantCount(requestDto.getChildCount())
+                .totalCount(requestDto.getTotalCount())
+                .totalPrice(requestDto.getTotalPrice())
+                .payedPrice(Integer.parseInt(jsonObject.get("totalAmount").toString()))
+                .orderState(OrderState.PARTIAL_PAYMENT)
+                .build();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+        order.setReserveUser(user);
+
+        Product product = productRepository.findById(requestDto.getProductId())
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+        order.setProduct(product);
+        Order savedOrder = orderRepository.save(order);
+
+        requestDto.getTravelerInfoList()
+                .forEach(travelerInfo -> {
+                    Traveler traveler = travelerInfo.toEntity();
+                    traveler.setOrder(order);
+                    travelerRepository.save(traveler);
+                });
+
+        return savedOrder.getOrderNumber();
+    }
+
+    // 잔금 완납
+    public void fullPayment(JSONObject jsonObject) {
+        String orderNumber = jsonObject.get("orderId").toString();
+        Order order = orderRepository.findByOrderNumber(orderNumber);
+
+        order.fullPayment((Integer.parseInt(jsonObject.get("totalAmount").toString())));
     }
 }
