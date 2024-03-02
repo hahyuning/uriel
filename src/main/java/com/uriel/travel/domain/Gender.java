@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum Gender implements CodedEnum<String> {
+public enum Gender {
 
     MALE("남"),
     FEMALE("여"),
@@ -31,13 +31,6 @@ public enum Gender implements CodedEnum<String> {
             return Gender.FEMALE;
         } else {
             return Gender.OTHER;
-        }
-    }
-
-    @jakarta.persistence.Converter(autoApply = true)
-    static class Converter extends AbstractCodedEnumConverter<Gender, String> {
-        public Converter() {
-            super(Gender.class);
         }
     }
 }

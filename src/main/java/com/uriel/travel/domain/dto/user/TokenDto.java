@@ -11,8 +11,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TokenDto {
-
-    String grantType;
     String accessToken;
     String refreshToken;
 }

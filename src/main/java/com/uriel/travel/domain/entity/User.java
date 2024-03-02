@@ -3,6 +3,7 @@ package com.uriel.travel.domain.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.uriel.travel.domain.Gender;
 import com.uriel.travel.domain.Role;
+import com.uriel.travel.domain.SocialType;
 import com.uriel.travel.domain.dto.user.UserRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Entity
@@ -34,6 +36,7 @@ public class User implements UserDetails {
     String enLastName;
     LocalDate birth;
 
+    @Enumerated(EnumType.STRING)
     Gender gender;
 
     String email; //=회원 아이디
@@ -42,12 +45,15 @@ public class User implements UserDetails {
     String phoneNumber;
 
     @Builder.Default
-    int headCount = 0; //가족 인원수
+    int headCount = 0;
+    //가족 인원수
     String childName;
 
     @Enumerated(EnumType.STRING)
-    @Builder.Default
-    Role role = Role.ROLE_USER;
+    Role role;
+
+    @Enumerated(EnumType.STRING)
+    SocialType socialType;
 
     @Builder.Default
     @JsonIgnore
@@ -55,10 +61,9 @@ public class User implements UserDetails {
     List<Order> orderList = new ArrayList<>();
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        ArrayList<SimpleGrantedAuthority> simpleGrantedAuthorities = new ArrayList<>();
-        simpleGrantedAuthorities.add(new SimpleGrantedAuthority(this.role.toString()));
-        return simpleGrantedAuthorities;
+        return Collections.singleton(new SimpleGrantedAuthority(this.role.toString()));
     }
 
     @Override
