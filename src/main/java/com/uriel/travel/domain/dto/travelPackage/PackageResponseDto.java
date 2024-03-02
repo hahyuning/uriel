@@ -1,6 +1,7 @@
 package com.uriel.travel.domain.dto.travelPackage;
 
 import com.uriel.travel.domain.dto.ImageDto;
+import com.uriel.travel.domain.dto.tag.TagResponseDto;
 import com.uriel.travel.domain.entity.Package;
 import com.uriel.travel.domain.entity.Schedule;
 import lombok.AccessLevel;

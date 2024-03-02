@@ -1,7 +1,7 @@
 package com.uriel.travel.Controller;
 
 import com.uriel.travel.Base.BaseResponse;
-import com.uriel.travel.domain.dto.user.MailDto;
+import com.uriel.travel.domain.dto.MailDto;
 import com.uriel.travel.domain.dto.user.UserRequestDto;
 import com.uriel.travel.domain.dto.user.UserResponseDto;
 import com.uriel.travel.service.MailService;

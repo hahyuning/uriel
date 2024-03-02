@@ -21,7 +21,7 @@ public class OrderResponseDto {
     public static class OrderInfo {
         String orderNumber;
 
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
         LocalDateTime orderDate;
 
         String reserveUser;
@@ -34,9 +34,9 @@ public class OrderResponseDto {
 
         String method;
 
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
         LocalDateTime startDate;
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
         LocalDateTime endDate;
 
         int adultCount;
@@ -57,7 +57,6 @@ public class OrderResponseDto {
                     .packageName(order.getProduct().getAPackage().getPackageName())
                     .productCode(order.getProduct().getProductCode())
                     .orderState(order.getOrderState().getViewName())
-                    .method(order.getMethod())
                     .startDate(order.getProduct().getStartDate())
                     .endDate(order.getProduct().getEndDate())
                     .adultCount(order.getAdultCount())
@@ -77,14 +76,14 @@ public class OrderResponseDto {
     public static class MyOrder {
         String orderNumber;
 
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
         LocalDateTime orderDate;
 
         String packageName;
 
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
         LocalDateTime startDate;
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
         LocalDateTime endDate;
 
         int totalCount;

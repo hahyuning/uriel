@@ -1,4 +1,4 @@
-package com.uriel.travel.domain.dto.user;
+package com.uriel.travel.domain.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

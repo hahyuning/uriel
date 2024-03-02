@@ -1,8 +1,7 @@
 package com.uriel.travel.Controller;
 
 import com.uriel.travel.Base.BaseResponse;
-import com.uriel.travel.domain.dto.filterCond.OrderFilter;
-import com.uriel.travel.domain.dto.order.OrderRequestDto;
+import com.uriel.travel.domain.dto.order.OrderFilter;
 import com.uriel.travel.domain.dto.order.OrderResponseDto;
 import com.uriel.travel.service.OrderService;
 import com.uriel.travel.util.SecurityUtil;
@@ -20,10 +19,10 @@ public class OrderController {
     private final OrderService orderService;
 
     // 주문 정보 등록 (테스트용)
-    @PostMapping("/test/create")
-    public BaseResponse<OrderResponseDto.OrderInfo> testCreateOrder(@RequestBody OrderRequestDto.Create requestDto) {
-        return BaseResponse.ok(orderService.testCreateOrder(requestDto));
-    }
+//    @PostMapping("/test/create")
+//    public BaseResponse<OrderResponseDto.OrderInfo> testCreateOrder(@RequestBody OrderRequestDto.Create requestDto) {
+//        return BaseResponse.ok(orderService.testCreateOrder(requestDto));
+//    }
 
     // 사용자 주문 목록 조회
     @GetMapping

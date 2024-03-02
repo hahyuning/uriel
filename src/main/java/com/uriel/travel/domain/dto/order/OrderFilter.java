@@ -1,5 +1,6 @@
-package com.uriel.travel.domain.dto.filterCond;
+package com.uriel.travel.domain.dto.order;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.querydsl.core.annotations.QueryProjection;
 import com.uriel.travel.domain.OrderState;
 import com.uriel.travel.domain.ProductState;
@@ -47,10 +48,15 @@ public class OrderFilter {
     public static class OrderFilterResponseDtoForAdmin {
 
         String orderNumber;
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
         LocalDateTime orderDate;
         String orderState;
 
         String packageName;
+        String productCode;
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
         LocalDateTime startDate;
 
         String reserveUserName;
@@ -62,12 +68,13 @@ public class OrderFilter {
         int balance;
 
         @QueryProjection
-        public OrderFilterResponseDtoForAdmin(String orderNumber, LocalDateTime orderDate, OrderState orderState, String packageName, LocalDateTime startDate,
+        public OrderFilterResponseDtoForAdmin(String orderNumber, LocalDateTime orderDate, OrderState orderState, String packageName, String productCode, LocalDateTime startDate,
                                               String reserveUserName, String phoneNumber, String email, int totalCount, int totalPrice, int payedPrice) {
             this.orderNumber = orderNumber;
             this.orderDate = orderDate;
             this.orderState = orderState.getViewName();
             this.packageName = packageName;
+            this.productCode = productCode;
             this.startDate = startDate;
             this.reserveUserName = reserveUserName;
             this.phoneNumber = phoneNumber;
@@ -84,10 +91,14 @@ public class OrderFilter {
     public static class OrderFilterResponseDto {
 
         String orderNumber;
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
         LocalDateTime orderDate;
         String orderState;
 
         String packageName;
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
         LocalDateTime startDate;
 
         int totalCount;

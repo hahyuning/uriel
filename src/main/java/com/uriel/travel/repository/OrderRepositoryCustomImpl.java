@@ -7,9 +7,9 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.uriel.travel.domain.Country;
 import com.uriel.travel.domain.OrderState;
 import com.uriel.travel.domain.SearchType;
-import com.uriel.travel.domain.dto.filterCond.OrderFilter;
-import com.uriel.travel.domain.dto.filterCond.QOrderFilter_OrderFilterResponseDto;
-import com.uriel.travel.domain.dto.filterCond.QOrderFilter_OrderFilterResponseDtoForAdmin;
+import com.uriel.travel.domain.dto.order.OrderFilter;
+import com.uriel.travel.domain.dto.order.QOrderFilter_OrderFilterResponseDto;
+import com.uriel.travel.domain.dto.order.QOrderFilter_OrderFilterResponseDtoForAdmin;
 import com.uriel.travel.domain.entity.QOrder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +19,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 @RequiredArgsConstructor
@@ -59,6 +60,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                         order.orderDate,
                         order.orderState,
                         order.product.aPackage.packageName,
+                        order.product.productCode,
                         order.product.startDate,
                         order.reserveUser.krName,
                         order.reserveUser.phoneNumber,
@@ -94,6 +96,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                         order.orderDate,
                         order.orderState,
                         order.product.aPackage.packageName,
+                        order.product.productCode,
                         order.product.startDate,
                         order.reserveUser.krName,
                         order.reserveUser.phoneNumber,
@@ -182,14 +185,16 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
             return null;
         }
 
-        if (SearchType.from(searchCond.getType()).equals(SearchType.RESERVE_USER)) {
+        if (Objects.equals(SearchType.from(searchCond.getType()), SearchType.RESERVE_USER)) {
             return order.reserveUser.krName.eq(searchCond.getTarget());
-        } else if (SearchType.from(searchCond.getType()).equals(SearchType.PHONE_NUMBER)) {
+        } else if (Objects.equals(SearchType.from(searchCond.getType()), SearchType.PHONE_NUMBER)) {
             return order.reserveUser.phoneNumber.eq(searchCond.getTarget());
-        } else if (SearchType.from(searchCond.getType()).equals(SearchType.EMAIL)) {
+        } else if (Objects.equals(SearchType.from(searchCond.getType()), SearchType.EMAIL)) {
             return order.reserveUser.email.eq(searchCond.getTarget());
-        } else if (SearchType.from(searchCond.getType()).equals(SearchType.ORDER_NUMBER)) {
+        } else if (Objects.equals(SearchType.from(searchCond.getType()), SearchType.ORDER_NUMBER)) {
             return order.orderNumber.eq(searchCond.getTarget());
+        } else if (Objects.equals(SearchType.from(searchCond.getType()), SearchType.PRODUCT_CODE)) {
+            return order.product.productCode.eq(searchCond.getTarget());
         }
 
         return null;

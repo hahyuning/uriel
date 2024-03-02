@@ -145,7 +145,7 @@ public class S3Service {
     // 파일 1개 업로드 (에디터)
     public ImageDto upload(MultipartFile file) {
 
-        String imagePath = "image/" + getFoldername();
+        String imagePath = "images/" + getFoldername();
 
         String originalImageName = file.getOriginalFilename();
         String ext = originalImageName.substring(originalImageName.indexOf(".") + 1); // 확장자
@@ -209,27 +209,36 @@ public class S3Service {
     }
 
     // 썸네일 복사
-    public void duplicateThumbnail(String originalImageName) {
+    public Thumbnail duplicateThumbnail(Thumbnail thumbnail) {
 
-        String newOriginalImageName = "";
+        String imagePath = "thumbnails/" + getFoldername();
+        String ext = thumbnail.getOriginalImageName().substring(thumbnail.getOriginalImageName().indexOf(".") + 1); // 확장자
+        String newUploadImageName = UUID.randomUUID().toString() + "." + ext;
+
+        String originalKey = thumbnail.getImagePath() + "/" + thumbnail.getUploadImageName();
+        String newKey = imagePath + "/" + newUploadImageName;
 
         try {
             //Copy 객체 생성
             CopyObjectRequest copyObjRequest = new CopyObjectRequest(
-                    this.bucket,
-                    originalImageName,
-                    this.bucket,
-                    newOriginalImageName
+                    bucket,
+                    originalKey,
+                    bucket,
+                    newKey
             );
             //Copy
             this.amazonS3Client.copyObject(copyObjRequest);
-
-            System.out.println(String.format("Finish copying [%s] to [%s]", originalImageName, newOriginalImageName));
 
         } catch (AmazonServiceException e) {
             e.printStackTrace();
         } catch (SdkClientException e) {
             e.printStackTrace();
         }
+
+        return Thumbnail.builder()
+                .originalImageName(thumbnail.getOriginalImageName())
+                .uploadImageName(newUploadImageName)
+                .imagePath(imagePath)
+                .imageUrl(amazonS3Client.getUrl(bucket, newKey).toString()).build();
     }
 }

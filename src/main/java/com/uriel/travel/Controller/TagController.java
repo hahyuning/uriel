@@ -1,8 +1,8 @@
 package com.uriel.travel.Controller;
 
 import com.uriel.travel.Base.BaseResponse;
-import com.uriel.travel.domain.dto.travelPackage.TagRequestDto;
-import com.uriel.travel.domain.dto.travelPackage.TagResponseDto;
+import com.uriel.travel.domain.dto.tag.TagRequestDto;
+import com.uriel.travel.domain.dto.tag.TagResponseDto;
 import com.uriel.travel.service.TagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
