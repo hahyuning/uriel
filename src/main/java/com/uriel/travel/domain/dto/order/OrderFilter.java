@@ -47,7 +47,7 @@ public class OrderFilter {
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class OrderFilterResponseDtoForAdmin {
 
-        String orderNumber;
+        String imomOrderId;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
         LocalDateTime orderDate;
@@ -55,33 +55,30 @@ public class OrderFilter {
 
         String packageName;
         String productCode;
+        String productState;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
         LocalDateTime startDate;
 
-        String reserveUserName;
+        String reserveUser;
         String phoneNumber;
         String email;
         int totalCount;
 
-        int payedPrice;
-        int balance;
-
         @QueryProjection
-        public OrderFilterResponseDtoForAdmin(String orderNumber, LocalDateTime orderDate, OrderState orderState, String packageName, String productCode, LocalDateTime startDate,
-                                              String reserveUserName, String phoneNumber, String email, int totalCount, int totalPrice, int payedPrice) {
-            this.orderNumber = orderNumber;
+        public OrderFilterResponseDtoForAdmin(String imomOrderId, LocalDateTime orderDate, OrderState orderState, String packageName, String productCode, ProductState productState, LocalDateTime startDate,
+                                              String reserveUser, String phoneNumber, String email, int totalCount) {
+            this.imomOrderId = imomOrderId;
             this.orderDate = orderDate;
             this.orderState = orderState.getViewName();
             this.packageName = packageName;
             this.productCode = productCode;
+            this.productState = productState.getViewName();
             this.startDate = startDate;
-            this.reserveUserName = reserveUserName;
+            this.reserveUser = reserveUser;
             this.phoneNumber = phoneNumber;
             this.email = email;
             this.totalCount = totalCount;
-            this.payedPrice = payedPrice;
-            this.balance = totalPrice - payedPrice;
         }
     }
 
@@ -90,7 +87,7 @@ public class OrderFilter {
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class OrderFilterResponseDto {
 
-        String orderNumber;
+        String imomOrderId;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
         LocalDateTime orderDate;
@@ -105,9 +102,9 @@ public class OrderFilter {
         String productState;
 
         @QueryProjection
-        public OrderFilterResponseDto(String orderNumber, LocalDateTime orderDate, OrderState orderState,
+        public OrderFilterResponseDto(String imomOrderId, LocalDateTime orderDate, OrderState orderState,
                                       String packageName, LocalDateTime startDate, int totalCount, ProductState productState) {
-            this.orderNumber = orderNumber;
+            this.imomOrderId = imomOrderId;
             this.orderDate = orderDate;
             this.orderState = orderState.getViewName();
             this.packageName = packageName;

@@ -33,7 +33,7 @@ public class PackageRepositoryCustomImpl implements PackageRepositoryCustom {
 
     @Override
     public List<PackageFilter.PackageFilterResponseDto> searchPackageByFilter(PackageFilter.PackageFilterCond filterCond) {
-        List<PackageFilter.PackageFilterResponseDto> packageList = jpaQueryFactory
+        return jpaQueryFactory
                 .select(new QPackageFilter_PackageFilterResponseDto(
                         aPackage.id,
                         aPackage.packageName,
@@ -49,18 +49,6 @@ public class PackageRepositoryCustomImpl implements PackageRepositoryCustom {
                         .and(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(seasonIn(filterCond))))
                         .and(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(priceIn(filterCond)))))
                 .fetch();
-
-        Long count = jpaQueryFactory
-                .select(aPackage.count())
-                .from(aPackage)
-                .where(aPackage.isPublic.eq(Release.PUBLIC)
-                        .and(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(themeIn(filterCond))))
-                        .and(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(familyIn(filterCond))))
-                        .and(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(seasonIn(filterCond))))
-                        .and(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(priceIn(filterCond)))))
-                .fetchOne();
-
-        return packageList;
     }
 
     @Override

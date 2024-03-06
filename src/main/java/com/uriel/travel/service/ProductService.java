@@ -2,10 +2,10 @@ package com.uriel.travel.service;
 
 import com.uriel.travel.domain.SaveState;
 import com.uriel.travel.domain.dto.ImageDto;
-import com.uriel.travel.domain.dto.product.ProductFilter;
-import com.uriel.travel.domain.dto.travelPackage.PackageResponseDto;
 import com.uriel.travel.domain.dto.product.ProductDetailResponseDto;
+import com.uriel.travel.domain.dto.product.ProductFilter;
 import com.uriel.travel.domain.dto.product.ProductRequestDto;
+import com.uriel.travel.domain.dto.travelPackage.PackageResponseDto;
 import com.uriel.travel.domain.entity.Package;
 import com.uriel.travel.domain.entity.*;
 import com.uriel.travel.exception.CustomNotFoundException;
@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -171,6 +172,13 @@ public class ProductService {
         return productRepositoryCustom.searchByPackage(filterCond, pageRequest);
     }
 
+    public List<ProductFilter.ProductTwoMonthDate> getTowMothData(ProductFilter.ProductFilterCond filterCond) {
+        filterCond.setStartDateTimeMin(LocalDateTime.now());
+        filterCond.setStartDateTimeMax(LocalDateTime.now().plusMonths(2));
+
+        return productRepositoryCustom.getTwoMonthProduct(filterCond);
+    }
+
     // 상품 상세 조회
     public ProductDetailResponseDto productDetail(Long productId) {
         // 상품 조회
@@ -215,6 +223,7 @@ public class ProductService {
     // 관리자용 상품 목록 조회
     public Page<ProductFilter.ProductFilterForAdminResponseDto> searchForAdmin(ProductFilter.ProductFilterCond filterCond) {
         PageRequest pageRequest = PageRequest.of(filterCond.getOffset(), filterCond.getLimit());
+
         return productRepositoryCustom.searchForAdmin(filterCond, pageRequest);
     }
 

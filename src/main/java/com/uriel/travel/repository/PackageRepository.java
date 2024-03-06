@@ -16,4 +16,7 @@ public interface PackageRepository extends JpaRepository<Package,Long> {
 
     @Query("select p from Package p where p.isPublic = '공개'")
     List<Package> findAllByIsPublic();
+
+    @Query("select p from Package p order by p.packageName asc")
+    List<Package> findAllPackageNames();
 }

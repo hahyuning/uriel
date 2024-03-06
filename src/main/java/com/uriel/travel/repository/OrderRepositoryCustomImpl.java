@@ -32,7 +32,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     public List<OrderFilter.OrderFilterResponseDto> findByReserveUser(OrderFilter.OrderFilterCond filterCond, String reserveUserEmail, Pageable pageable) {
         return jpaQueryFactory
                 .select(new QOrderFilter_OrderFilterResponseDto(
-                        order.orderNumber,
+                        order.imomOrderId,
                         order.orderDate,
                         order.orderState,
                         order.product.aPackage.packageName,
@@ -56,18 +56,17 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     public Page<OrderFilter.OrderFilterResponseDtoForAdmin> searchOrder(OrderFilter.OrderSearchCond searchCond, Pageable pageable) {
         List<OrderFilter.OrderFilterResponseDtoForAdmin> orderList = jpaQueryFactory
                 .select(new QOrderFilter_OrderFilterResponseDtoForAdmin(
-                        order.orderNumber,
+                        order.imomOrderId,
                         order.orderDate,
                         order.orderState,
                         order.product.aPackage.packageName,
                         order.product.productCode,
+                        order.product.productState,
                         order.product.startDate,
                         order.reserveUser.krName,
                         order.reserveUser.phoneNumber,
                         order.reserveUser.email,
-                        order.totalCount,
-                        order.totalPrice,
-                        order.payedPrice
+                        order.totalCount
                 ))
                 .from(order)
                 .where(
@@ -92,18 +91,17 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     public Page<OrderFilter.OrderFilterResponseDtoForAdmin> ordersByFilter(OrderFilter.OrderFilterCond filterCond, Pageable pageable) {
         List<OrderFilter.OrderFilterResponseDtoForAdmin> orderList = jpaQueryFactory
                 .select(new QOrderFilter_OrderFilterResponseDtoForAdmin(
-                        order.orderNumber,
+                        order.imomOrderId,
                         order.orderDate,
                         order.orderState,
                         order.product.aPackage.packageName,
                         order.product.productCode,
+                        order.product.productState,
                         order.product.startDate,
                         order.reserveUser.krName,
                         order.reserveUser.phoneNumber,
                         order.reserveUser.email,
-                        order.totalCount,
-                        order.totalPrice,
-                        order.payedPrice
+                        order.totalCount
                 ))
                 .from(order)
                 .where(
@@ -191,8 +189,8 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
             return order.reserveUser.phoneNumber.eq(searchCond.getTarget());
         } else if (Objects.equals(SearchType.from(searchCond.getType()), SearchType.EMAIL)) {
             return order.reserveUser.email.eq(searchCond.getTarget());
-        } else if (Objects.equals(SearchType.from(searchCond.getType()), SearchType.ORDER_NUMBER)) {
-            return order.orderNumber.eq(searchCond.getTarget());
+        } else if (Objects.equals(SearchType.from(searchCond.getType()), SearchType.IMOM_ORDER_ID)) {
+            return order.imomOrderId.eq(searchCond.getTarget());
         } else if (Objects.equals(SearchType.from(searchCond.getType()), SearchType.PRODUCT_CODE)) {
             return order.product.productCode.eq(searchCond.getTarget());
         }

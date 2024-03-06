@@ -81,6 +81,14 @@ public class ProductController {
         return BaseResponse.ok(productService.searchByPackage(filterCond));
     }
 
+    // 패키지 별 상품 목록 조회
+    @GetMapping("/search/{packageId}")
+    public BaseResponse<List<ProductFilter.ProductTwoMonthDate>> getTowMonthData(@PathVariable Long packageId) {
+        ProductFilter.ProductFilterCond filterCond = new ProductFilter.ProductFilterCond();
+        filterCond.setPackageId(packageId);
+        return BaseResponse.ok(productService.getTowMothData(filterCond));
+    }
+
     // 상품 상세확인
     @GetMapping("/{productId}")
     public BaseResponse<ProductDetailResponseDto> productDetail(@PathVariable Long productId) {

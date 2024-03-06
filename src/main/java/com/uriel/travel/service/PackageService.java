@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -263,5 +264,13 @@ public class PackageService {
         return packageRepository.findById(packageId)
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND));
+    }
+
+    // 전체 패키지 목록
+    public List<PackageResponseDto.PackageInfoSimple> getAllPackagesSimple() {
+        return packageRepository.findAllPackageNames()
+                .stream()
+                .map(PackageResponseDto.PackageInfoSimple::new)
+                .collect(Collectors.toList());
     }
 }

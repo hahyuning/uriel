@@ -19,12 +19,17 @@ import java.util.List;
 @Table(name = "ORDERS")
 public class Order extends BaseTimeEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "order_id")
+//    @Id @GeneratedValue(strategy = GenerationType.UUID)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @Column(name = "imom_order_id")
     Long id;
 
-    String orderNumber;  // toss 응답 -> orderId
+    String imomOrderId;
+
+    @Builder.Default
+    @ElementCollection
+    @CollectionTable(name = "ORDER_NUMBER", joinColumns = @JoinColumn(name = "imom_order_id"))
+    List<String> orderNumberList = new ArrayList<>();  // toss 응답 -> orderId
 
     LocalDateTime orderDate; // toss 응답 -> approveAt
 
@@ -45,10 +50,10 @@ public class Order extends BaseTimeEntity {
     int totalCount = 0; // 여행자 변경 시 변경 필요
 
     @Builder.Default
-    int totalPrice = 0; // 상품 수정 시 변경되어야 함
+    Long totalPrice = 0L; // 상품 수정 시 변경되어야 함
 
     @Builder.Default
-    int payedPrice = 0; // 결제 완료한 금액
+    Long payedPrice = 0L; // 결제 완료한 금액
 
     OrderState orderState;
 
@@ -61,11 +66,6 @@ public class Order extends BaseTimeEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Traveler> travelerList = new ArrayList<>();
 
-    @Builder.Default
-    @JsonIgnore
-    @OneToMany(mappedBy = "order")
-    List<Payment> payments = new ArrayList<>();
-
     public void setProduct(Product product) {
         this.product = product;
     }
@@ -75,15 +75,19 @@ public class Order extends BaseTimeEntity {
         user.getOrderList().add(this);
     }
 
-    public void fullPayment(int totalAmount) {
+    public void additionalPayment(Long totalAmount) {
         this.payedPrice += totalAmount;
 
         if (this.payedPrice > this.totalPrice) {
             this.orderState = OrderState.REFUND_NEEDED;
         } else if (this.payedPrice < this.totalPrice) {
-            this.orderState = OrderState.NEEDED_ADDITIONAL_PAYMENT;
+            this.orderState = OrderState.PAYMENT_NEEDED;
         } else {
-            this.orderState = OrderState.FULL_PAYMENT;
+            this.orderState = OrderState.COMPLETED;
         }
+    }
+
+    public void addOrderNumber(String orderNumber) {
+        this.orderNumberList.add(orderNumber);
     }
 }

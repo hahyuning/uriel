@@ -25,9 +25,9 @@ public enum Gender {
     }
 
     public static Gender mapToGender(String genderString) {
-        if ("M".equalsIgnoreCase(genderString)) {
+        if ("M".equalsIgnoreCase(genderString) || "male".equalsIgnoreCase(genderString)) {
             return Gender.MALE;
-        } else if ("F".equalsIgnoreCase(genderString)) {
+        } else if ("F".equalsIgnoreCase(genderString) || "female".equalsIgnoreCase(genderString)) {
             return Gender.FEMALE;
         } else {
             return Gender.OTHER;

@@ -4,10 +4,7 @@ import com.uriel.travel.domain.dto.ImageDto;
 import com.uriel.travel.domain.dto.tag.TagResponseDto;
 import com.uriel.travel.domain.entity.Package;
 import com.uriel.travel.domain.entity.Schedule;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
@@ -109,6 +106,20 @@ public class PackageResponseDto {
                         .vehicle(schedule.getVehicle())
                         .build();
             }
+        }
+    }
+
+    @Getter
+    @AllArgsConstructor
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class PackageInfoSimple {
+
+        Long packageId;
+        String packageName;
+
+        public PackageInfoSimple(Package aPackage) {
+            this.packageId = aPackage.getId();
+            this.packageName = aPackage.getPackageName();
         }
     }
 }

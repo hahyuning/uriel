@@ -47,10 +47,10 @@ public class OrderService {
 
     // 주문 정보 상세 조회
     @Transactional(readOnly = true)
-    public OrderResponseDto.OrderInfo getOrderInfo(String orderNumber) {
-        OrderResponseDto.OrderInfo orderResponseDto = OrderResponseDto.OrderInfo.of(orderRepository.findByOrderNumber(orderNumber));
+    public OrderResponseDto.OrderInfo getOrderInfo(String imomOrderId) {
+        OrderResponseDto.OrderInfo orderResponseDto = OrderResponseDto.OrderInfo.of(orderRepository.findByImomOrderId(imomOrderId));
 
-        List<Traveler> travelerList = travelerRepository.findByorderNumber(orderNumber);
+        List<Traveler> travelerList = travelerRepository.findByImomOrderId(imomOrderId);
         List<TravelerInfo> travelerInfos = travelerList.stream().map(TravelerInfo::new).collect(Collectors.toList());
         orderResponseDto.setTravelerInfos(travelerInfos);
 
@@ -72,20 +72,21 @@ public class OrderService {
     }
 
     // 주문 등록 (토스 연동)
-    public String createOrder(JSONObject jsonObject, OrderRequestDto.Create requestDto, String email) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public void createOrder(JSONObject jsonObject, OrderRequestDto.Create requestDto, String email) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
 
         Order order = Order.builder()
-                .orderNumber(jsonObject.get("orderId").toString())
-                .orderDate(LocalDateTime.parse(jsonObject.get("approvedAt").toString(), formatter))
+                .orderDate(LocalDateTime.parse((String) jsonObject.get("approvedAt"), formatter))
                 .adultCount(requestDto.getAdultCount())
                 .childCount(requestDto.getChildCount())
                 .infantCount(requestDto.getChildCount())
                 .totalCount(requestDto.getTotalCount())
                 .totalPrice(requestDto.getTotalPrice())
-                .payedPrice(Integer.parseInt(jsonObject.get("totalAmount").toString()))
-                .orderState(OrderState.PARTIAL_PAYMENT)
+                .payedPrice((Long) jsonObject.get("totalAmount"))
+                .orderState(OrderState.RESERVED)
                 .build();
+
+        order.addOrderNumber((String) jsonObject.get("orderId"));
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
@@ -96,7 +97,7 @@ public class OrderService {
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND));
         order.setProduct(product);
-        Order savedOrder = orderRepository.save(order);
+        orderRepository.save(order);
 
         requestDto.getTravelerInfoList()
                 .forEach(travelerInfo -> {
@@ -104,15 +105,18 @@ public class OrderService {
                     traveler.setOrder(order);
                     travelerRepository.save(traveler);
                 });
-
-        return savedOrder.getOrderNumber();
     }
 
     // 잔금 완납
-    public void fullPayment(JSONObject jsonObject) {
-        String orderNumber = jsonObject.get("orderId").toString();
-        Order order = orderRepository.findByOrderNumber(orderNumber);
+    public void additionalPayment(JSONObject jsonObject, OrderRequestDto.AdditionalPayment requestDto) {
+        Order order = orderRepository.findByImomOrderId(requestDto.getImomOrderId());
 
-        order.fullPayment((Integer.parseInt(jsonObject.get("totalAmount").toString())));
+        order.addOrderNumber((String) jsonObject.get("orderId"));
+        order.additionalPayment((Long) jsonObject.get("totalAmount"));
+    }
+
+    // 여행자 정보 변경
+    public void updateTravelers(OrderRequestDto.UpdateTraveler requestDto) {
+
     }
 }

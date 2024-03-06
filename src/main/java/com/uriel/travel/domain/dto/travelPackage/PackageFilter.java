@@ -23,9 +23,6 @@ public class PackageFilter {
         List<Long> familyList;
         List<Long> priceList;
         List<Long> seasonList;
-
-        int offset;
-        int limit;
     }
 
     @Getter

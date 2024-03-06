@@ -50,10 +50,13 @@ public class User implements UserDetails {
     String childName;
 
     @Enumerated(EnumType.STRING)
-    Role role;
+    @Builder.Default
+    Role role = Role.ROLE_USER;
 
     @Enumerated(EnumType.STRING)
     SocialType socialType;
+
+    String socialId;
 
     @Builder.Default
     @JsonIgnore
