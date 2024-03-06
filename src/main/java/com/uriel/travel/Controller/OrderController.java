@@ -2,6 +2,7 @@ package com.uriel.travel.Controller;
 
 import com.uriel.travel.Base.BaseResponse;
 import com.uriel.travel.domain.dto.order.OrderFilter;
+import com.uriel.travel.domain.dto.order.OrderRequestDto;
 import com.uriel.travel.domain.dto.order.OrderResponseDto;
 import com.uriel.travel.service.OrderService;
 import com.uriel.travel.util.SecurityUtil;
@@ -46,5 +47,12 @@ public class OrderController {
     @GetMapping("/search")
     public BaseResponse<Page<OrderFilter.OrderFilterResponseDtoForAdmin>> orderSearchForAdmin(@ModelAttribute OrderFilter.OrderSearchCond searchCond) {
         return BaseResponse.ok(orderService.orderSearch(searchCond));
+    }
+
+    // 여행자 정보 수정
+    @PostMapping("/update/travelers")
+    public BaseResponse<Void> updateTravelers(@RequestBody OrderRequestDto.UpdateTraveler requestDto) {
+        orderService.updateTravelers(requestDto);
+        return BaseResponse.ok();
     }
 }

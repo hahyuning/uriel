@@ -1,51 +1,70 @@
 package com.uriel.travel.config;
 
-import com.uriel.travel.jwt.JwtFilter;
-import com.uriel.travel.jwt.TokenProvider;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.uriel.travel.jwt.JwtAuthenticationFilter;
+import com.uriel.travel.jwt.JwtTokenProvider;
+import com.uriel.travel.jwt.JwtVerificationFilter;
+import com.uriel.travel.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @EnableWebSecurity
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final TokenProvider tokenProvider;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final RedisService redisService;
     private final CorsConfig corsConfig;
+//    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 //    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 //    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
-
-    // 패스워드 인코더
-    @Bean
-    public BCryptPasswordEncoder encoder(){
-        return new BCryptPasswordEncoder();
-    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // CSRF 설정 Disable
-        return http.csrf().disable()
-                .httpBasic().disable()
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
                 .addFilter(corsConfig.corsFilter())
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionManagement((session) -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .apply(new CustomFilterConfigurer())
                 .and()
-                .authorizeHttpRequests()
-                // 해당 API에 대해서는 모든 요청을 허가
-                .requestMatchers("/**").permitAll()
-//                // USER 권한이 있어야 요청할 수 있음
-//                .requestMatchers("/members/test").hasRole("USER")
-                // 이 밖에 모든 요청에 대해서 인증을 필요로 한다는 설정
-                .anyRequest().authenticated()
-                .and()
+                .authorizeHttpRequests((authorizeRequests) -> authorizeRequests
+                        .requestMatchers("/**").permitAll()
+                        .anyRequest().authenticated());
+//                .oauth2Login((oauth2) -> oauth2
+//                        .successHandler(oAuth2LoginSuccessHandler)
+//                        .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint
+//                                .userService(customOAuth2UserService)));
+
                 // JWT 인증을 위하여 직접 구현한 필터를 UsernamePasswordAuthenticationFilter 전에 실행
-                .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class).build();
+        return http.build();
+    }
+
+    public class CustomFilterConfigurer extends AbstractHttpConfigurer<CustomFilterConfigurer, HttpSecurity> {
+        @Override
+        public void configure(HttpSecurity builder) throws Exception {
+
+            AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
+            JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager, jwtTokenProvider, redisService, new ObjectMapper());
+            JwtVerificationFilter jwtVerificationFilter = new JwtVerificationFilter(redisService, jwtTokenProvider);
+
+            jwtAuthenticationFilter.setFilterProcessesUrl("/auth/login");
+//            jwtAuthenticationFilter.setAuthenticationSuccessHandler(new LoginSuccessHandler());
+//            jwtAuthenticationFilter.setAuthenticationFailureHandler(new LoginFailurHandler());
+
+            builder
+                    .addFilter(jwtAuthenticationFilter)
+                    .addFilterAfter(jwtVerificationFilter, JwtAuthenticationFilter.class);
+        }
     }
 }

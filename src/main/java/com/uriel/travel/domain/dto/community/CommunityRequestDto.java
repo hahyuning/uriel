@@ -22,7 +22,7 @@ public class CommunityRequestDto {
 
 
         public Posts toEntity() {
-            if (type.equals("blog")) {
+            if (type.equals("여행이야기")) {
                 return Posts.builder()
                         .postType(PostType.BLOG)
                         .title(title)
@@ -32,7 +32,7 @@ public class CommunityRequestDto {
                         .build();
             } else {
                 return Posts.builder()
-                        .postType(PostType.NOTICE)
+                        .postType(PostType.from(type))
                         .title(title)
                         .contentHtml(contentHtml)
                         .contentMd(contentMd)

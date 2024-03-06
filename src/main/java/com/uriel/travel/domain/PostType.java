@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum PostType {
-    NOTICE("공지사항"), BLOG("여행이야기");
+    NOTICE("공지사항"), BLOG("여행이야기"), QNA("자주묻는질문");
 
     private final String viewName;
 

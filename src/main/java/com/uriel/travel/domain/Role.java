@@ -8,14 +8,12 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum Role {
-    ROLE_ADMIN("ADMIN"), ROLE_USER("USER");
-
-    private final String viewName;
+    ROLE_ADMIN, ROLE_USER, ROLE_GUEST;
 
     @JsonCreator
     public static Role from(String sub) {
         for (Role authority : Role.values()) {
-            if (authority.getViewName().equals(sub)) {
+            if (authority.toString().equals(sub)) {
                 return authority;
             }
         }

@@ -37,7 +37,7 @@ public class Posts extends BaseTimeEntity {
         this.contentHtml = requestDto.getContentHtml();
         this.contentMd = requestDto.getContentMd();
 
-        if (requestDto.getType().equals("blog")) {
+        if (requestDto.getType().equals("여행이야기")) {
             this.blogUrl = requestDto.getBlogUrl();
         }
     }

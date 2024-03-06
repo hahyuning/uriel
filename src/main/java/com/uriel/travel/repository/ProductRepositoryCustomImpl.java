@@ -10,6 +10,7 @@ import com.uriel.travel.domain.SaveState;
 import com.uriel.travel.domain.dto.product.ProductFilter;
 import com.uriel.travel.domain.dto.product.QProductFilter_ProductFilterForAdminResponseDto;
 import com.uriel.travel.domain.dto.product.QProductFilter_ProductFilterResponseDto;
+import com.uriel.travel.domain.dto.product.QProductFilter_ProductTwoMonthDate;
 import com.uriel.travel.domain.entity.QProduct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,6 +82,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 .from(product)
                 .where(
                         product.isPublic.eq(Release.PUBLIC),
+                        product.saveState.eq(SaveState.SAVED),
                         startDateAfter(),
                         packageIdEq(filterCond)
                 )
@@ -92,11 +95,31 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 .select(product.count())
                 .from(product)
                 .where(
+                        product.isPublic.eq(Release.PUBLIC),
+                        product.saveState.eq(SaveState.SAVED),
                         startDateAfter(),
                         packageIdEq(filterCond))
                 .fetchOne();
 
         return new PageImpl<>(productList, pageable, count);
+    }
+
+    @Override
+    public List<ProductFilter.ProductTwoMonthDate> getTwoMonthProduct(ProductFilter.ProductFilterCond filterCond) {
+        return jpaQueryFactory
+                .select(new QProductFilter_ProductTwoMonthDate(
+                        product.id,
+                        product.startDate
+                ))
+                .from(product)
+                .where(
+                        product.isPublic.eq(Release.PUBLIC),
+                        product.saveState.eq(SaveState.SAVED),
+                        startDateBtw(filterCond),
+                        packageIdEq(filterCond)
+                )
+                .orderBy(product.startDate.asc())
+                .fetch();
     }
 
     @Override
@@ -160,7 +183,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     private BooleanExpression startDateBtw(ProductFilter.ProductFilterCond filterCond) {
 
         if (filterCond.getStartDateMax() == null || filterCond.getStartDateMin() == null)  return null;
-        return product.startDate.between(filterCond.getStartDateMin(), filterCond.getStartDateMax());
+        return product.startDate.between(filterCond.getStartDateMin().atStartOfDay(), filterCond.getStartDateMax().atTime(LocalTime.MAX));
 
     }
 

@@ -10,9 +10,9 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class TokenDto {
+public class JwtToken {
 
-    String grantType;
     String accessToken;
     String refreshToken;
+    Long accessTokenExpiresIn;
 }

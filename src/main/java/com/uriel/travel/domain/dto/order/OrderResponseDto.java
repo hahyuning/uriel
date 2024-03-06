@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,24 +20,25 @@ public class OrderResponseDto {
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class OrderInfo {
-        String orderNumber;
+        String imomOrderId;
 
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime orderDate;
 
         String reserveUser;
+        LocalDate birth;
+        String gender;
+        String email;
+        String phoneNumber;
 
         String packageName;
-
         String productCode;
 
         String orderState;
 
-        String method;
-
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime startDate;
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime endDate;
 
         int adultCount;
@@ -44,16 +46,21 @@ public class OrderResponseDto {
         int infantCount;
         int totalCount;
 
-        int payedPrice;
-        int balance;
+        Long totalPrice;
+        Long payedPrice;
+        Long balance;
 
         List<TravelerInfo> travelerInfos;
 
         public static OrderInfo of(Order order) {
             return OrderInfo.builder()
-                    .orderNumber(order.getOrderNumber())
+                    .imomOrderId(order.getImomOrderId())
                     .orderDate(order.getOrderDate())
                     .reserveUser(order.getReserveUser().getKrName())
+                    .birth(order.getReserveUser().getBirth())
+                    .gender(order.getReserveUser().getGender().getViewName())
+                    .email(order.getReserveUser().getEmail())
+                    .phoneNumber(order.getReserveUser().getPhoneNumber())
                     .packageName(order.getProduct().getAPackage().getPackageName())
                     .productCode(order.getProduct().getProductCode())
                     .orderState(order.getOrderState().getViewName())
@@ -63,6 +70,7 @@ public class OrderResponseDto {
                     .childCount(order.getChildCount())
                     .infantCount(order.getInfantCount())
                     .totalCount(order.getTotalCount())
+                    .totalPrice(order.getTotalPrice())
                     .payedPrice(order.getPayedPrice())
                     .balance(order.getTotalPrice() - order.getPayedPrice())
                     .build();
@@ -74,16 +82,16 @@ public class OrderResponseDto {
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class MyOrder {
-        String orderNumber;
+        String imomOrderId;
 
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime orderDate;
 
         String packageName;
 
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime startDate;
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime endDate;
 
         int totalCount;
@@ -93,7 +101,7 @@ public class OrderResponseDto {
 
         public static MyOrder of(Order order) {
             return MyOrder.builder()
-                    .orderNumber(order.getOrderNumber())
+                    .imomOrderId(order.getImomOrderId())
                     .orderDate(order.getOrderDate())
                     .packageName(order.getProduct().getAPackage().getPackageName())
                     .startDate(order.getProduct().getStartDate())

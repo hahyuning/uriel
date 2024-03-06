@@ -174,4 +174,10 @@ public class PackageController {
         packageService.duplicatePackage(packageId);
         return BaseResponse.ok();
     }
+
+    // 패키지 전체 조회 (심플 ver 드롭다운용)
+    @GetMapping("/simple")
+    public BaseResponse<List<PackageResponseDto.PackageInfoSimple>> getAllPackagesSimple() {
+        return BaseResponse.ok(packageService.getAllPackagesSimple());
+    }
 }

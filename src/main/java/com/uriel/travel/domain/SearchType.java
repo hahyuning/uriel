@@ -11,7 +11,7 @@ public enum SearchType implements CodedEnum<String> {
     RESERVE_USER("예약자명"),
     PHONE_NUMBER("핸드폰"),
     EMAIL("이메일"),
-    ORDER_NUMBER("주문번호"),
+    IMOM_ORDER_ID("주문번호"),
     PRODUCT_CODE("상품코드");
 
     private final String viewName;

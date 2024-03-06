@@ -11,9 +11,12 @@ import java.util.List;
 @Repository
 public interface PackageRepository extends JpaRepository<Package,Long> {
 
-    @Query("select p from Package p where p.country =:country and p.isPublic = '공개'")
+    @Query("select p from Package p where p.country =:country and p.isPublic = '공개' and p.saveState = '저장'")
     List<Package> findByCountry(Country country);
 
-    @Query("select p from Package p where p.isPublic = '공개'")
+    @Query("select p from Package p where p.isPublic = '공개' and p.saveState = '저장'")
     List<Package> findAllByIsPublic();
+
+    @Query("select p from Package p order by p.packageName asc")
+    List<Package> findAllPackageNames();
 }

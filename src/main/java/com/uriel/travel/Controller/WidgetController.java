@@ -2,12 +2,9 @@ package com.uriel.travel.Controller;
 
 import com.uriel.travel.domain.dto.order.OrderRequestDto;
 import com.uriel.travel.service.OrderService;
-import com.uriel.travel.service.TossService;
-import com.uriel.travel.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -30,31 +27,18 @@ import java.util.Base64;
 public class WidgetController {
 
     private final OrderService orderService;
-    private final TossService tossService;
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     // 예약금 결제
     @RequestMapping(value = "/confirm")
-    public ResponseEntity<JSONObject> confirmPayment(@RequestBody String jsonBody) throws Exception {
+    public ResponseEntity<JSONObject> confirmPayment(@RequestBody OrderRequestDto.Create requestDto) throws Exception {
 
         JSONParser parser = new JSONParser();
-        String orderId;
-        String amount;
-        String paymentKey;
-        try {
-            // 클라이언트에서 받은 JSON 요청 바디입니다.
-            JSONObject requestData = (JSONObject) parser.parse(jsonBody);
-            paymentKey = (String) requestData.get("paymentKey");
-            orderId = (String) requestData.get("orderId");
-            amount = (String) requestData.get("amount");
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        };
         JSONObject obj = new JSONObject();
-        obj.put("orderId", orderId);
-        obj.put("amount", amount);
-        obj.put("paymentKey", paymentKey);
+        obj.put("orderId", requestDto.getOrderId());
+        obj.put("amount", requestDto.getAmount());
+        obj.put("paymentKey", requestDto.getPaymentKey());
 
         // 토스페이먼츠 API는 시크릿 키를 사용자 ID로 사용하고, 비밀번호는 사용하지 않습니다.
         // 비밀번호가 없다는 것을 알리기 위해 시크릿 키 뒤에 콜론을 추가합니다.
@@ -83,25 +67,7 @@ public class WidgetController {
         Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
         JSONObject jsonObject = (JSONObject) parser.parse(reader); // payment 객체?????
 
-        try {
-            // 클라이언트에서 받은 JSON 요청 바디입니다.
-            JSONObject requestData = (JSONObject) parser.parse(jsonBody);
-
-            OrderRequestDto.Create requestDto = OrderRequestDto.Create.builder()
-                    .productId(Long.parseLong(requestData.get("productId").toString()))
-                    .adultCount(Integer.parseInt(requestData.get("totalAmount").toString()))
-                    .childCount(Integer.parseInt(requestData.get("childCount").toString()))
-                    .infantCount(Integer.parseInt(requestData.get("infantCount").toString()))
-                    .totalCount(Integer.parseInt(requestData.get("totalCount").toString()))
-                    .totalPrice(Integer.parseInt(requestData.get("totalPrice").toString()))
-                    .build();
-
-            String orderNumber = orderService.createOrder(jsonObject, requestDto, SecurityUtil.getCurrentUsername());
-            tossService.createPayment(orderNumber, jsonObject);
-
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        };
+        orderService.createOrder(jsonObject, requestDto, "hahyuning@naver.com");
 
         responseStream.close();
 
@@ -110,25 +76,13 @@ public class WidgetController {
 
     // 잔금 완납
     @RequestMapping(value = "/confirm/full")
-    public ResponseEntity<JSONObject> confirmFullPayment(@RequestBody String jsonBody) throws Exception {
+    public ResponseEntity<JSONObject> confirmFullPayment(@RequestBody OrderRequestDto.AdditionalPayment requestDto) throws Exception {
 
         JSONParser parser = new JSONParser();
-        String orderId;
-        String amount;
-        String paymentKey;
-        try {
-            // 클라이언트에서 받은 JSON 요청 바디입니다.
-            JSONObject requestData = (JSONObject) parser.parse(jsonBody);
-            paymentKey = (String) requestData.get("paymentKey");
-            orderId = (String) requestData.get("orderId");
-            amount = (String) requestData.get("amount");
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        };
         JSONObject obj = new JSONObject();
-        obj.put("orderId", orderId);
-        obj.put("amount", amount);
-        obj.put("paymentKey", paymentKey);
+        obj.put("orderId", requestDto.getOrderId());
+        obj.put("amount", requestDto.getAmount());
+        obj.put("paymentKey", requestDto.getPaymentKey());
 
         // 토스페이먼츠 API는 시크릿 키를 사용자 ID로 사용하고, 비밀번호는 사용하지 않습니다.
         // 비밀번호가 없다는 것을 알리기 위해 시크릿 키 뒤에 콜론을 추가합니다.
@@ -157,14 +111,10 @@ public class WidgetController {
         Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
         JSONObject jsonObject = (JSONObject) parser.parse(reader); // payment 객체?????
 
-        orderService.fullPayment(jsonObject);
-        tossService.createPayment(jsonObject.get("orderId").toString(), jsonObject);
+        orderService.additionalPayment(jsonObject, requestDto);
 
         responseStream.close();
 
         return ResponseEntity.status(code).body(jsonObject);
     }
-
-    // 결제 취소
-
 }

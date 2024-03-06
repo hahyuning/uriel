@@ -2,10 +2,10 @@ package com.uriel.travel.service;
 
 import com.uriel.travel.domain.SaveState;
 import com.uriel.travel.domain.dto.ImageDto;
-import com.uriel.travel.domain.dto.product.ProductFilter;
-import com.uriel.travel.domain.dto.travelPackage.PackageResponseDto;
 import com.uriel.travel.domain.dto.product.ProductDetailResponseDto;
+import com.uriel.travel.domain.dto.product.ProductFilter;
 import com.uriel.travel.domain.dto.product.ProductRequestDto;
+import com.uriel.travel.domain.dto.travelPackage.PackageResponseDto;
 import com.uriel.travel.domain.entity.Package;
 import com.uriel.travel.domain.entity.*;
 import com.uriel.travel.exception.CustomNotFoundException;
@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -36,6 +37,7 @@ public class ProductService {
     private final ProductRepositoryCustomImpl productRepositoryCustom;
     private final ThumbnailRepository thumbnailRepository;
     private final ScheduleRepository scheduleRepository;
+    private final OrderRepository orderRepository;
 
     // 상품 등록
     public Long create(ProductRequestDto.Create requestDto) {
@@ -83,9 +85,11 @@ public class ProductService {
 
     // 상품 수정
     public void update(ProductRequestDto.Update requestDto, Long productId) {
+
         Product product = productRepository.findById(productId)
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND));
+
 
         // 패키지 수정
         if (!Objects.equals(product.getAPackage().getId(), requestDto.getPackageId())) {
@@ -96,6 +100,35 @@ public class ProductService {
         product.update(requestDto);
 
         ProductDetail productDetail = productDetailRepository.findByProductId(productId);
+
+        int adultPrice = productDetail.getAdultPrice();
+        int adultSurcharge = productDetail.getAdultSurcharge();
+        int childPrice = productDetail.getChildPrice();
+        int childSurcharge = productDetail.getChildSurcharge();
+        int infantPrice = productDetail.getInfantPrice();
+        int infantSurcharge = productDetail.getInfantSurcharge();
+
+        int newAdultPrice = requestDto.getAdultPrice();
+        int newAdultSurcharge = requestDto.getAdultSurcharge();
+        int newChildPrice = requestDto.getChildPrice();
+        int newChildSurcharge = requestDto.getChildSurcharge();
+        int newInfantPrice = requestDto.getInfantPrice();
+        int newInfantSurcharge = requestDto.getInfantSurcharge();
+
+        if (newAdultPrice != adultPrice || newAdultSurcharge != adultSurcharge || newChildPrice != childPrice ||
+                newChildSurcharge != childSurcharge || newInfantPrice != infantPrice || newInfantSurcharge != infantSurcharge) {
+            orderRepository.findByProductId(productId)
+                    .forEach(order -> {
+                        int adultCount = order.getAdultCount();
+                        int childCount = order.getChildCount();
+                        int infantCount = order.getInfantCount();
+
+                        Long newTotalPrice = Long.valueOf((newAdultPrice + newAdultSurcharge) * adultCount + (newChildPrice + newChildSurcharge) * childCount + (newInfantPrice + newInfantSurcharge) * infantCount);
+
+                        order.updateTotalPriceWithProductPriceChange(newTotalPrice);
+                    });
+        }
+
         productDetail.update(requestDto);
     }
 
@@ -171,6 +204,13 @@ public class ProductService {
         return productRepositoryCustom.searchByPackage(filterCond, pageRequest);
     }
 
+    public List<ProductFilter.ProductTwoMonthDate> getTowMothData(ProductFilter.ProductFilterCond filterCond) {
+        filterCond.setStartDateTimeMin(LocalDateTime.now());
+        filterCond.setStartDateTimeMax(LocalDateTime.now().plusMonths(2));
+
+        return productRepositoryCustom.getTwoMonthProduct(filterCond);
+    }
+
     // 상품 상세 조회
     public ProductDetailResponseDto productDetail(Long productId) {
         // 상품 조회
@@ -215,6 +255,7 @@ public class ProductService {
     // 관리자용 상품 목록 조회
     public Page<ProductFilter.ProductFilterForAdminResponseDto> searchForAdmin(ProductFilter.ProductFilterCond filterCond) {
         PageRequest pageRequest = PageRequest.of(filterCond.getOffset(), filterCond.getLimit());
+
         return productRepositoryCustom.searchForAdmin(filterCond, pageRequest);
     }
 

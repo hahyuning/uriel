@@ -16,14 +16,47 @@ public class OrderRequestDto {
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class Create {
 
+        String paymentKey;
+        String amount;
+        String orderId;
+
         Long productId;
 
         int adultCount;
         int childCount;
         int infantCount;
         int totalCount;
-        int totalPrice;
+        Long totalPrice;
 
         List<TravelerInfo> travelerInfoList;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class UpdateTraveler {
+
+        String imomOrderId;
+
+        int adultCount;
+        int childCount;
+        int infantCount;
+        int totalCount;
+
+        List<TravelerInfo> travelerInfoList;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class AdditionalPayment {
+
+        String paymentKey;
+        String orderId;
+        String amount;
+
+        String imomOrderId;
     }
 }

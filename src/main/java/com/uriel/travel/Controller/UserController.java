@@ -4,10 +4,13 @@ import com.uriel.travel.Base.BaseResponse;
 import com.uriel.travel.domain.dto.MailDto;
 import com.uriel.travel.domain.dto.user.UserRequestDto;
 import com.uriel.travel.domain.dto.user.UserResponseDto;
+import com.uriel.travel.domain.entity.User;
 import com.uriel.travel.service.MailService;
 import com.uriel.travel.service.UserService;
 import com.uriel.travel.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,6 +20,11 @@ public class UserController {
 
     private final UserService userService;
     private final MailService mailService;
+
+    @GetMapping("/info")
+    public ResponseEntity<User> info(@AuthenticationPrincipal User user){
+        return ResponseEntity.ok(user);
+    }
 
     // 이메일 중복 확인
     @PostMapping("/email")

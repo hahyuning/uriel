@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum Gender implements CodedEnum<String> {
+public enum Gender {
 
     MALE("남"),
     FEMALE("여"),
@@ -25,19 +25,12 @@ public enum Gender implements CodedEnum<String> {
     }
 
     public static Gender mapToGender(String genderString) {
-        if ("M".equalsIgnoreCase(genderString)) {
+        if ("M".equalsIgnoreCase(genderString) || "male".equalsIgnoreCase(genderString)) {
             return Gender.MALE;
-        } else if ("F".equalsIgnoreCase(genderString)) {
+        } else if ("F".equalsIgnoreCase(genderString) || "female".equalsIgnoreCase(genderString)) {
             return Gender.FEMALE;
         } else {
             return Gender.OTHER;
-        }
-    }
-
-    @jakarta.persistence.Converter(autoApply = true)
-    static class Converter extends AbstractCodedEnumConverter<Gender, String> {
-        public Converter() {
-            super(Gender.class);
         }
     }
 }

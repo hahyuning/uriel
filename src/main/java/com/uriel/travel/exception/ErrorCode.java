@@ -25,6 +25,7 @@ public enum ErrorCode {
     DUPLICATE_COUNTRY(40007, "이미 존재하는 여행지입니다."),
     DUPLICATE_TAG(40008, "이미 존재하는 태그입니다."),
     BAD_TEG_TYPE(40009, "태그 타입이 올바르지 않습니다."),
+    BAD_SOCIAL_TYPE(40010, "유효하지 않은 소셜 타입입니다."),
 
     /**
      * 401 : 인증되지 않은 사용자

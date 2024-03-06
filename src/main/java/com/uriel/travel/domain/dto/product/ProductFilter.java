@@ -7,11 +7,15 @@ import com.uriel.travel.domain.ProductState;
 import com.uriel.travel.domain.Release;
 import com.uriel.travel.domain.SaveState;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ProductFilter {
 
@@ -25,8 +29,11 @@ public class ProductFilter {
         String privacy;
         String saveState;
 
-        LocalDateTime startDateMin;
-        LocalDateTime startDateMax;
+        LocalDate startDateMin;
+        LocalDate startDateMax;
+
+        LocalDateTime startDateTimeMin;
+        LocalDateTime startDateTimeMax;
 
         Integer startDateOrder;
         Integer endDateOrder;
@@ -43,9 +50,9 @@ public class ProductFilter {
         Long productId;
         String productCode;
 
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime startDate;
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime endDate;
 
         int maxCount;
@@ -79,9 +86,9 @@ public class ProductFilter {
         String packageName;
         String productCode;
 
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime startDate;
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd-HH-mm-ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime endDate;
 
         int minCount;
@@ -107,5 +114,32 @@ public class ProductFilter {
             this.privacy = privacy.getViewName();
         }
 
+    }
+
+    @Getter
+    @Setter
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class ProductTwoMonthDate {
+
+        Long productId;
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+        LocalDateTime startDate;
+
+        @QueryProjection
+        public ProductTwoMonthDate(Long id, LocalDateTime startDate) {
+            this.productId = id;
+            this.startDate = startDate;
+        }
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class ProductTotalResponseDto {
+
+        Page<ProductFilterResponseDto> productList;
+        List<ProductTwoMonthDate> dateList;
     }
 }
