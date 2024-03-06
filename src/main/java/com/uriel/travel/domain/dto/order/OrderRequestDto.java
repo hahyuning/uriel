@@ -37,7 +37,7 @@ public class OrderRequestDto {
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class UpdateTraveler {
 
-        Long orderId;
+        String imomOrderId;
 
         int adultCount;
         int childCount;

@@ -2,6 +2,7 @@ package com.uriel.travel.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.uriel.travel.domain.OrderState;
+import com.uriel.travel.domain.dto.order.OrderRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -90,4 +91,31 @@ public class Order extends BaseTimeEntity {
     public void addOrderNumber(String orderNumber) {
         this.orderNumberList.add(orderNumber);
     }
+
+    public void updateTotalPriceWithProductPriceChange(Long newTotalPrice) {
+        this.totalPrice = newTotalPrice;
+
+        if (totalPrice < payedPrice) {
+            this.orderState = OrderState.REFUND_NEEDED;
+        } else if (totalPrice.equals(payedPrice)) {
+            this.orderState = OrderState.COMPLETED;
+        }
+    }
+
+    public void updateTravelerAndPrice(OrderRequestDto.UpdateTraveler requestDto, ProductDetail productDetail) {
+        this.totalPrice = Long.valueOf((productDetail.getAdultPrice() + productDetail.getAdultSurcharge()) * requestDto.getAdultCount()
+                + (productDetail.getChildPrice() + productDetail.getChildSurcharge()) * requestDto.getChildCount()
+                + (productDetail.getInfantPrice() + productDetail.getInfantSurcharge()) * requestDto.getInfantCount());
+
+        this.adultCount = requestDto.getAdultCount();
+        this.childCount = requestDto.getChildCount();
+        this.infantCount = requestDto.getInfantCount();
+
+        if (totalPrice < payedPrice) {
+            this.orderState = OrderState.REFUND_NEEDED;
+        } else if (totalPrice.equals(payedPrice)) {
+            this.orderState = OrderState.COMPLETED;
+        }
+    }
+
 }

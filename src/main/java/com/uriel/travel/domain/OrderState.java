@@ -13,7 +13,7 @@ public enum OrderState implements CodedEnum<String> {
     COMPLETED("잔금 완료"),
     PAYMENT_NEEDED("추가 결제 필요"),
     REFUND_NEEDED("환불 필요"),
-    CANCELED("전액 환불 완료");
+    CANCELED("취소");
 
     private final String viewName;
 

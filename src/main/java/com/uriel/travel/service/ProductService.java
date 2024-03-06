@@ -37,6 +37,7 @@ public class ProductService {
     private final ProductRepositoryCustomImpl productRepositoryCustom;
     private final ThumbnailRepository thumbnailRepository;
     private final ScheduleRepository scheduleRepository;
+    private final OrderRepository orderRepository;
 
     // 상품 등록
     public Long create(ProductRequestDto.Create requestDto) {
@@ -84,9 +85,11 @@ public class ProductService {
 
     // 상품 수정
     public void update(ProductRequestDto.Update requestDto, Long productId) {
+
         Product product = productRepository.findById(productId)
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND));
+
 
         // 패키지 수정
         if (!Objects.equals(product.getAPackage().getId(), requestDto.getPackageId())) {
@@ -97,6 +100,35 @@ public class ProductService {
         product.update(requestDto);
 
         ProductDetail productDetail = productDetailRepository.findByProductId(productId);
+
+        int adultPrice = productDetail.getAdultPrice();
+        int adultSurcharge = productDetail.getAdultSurcharge();
+        int childPrice = productDetail.getChildPrice();
+        int childSurcharge = productDetail.getChildSurcharge();
+        int infantPrice = productDetail.getInfantPrice();
+        int infantSurcharge = productDetail.getInfantSurcharge();
+
+        int newAdultPrice = requestDto.getAdultPrice();
+        int newAdultSurcharge = requestDto.getAdultSurcharge();
+        int newChildPrice = requestDto.getChildPrice();
+        int newChildSurcharge = requestDto.getChildSurcharge();
+        int newInfantPrice = requestDto.getInfantPrice();
+        int newInfantSurcharge = requestDto.getInfantSurcharge();
+
+        if (newAdultPrice != adultPrice || newAdultSurcharge != adultSurcharge || newChildPrice != childPrice ||
+                newChildSurcharge != childSurcharge || newInfantPrice != infantPrice || newInfantSurcharge != infantSurcharge) {
+            orderRepository.findByProductId(productId)
+                    .forEach(order -> {
+                        int adultCount = order.getAdultCount();
+                        int childCount = order.getChildCount();
+                        int infantCount = order.getInfantCount();
+
+                        Long newTotalPrice = Long.valueOf((newAdultPrice + newAdultSurcharge) * adultCount + (newChildPrice + newChildSurcharge) * childCount + (newInfantPrice + newInfantSurcharge) * infantCount);
+
+                        order.updateTotalPriceWithProductPriceChange(newTotalPrice);
+                    });
+        }
+
         productDetail.update(requestDto);
     }
 

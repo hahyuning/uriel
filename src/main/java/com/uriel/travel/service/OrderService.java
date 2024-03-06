@@ -5,10 +5,7 @@ import com.uriel.travel.domain.dto.order.OrderFilter;
 import com.uriel.travel.domain.dto.order.OrderRequestDto;
 import com.uriel.travel.domain.dto.order.OrderResponseDto;
 import com.uriel.travel.domain.dto.order.TravelerInfo;
-import com.uriel.travel.domain.entity.Order;
-import com.uriel.travel.domain.entity.Product;
-import com.uriel.travel.domain.entity.Traveler;
-import com.uriel.travel.domain.entity.User;
+import com.uriel.travel.domain.entity.*;
 import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.repository.*;
@@ -35,6 +32,7 @@ public class OrderService {
     private final TravelerRepository travelerRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final ProductDetailRepository productDetailRepository;
 
     private final OrderRepositoryCustomImpl orderRepositoryCustom;
 
@@ -117,6 +115,28 @@ public class OrderService {
 
     // 여행자 정보 변경
     public void updateTravelers(OrderRequestDto.UpdateTraveler requestDto) {
+        Order order = orderRepository.findByImomOrderId(requestDto.getImomOrderId());
 
+        int adultCount = order.getAdultCount();
+        int childCount = order.getChildCount();
+        int infantCount = order.getInfantCount();
+
+        int newAdultCount = requestDto.getAdultCount();
+        int newChildCount = requestDto.getChildCount();
+        int newInfantCount = requestDto.getInfantCount();
+
+        if (adultCount != newAdultCount || childCount != newChildCount || infantCount != newInfantCount) {
+            ProductDetail productDetail = productDetailRepository.findByProductId(order.getProduct().getId());
+            order.updateTravelerAndPrice(requestDto, productDetail);
+        }
+
+        travelerRepository.deleteAll(order.getTravelerList());
+
+        requestDto.getTravelerInfoList()
+                .forEach(travelerInfo -> {
+                    Traveler traveler = travelerInfo.toEntity();
+                    traveler.setOrder(order);
+                    travelerRepository.save(traveler);
+                });
     }
 }

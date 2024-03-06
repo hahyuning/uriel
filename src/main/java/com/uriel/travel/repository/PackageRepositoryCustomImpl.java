@@ -44,6 +44,7 @@ public class PackageRepositoryCustomImpl implements PackageRepositoryCustom {
                 ))
                 .from(aPackage)
                 .where(aPackage.isPublic.eq(Release.PUBLIC)
+                        .and(aPackage.saveState.eq(SaveState.SAVED))
                         .and(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(themeIn(filterCond))))
                         .and(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(familyIn(filterCond))))
                         .and(aPackage.id.in(JPAExpressions.select(tagging.aPackage.id).from(tagging).where(seasonIn(filterCond))))

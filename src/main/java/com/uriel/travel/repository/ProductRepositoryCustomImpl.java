@@ -82,6 +82,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 .from(product)
                 .where(
                         product.isPublic.eq(Release.PUBLIC),
+                        product.saveState.eq(SaveState.SAVED),
                         startDateAfter(),
                         packageIdEq(filterCond)
                 )
@@ -94,6 +95,8 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 .select(product.count())
                 .from(product)
                 .where(
+                        product.isPublic.eq(Release.PUBLIC),
+                        product.saveState.eq(SaveState.SAVED),
                         startDateAfter(),
                         packageIdEq(filterCond))
                 .fetchOne();
@@ -111,6 +114,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 .from(product)
                 .where(
                         product.isPublic.eq(Release.PUBLIC),
+                        product.saveState.eq(SaveState.SAVED),
                         startDateBtw(filterCond),
                         packageIdEq(filterCond)
                 )
