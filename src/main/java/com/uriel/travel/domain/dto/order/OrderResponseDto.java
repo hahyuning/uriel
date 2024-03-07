@@ -50,6 +50,7 @@ public class OrderResponseDto {
         Long payedPrice;
         Long balance;
 
+        List<String> orderNumberList;
         List<TravelerInfo> travelerInfos;
 
         public static OrderInfo of(Order order) {
@@ -73,6 +74,7 @@ public class OrderResponseDto {
                     .totalPrice(order.getTotalPrice())
                     .payedPrice(order.getPayedPrice())
                     .balance(order.getTotalPrice() - order.getPayedPrice())
+                    .orderNumberList(order.getOrderNumberList())
                     .build();
         }
     }

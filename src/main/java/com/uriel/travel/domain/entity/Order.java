@@ -22,14 +22,15 @@ public class Order extends BaseTimeEntity {
 
 //    @Id @GeneratedValue(strategy = GenerationType.UUID)
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    @Column(name = "imom_order_id")
+    @Column(name = "order_id")
     Long id;
 
+    @Column(name = "imom_order_id")
     String imomOrderId;
 
     @Builder.Default
     @ElementCollection
-    @CollectionTable(name = "ORDER_NUMBER", joinColumns = @JoinColumn(name = "imom_order_id"))
+    @CollectionTable(name = "ORDER_NUMBER", joinColumns = @JoinColumn(name = "order_id"))
     List<String> orderNumberList = new ArrayList<>();  // toss 응답 -> orderId
 
     LocalDateTime orderDate; // toss 응답 -> approveAt

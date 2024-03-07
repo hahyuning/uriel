@@ -56,6 +56,7 @@ public class ProductService {
 
         // 상품 디테일 등록
         ProductDetail productDetail = new ProductDetail(requestDto, savedProduct);
+        productDetail.setProduct(product);
         productDetailRepository.save(productDetail);
 
         // 상품 코드 생성

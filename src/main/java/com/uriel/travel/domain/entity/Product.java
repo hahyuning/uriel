@@ -65,7 +65,7 @@ public class Product extends BaseTimeEntity {
         this.maxCount = requestDto.getMaxCount();
         this.productState = ProductState.from(requestDto.getProductState());
         this.airline = Airline.from(requestDto.getAirline());
-        this.price = requestDto.getPrice();
+        this.price = requestDto.getAdultPrice();
     }
 
     // id 초기화

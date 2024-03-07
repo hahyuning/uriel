@@ -30,7 +30,6 @@ public class ProductRequestDto {
         String productState;
         String airline;
         String privacy;
-        int price;
 
         int flagCarrier; // 비행기 국적
         int tourConductor; // 인솔자 동행
@@ -54,9 +53,9 @@ public class ProductRequestDto {
                     .endDate(endDate)
                     .minCount(minCount)
                     .maxCount(maxCount)
+                    .price(adultPrice)
                     .productState(ProductState.from(productState))
                     .airline(Airline.from(airline))
-                    .price(price)
                     .build();
         }
     }
@@ -78,7 +77,6 @@ public class ProductRequestDto {
         int maxCount;
         String productState;
         String airline;
-        int price;
 
         int flagCarrier; // 비행기 국적
         int tourConductor; // 인솔자 동행

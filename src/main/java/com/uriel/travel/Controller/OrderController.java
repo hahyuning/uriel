@@ -32,9 +32,9 @@ public class OrderController {
     }
 
     // 주문 정보 상세 조회
-    @GetMapping("/detail/{orderId}")
-    public BaseResponse<OrderResponseDto.OrderInfo> getOrderInfo(@PathVariable String orderId) {
-        return BaseResponse.ok(orderService.getOrderInfo(orderId));
+    @GetMapping("/detail/{imomorderid}")
+    public BaseResponse<OrderResponseDto.OrderInfo> getOrderInfo(@PathVariable String imomorderid) {
+        return BaseResponse.ok(orderService.getOrderInfo(imomorderid));
     }
 
     // 관리자 주문 목록 조회

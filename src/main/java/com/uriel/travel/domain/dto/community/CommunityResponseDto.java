@@ -20,14 +20,16 @@ public class CommunityResponseDto {
         Long postId;
         String title;
         String content;
-        LocalDate createdDate;
+        String type;
+        String bolgUrl;
 
         public static GetPostForUpdate of(Posts posts) {
             return GetPostForUpdate.builder()
                     .postId(posts.getId())
                     .title(posts.getTitle())
                     .content(posts.getContentMd())
-                    .createdDate(posts.getCreatedDate().toLocalDate())
+                    .type(posts.getPostType().getViewName())
+                    .bolgUrl(posts.getBlogUrl())
                     .build();
         }
     }
