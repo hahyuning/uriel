@@ -69,7 +69,7 @@ public class ProductController {
     }
 
     // 상품 복제
-    @PostMapping("/duplicate/{productId}")
+    @GetMapping("/duplicate/{productId}")
     public BaseResponse<Void> duplicate(@PathVariable Long productId) {
         productService.duplicate(productId);
         return BaseResponse.ok();
