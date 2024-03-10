@@ -1,5 +1,6 @@
 package com.uriel.travel.Controller;
 
+import com.uriel.travel.Base.BaseResponse;
 import com.uriel.travel.domain.dto.order.OrderRequestDto;
 import com.uriel.travel.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ public class WidgetController {
 
     // 예약금 결제
     @RequestMapping(value = "/confirm")
-    public ResponseEntity<JSONObject> confirmPayment(@RequestBody OrderRequestDto.Create requestDto) throws Exception {
+    public BaseResponse<String> confirmPayment(@RequestBody OrderRequestDto.Create requestDto) throws Exception {
 
         JSONParser parser = new JSONParser();
         JSONObject obj = new JSONObject();
@@ -67,11 +68,11 @@ public class WidgetController {
         Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
         JSONObject jsonObject = (JSONObject) parser.parse(reader); // payment 객체?????
 
-        orderService.createOrder(jsonObject, requestDto, "hahyuning@naver.com");
+        String imomOrderId = orderService.createOrder(jsonObject, requestDto, "woori@imom.kr");
 
         responseStream.close();
 
-        return ResponseEntity.status(code).body(jsonObject);
+        return BaseResponse.ok(imomOrderId);
     }
 
     // 잔금 완납

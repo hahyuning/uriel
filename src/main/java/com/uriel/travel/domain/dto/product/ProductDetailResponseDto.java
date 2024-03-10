@@ -39,7 +39,6 @@ public class ProductDetailResponseDto {
         int nowCount; // 현재 예약인원
         String productState; // 상품 상태
         String airline; // 항공사
-        int price; // 가격
 
         int flagCarrier; // 비행기 국적
         int tourConductor; // 인솔자 동행
@@ -70,7 +69,6 @@ public class ProductDetailResponseDto {
                     .nowCount(product.getNowCount())
                     .productState(product.getProductState().getViewName())
                     .airline(product.getAirline().getViewName())
-                    .price(product.getPrice())
                     .flagCarrier(productDetail.getFlagCarrier())
                     .tourConductor(productDetail.getTourConductor())
                     .shopping(productDetail.getShopping())

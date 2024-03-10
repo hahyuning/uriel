@@ -52,7 +52,10 @@ public class PackageController {
                                      @RequestPart(value = "files", required = false) List<MultipartFile> files) {
 
         Long packageId = packageService.temporarySave(requestDto); // 패키지 저장
-        s3Service.uploadThumbnails(files, packageId); // 썸네일 저장
+        if (files != null) {
+            s3Service.uploadThumbnails(files, packageId); // 썸네일 저장
+        }
+
 
         // 일정 저장
         scheduleService.create(requestDto.getScheduleList(), packageId);
@@ -75,7 +78,10 @@ public class PackageController {
         packageService.update(requestDto, packageId);
         // 썸네일 업데이트
         s3Service.deleteThumbnail(packageId);
-        s3Service.uploadThumbnails(files, packageId);
+        if (files != null) {
+            s3Service.uploadThumbnails(files, packageId); // 썸네일 저장
+        }
+
 
         //일정 업데이트
         scheduleService.deleteAllSchedule(packageId);
@@ -101,7 +107,10 @@ public class PackageController {
 
         // 썸네일 업데이트
         s3Service.deleteThumbnail(packageId);
-        s3Service.uploadThumbnails(files, packageId);
+        if (files != null) {
+            s3Service.uploadThumbnails(files, packageId); // 썸네일 저장
+        }
+
 
         //일정 업데이트
         scheduleService.deleteAllSchedule(packageId);

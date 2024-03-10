@@ -70,10 +70,11 @@ public class OrderService {
     }
 
     // 주문 등록 (토스 연동)
-    public void createOrder(JSONObject jsonObject, OrderRequestDto.Create requestDto, String email) {
+    public String createOrder(JSONObject jsonObject, OrderRequestDto.Create requestDto, String email) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
 
         Order order = Order.builder()
+                .imomOrderId((String) jsonObject.get("orderId"))
                 .orderDate(LocalDateTime.parse((String) jsonObject.get("approvedAt"), formatter))
                 .adultCount(requestDto.getAdultCount())
                 .childCount(requestDto.getChildCount())
@@ -103,6 +104,8 @@ public class OrderService {
                     traveler.setOrder(order);
                     travelerRepository.save(traveler);
                 });
+
+        return order.getImomOrderId();
     }
 
     // 잔금 완납

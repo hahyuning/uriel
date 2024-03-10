@@ -20,9 +20,9 @@ public class ProductRequestDto {
 
         Long packageId;
 
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime startDate;
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime endDate;
 
         int minCount;
@@ -30,7 +30,6 @@ public class ProductRequestDto {
         String productState;
         String airline;
         String privacy;
-        int price;
 
         int flagCarrier; // 비행기 국적
         int tourConductor; // 인솔자 동행
@@ -54,9 +53,9 @@ public class ProductRequestDto {
                     .endDate(endDate)
                     .minCount(minCount)
                     .maxCount(maxCount)
+                    .price(adultPrice)
                     .productState(ProductState.from(productState))
                     .airline(Airline.from(airline))
-                    .price(price)
                     .build();
         }
     }
@@ -69,16 +68,15 @@ public class ProductRequestDto {
         String privacy;
         Long packageId;
 
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime startDate;
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime endDate;
 
         int minCount;
         int maxCount;
         String productState;
         String airline;
-        int price;
 
         int flagCarrier; // 비행기 국적
         int tourConductor; // 인솔자 동행

@@ -56,6 +56,7 @@ public class ProductService {
 
         // 상품 디테일 등록
         ProductDetail productDetail = new ProductDetail(requestDto, savedProduct);
+        productDetail.setProduct(savedProduct);
         productDetailRepository.save(productDetail);
 
         // 상품 코드 생성
@@ -81,6 +82,9 @@ public class ProductService {
         // 상품 디테일 등록
         ProductDetail productDetail = new ProductDetail(requestDto, savedProduct);
         productDetailRepository.save(productDetail);
+
+        // 상품 코드 생성
+        savedProduct.setProductCode();
     }
 
     // 상품 수정
@@ -188,7 +192,7 @@ public class ProductService {
 
         entityManager.detach(product);
         product.idInitialize();
-        product.setPrivacy("임시저장");
+        product.setSaveState(SaveState.TEMPORARY);
         productRepository.save(product);
 
         ProductDetail productDetail = productDetailRepository.findByProductId(productId);

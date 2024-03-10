@@ -15,6 +15,9 @@ public abstract class AbstractCodedEnumConverter<T extends Enum<T> & CodedEnum<E
 
     @Override
     public E convertToDatabaseColumn(T attribute) {
+        if (Objects.isNull(attribute)) {
+            return null;
+        }
         return attribute.getViewName();
     }
 
