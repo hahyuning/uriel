@@ -17,7 +17,7 @@ public class SchedulerConfig {
     @Value("${schedule.use}")
     private boolean useSchedule;
 
-    @Scheduled(cron = "${schedule.cron}")
+    @Scheduled(cron = "${schedule.cron}", zone = "Asia/Seoul")
     public void run() {
         try {
             if (useSchedule) {
