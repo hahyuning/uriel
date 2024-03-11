@@ -6,10 +6,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.cloud.openfeign.FeignAutoConfiguration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableJpaAuditing
 @SpringBootApplication
 @EnableFeignClients("com.uriel.travel.exception.feign")
+@EnableScheduling
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
 public class TravelApplication {
 

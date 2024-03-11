@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -81,7 +82,6 @@ public class Product extends BaseTimeEntity {
         this.saveState = saveState;
     }
 
-
     public void setProductCode() {
         String resultCode = this.aPackage.getCountry().toString(); // 여행지역 코드
         resultCode += LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMdd")); // 생성 년월일
@@ -93,5 +93,16 @@ public class Product extends BaseTimeEntity {
 
     public void updateNowCount(int totalCount) {
         this.nowCount += totalCount;
+        LocalDate nowDate = LocalDate.now();
+
+        if (maxCount == nowCount) {
+            this.productState = ProductState.RESERVATION_DEADLINE;
+        } else if (maxCount > nowCount && this.startDate.toLocalDate().isAfter(nowDate.plusWeeks(2))) {
+            this.productState = ProductState.RESERVATION_AVAILABLE;
+        }
+    }
+
+    public void setProductState(ProductState productState) {
+        this.productState = productState;
     }
 }

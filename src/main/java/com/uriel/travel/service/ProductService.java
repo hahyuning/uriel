@@ -1,5 +1,6 @@
 package com.uriel.travel.service;
 
+import com.uriel.travel.domain.ProductState;
 import com.uriel.travel.domain.SaveState;
 import com.uriel.travel.domain.dto.ImageDto;
 import com.uriel.travel.domain.dto.product.ProductDetailResponseDto;
@@ -330,5 +331,16 @@ public class ProductService {
         return packageRepository.findById(packageId)
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND));
+    }
+
+    // 스케쥴링
+    public void changeProductStateByScheduler() {
+        LocalDate now = LocalDate.now();
+        productRepository.findAll()
+            .forEach(product -> {
+                if (product.getStartDate().toLocalDate().isBefore(now.plusWeeks(2))) {
+                    product.setProductState(ProductState.RESERVATION_DEADLINE);
+                }
+            });
     }
 }
