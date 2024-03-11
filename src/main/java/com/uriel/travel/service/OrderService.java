@@ -5,6 +5,7 @@ import com.uriel.travel.domain.dto.order.OrderFilter;
 import com.uriel.travel.domain.dto.order.OrderRequestDto;
 import com.uriel.travel.domain.dto.order.OrderResponseDto;
 import com.uriel.travel.domain.dto.order.TravelerInfo;
+import com.uriel.travel.domain.dto.toss.WebHookInfo;
 import com.uriel.travel.domain.entity.*;
 import com.uriel.travel.exception.CustomBadRequestException;
 import com.uriel.travel.exception.CustomNotFoundException;
@@ -183,6 +184,32 @@ public class OrderService {
 
         if (product.getNowCount() + totalCount > product.getMinCount()) {
             throw new CustomBadRequestException(ErrorCode.EXCEED_MAX_COUNT);
+        }
+    }
+
+    public void updateOrderStateByVAWebHook(WebHookInfo.VirtualAccount requestDto, JSONObject jsonObject) {
+        // done -> 입금 완료
+        // canceled -> 취소
+        // partial canceled -> 부분 취소
+        Order order = orderRepository.findByTossOrderId(requestDto.getOrderId());
+        if (requestDto.getStatus().equals("DONE")) {
+            order.updateAdditionalPrice((Long) jsonObject.get("totalAmount"));
+        } else if (requestDto.getStatus().equals("CANCELED")) {
+            order.cancel();
+        } else if (requestDto.getStatus().equals("PARTIAL_CANCELED")) {
+            JSONObject cancels = (JSONObject) jsonObject.get("cancels");
+            order.updateAdditionalPrice( -1 * (Long) cancels.get("cancelAmount"));
+        }
+    }
+
+    public void updateOrderStateByOPWebHook(WebHookInfo.OtherPayments requestDto) {
+        // canceled -> 취소
+        // partial canceled -> 부분 취소
+        if (requestDto.getData().getStatus().equals("CANCELED")) {
+            orderRepository.findByTossOrderId(requestDto.getData().getOrderId()).cancel();
+        } else if (requestDto.getData().getStatus().equals("PARTIAL_CANCELED")) {
+            orderRepository.findByTossOrderId(requestDto.getData().getOrderId())
+                    .updateAdditionalPrice( -1 * requestDto.getData().getCancel().getCancelAmount());
         }
     }
 }

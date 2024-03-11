@@ -2,6 +2,7 @@ package com.uriel.travel.Controller;
 
 import com.uriel.travel.Base.BaseResponse;
 import com.uriel.travel.domain.dto.order.OrderRequestDto;
+import com.uriel.travel.domain.dto.toss.WebHookInfo;
 import com.uriel.travel.service.OrderService;
 import com.uriel.travel.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -93,7 +95,7 @@ public class WidgetController {
 
         // 토스페이먼츠 API는 시크릿 키를 사용자 ID로 사용하고, 비밀번호는 사용하지 않습니다.
         // 비밀번호가 없다는 것을 알리기 위해 시크릿 키 뒤에 콜론을 추가합니다.
-        String widgetSecretKey = "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6";
+        String widgetSecretKey = "test_sk_Z61JOxRQVEoWEyYPlRnR8W0X9bAq";
         Base64.Encoder encoder = Base64.getEncoder();
         byte[] encodedBytes = encoder.encode((widgetSecretKey + ":").getBytes("UTF-8"));
         String authorizations = "Basic " + new String(encodedBytes, 0, encodedBytes.length);
@@ -127,5 +129,45 @@ public class WidgetController {
 
     private void updateMarketingAgreement(String email, boolean agreement) {
         userService.updateMarketingAgreement(email, agreement);
+    }
+
+    // 가상계좌 웹훅 로직
+    @PostMapping("/virtual-account/hook")
+    public void virtualAccountWebHook(@RequestBody WebHookInfo.VirtualAccount requestDto) throws Exception {
+        logger.info("가상계좌 웹훅 들어옴");
+        logger.info(requestDto.getStatus() + "");
+
+        JSONParser parser = new JSONParser();
+
+        String widgetSecretKey = "test_sk_Z61JOxRQVEoWEyYPlRnR8W0X9bAq";
+        Base64.Encoder encoder = Base64.getEncoder();
+        byte[] encodedBytes = encoder.encode((widgetSecretKey + ":").getBytes("UTF-8"));
+        String authorizations = "Basic " + new String(encodedBytes, 0, encodedBytes.length);
+
+        // 결제를 승인하면 결제수단에서 금액이 차감돼요.
+        URL url = new URL("https://api.tosspayments.com/v1/payments/orders/" + requestDto.getOrderId());
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestProperty("Authorization", authorizations);
+        connection.setRequestMethod("GET");
+        connection.setDoOutput(true);
+
+        int code = connection.getResponseCode();
+        boolean isSuccess = code == 200;
+
+        InputStream responseStream = isSuccess ? connection.getInputStream() : connection.getErrorStream();
+
+        Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
+        JSONObject jsonObject = (JSONObject) parser.parse(reader);
+
+        orderService.updateOrderStateByVAWebHook(requestDto, jsonObject);
+    }
+
+    // 가상계좌 웹훅 로직
+    @PostMapping("/others/hook")
+    public void virtualAccountWebHook(@RequestBody WebHookInfo.OtherPayments requestDto) throws Exception {
+        logger.info("일반결제 웹훅 들어옴");
+        logger.info(requestDto.getData().getStatus() + "");
+
+        orderService.updateOrderStateByOPWebHook(requestDto);
     }
 }
