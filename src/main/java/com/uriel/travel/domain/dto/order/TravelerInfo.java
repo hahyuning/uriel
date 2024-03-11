@@ -5,6 +5,8 @@ import com.uriel.travel.domain.entity.Traveler;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,7 +18,7 @@ public class TravelerInfo {
     String enLastName;
 
     String gender;
-    String birth;
+    LocalDate birth;
     String phoneNumber;
 
     boolean isRepresentative;

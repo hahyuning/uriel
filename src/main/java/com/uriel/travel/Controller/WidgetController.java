@@ -3,6 +3,7 @@ package com.uriel.travel.Controller;
 import com.uriel.travel.Base.BaseResponse;
 import com.uriel.travel.domain.dto.order.OrderRequestDto;
 import com.uriel.travel.service.OrderService;
+import com.uriel.travel.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -28,12 +29,16 @@ import java.util.Base64;
 public class WidgetController {
 
     private final OrderService orderService;
+    private final UserService userService;
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     // 예약금 결제
     @RequestMapping(value = "/confirm")
     public BaseResponse<String> confirmPayment(@RequestBody OrderRequestDto.Create requestDto) throws Exception {
+
+        // 예약 가능 여부 체크
+        orderService.checkReservedUserCount(requestDto.getTotalCount(), requestDto.getProductId());
 
         JSONParser parser = new JSONParser();
         JSONObject obj = new JSONObject();
@@ -66,9 +71,10 @@ public class WidgetController {
 
         // 결제 성공 및 실패 비즈니스 로직을 구현하세요.
         Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
-        JSONObject jsonObject = (JSONObject) parser.parse(reader); // payment 객체?????
+        JSONObject jsonObject = (JSONObject) parser.parse(reader);
 
         String imomOrderId = orderService.createOrder(jsonObject, requestDto, "woori@imom.kr");
+        updateMarketingAgreement("woori@imom.kr", requestDto.isMarketing());
 
         responseStream.close();
 
@@ -117,5 +123,9 @@ public class WidgetController {
         responseStream.close();
 
         return ResponseEntity.status(code).body(jsonObject);
+    }
+
+    private void updateMarketingAgreement(String email, boolean agreement) {
+        userService.updateMarketingAgreement(email, agreement);
     }
 }

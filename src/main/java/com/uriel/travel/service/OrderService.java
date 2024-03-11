@@ -6,6 +6,7 @@ import com.uriel.travel.domain.dto.order.OrderRequestDto;
 import com.uriel.travel.domain.dto.order.OrderResponseDto;
 import com.uriel.travel.domain.dto.order.TravelerInfo;
 import com.uriel.travel.domain.entity.*;
+import com.uriel.travel.exception.CustomBadRequestException;
 import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.repository.*;
@@ -62,14 +63,14 @@ public class OrderService {
         return orderRepositoryCustom.ordersByFilter(filterCond, pageRequest);
     }
 
-    // 주문 목록 검색
-    @Transactional(readOnly = true)
-    public Page<OrderFilter.OrderFilterResponseDtoForAdmin> orderSearch(OrderFilter.OrderSearchCond searchCond) {
-        PageRequest pageRequest = PageRequest.of(searchCond.getOffset(), 10);
-        return orderRepositoryCustom.searchOrder(searchCond, pageRequest);
-    }
+//    // 주문 목록 검색
+//    @Transactional(readOnly = true)
+//    public Page<OrderFilter.OrderFilterResponseDtoForAdmin> orderSearch(OrderFilter.OrderSearchCond searchCond) {
+//        PageRequest pageRequest = PageRequest.of(searchCond.getOffset(), 10);
+//        return orderRepositoryCustom.searchOrder(searchCond, pageRequest);
+//    }
 
-    // 주문 등록 (토스 연동)
+    // 주문 등록
     public String createOrder(JSONObject jsonObject, OrderRequestDto.Create requestDto, String email) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
 
@@ -82,8 +83,14 @@ public class OrderService {
                 .totalCount(requestDto.getTotalCount())
                 .totalPrice(requestDto.getTotalPrice())
                 .payedPrice((Long) jsonObject.get("totalAmount"))
-                .orderState(OrderState.RESERVED)
                 .build();
+
+        String method = (String) jsonObject.get("method");
+        if (method.equals("가상계좌")) {
+            order.setOrderState(OrderState.READY);
+        } else {
+            order.setOrderState(OrderState.RESERVED);
+        }
 
         order.addOrderNumber((String) jsonObject.get("orderId"));
 
@@ -95,6 +102,8 @@ public class OrderService {
         Product product = productRepository.findById(requestDto.getProductId())
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND));
+        product.updateNowCount(requestDto.getTotalCount());
+
         order.setProduct(product);
         orderRepository.save(order);
 
@@ -141,5 +150,39 @@ public class OrderService {
                     traveler.setOrder(order);
                     travelerRepository.save(traveler);
                 });
+
+
+        Product product = productRepository.findById(order.getProduct().getId())
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+        product.updateNowCount(requestDto.getTotalCount() - order.getTotalCount());
+    }
+
+    // 주문 취소
+    public void cancelOrder(String imomOrderId) {
+        Order order = orderRepository.findByImomOrderId(imomOrderId);
+        order.cancel();
+
+        Product product = productRepository.findById(order.getProduct().getId())
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+        product.updateNowCount(-1 * (order.getTotalCount()));
+    }
+
+    // 추가금 변경
+    public void updateAdditionalPrice(OrderRequestDto.UpdateAdditionalPrice requestDto) {
+        Order order = orderRepository.findByImomOrderId(requestDto.getImomOrderId());
+        order.updateAdditionalPrice(requestDto.getAdditionalPrice());
+    }
+
+    // 예약가능여부 확인 (인원 확인)
+    public void checkReservedUserCount(int totalCount, Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+
+        if (product.getNowCount() + totalCount > product.getMinCount()) {
+            throw new CustomBadRequestException(ErrorCode.EXCEED_MAX_COUNT);
+        }
     }
 }

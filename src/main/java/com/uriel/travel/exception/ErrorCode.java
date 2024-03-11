@@ -26,6 +26,7 @@ public enum ErrorCode {
     DUPLICATE_TAG(40008, "이미 존재하는 태그입니다."),
     BAD_TEG_TYPE(40009, "태그 타입이 올바르지 않습니다."),
     BAD_SOCIAL_TYPE(40010, "유효하지 않은 소셜 타입입니다."),
+    EXCEED_MAX_COUNT(40011, "예약 가능한 인원을 초과했습니다."),
 
     /**
      * 401 : 인증되지 않은 사용자
@@ -36,6 +37,7 @@ public enum ErrorCode {
     REFRESH_TOKEN_NOT_EXIST(40104, "리프레쉬 토큰이 존재하지 않습니다"),
     REFRESH_TOKEN_NULL(40105,"리프레쉬 토큰 값이 비었습니다."),
     MEMBER_ROLE_INVALID(40106,"MEMBER_ROLE_INVALID"),
+
     /**
      * 403: 권한 없음
      */

@@ -57,6 +57,9 @@ public class Order extends BaseTimeEntity {
     @Builder.Default
     Long payedPrice = 0L; // 결제 완료한 금액
 
+    @Builder.Default
+    Long additionalPrice = 0L;
+
     OrderState orderState;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -80,12 +83,12 @@ public class Order extends BaseTimeEntity {
     public void additionalPayment(Long totalAmount) {
         this.payedPrice += totalAmount;
 
-        if (this.payedPrice > this.totalPrice) {
+        if (this.totalPrice < this.payedPrice + this.additionalPrice) {
             this.orderState = OrderState.REFUND_NEEDED;
-        } else if (this.payedPrice < this.totalPrice) {
-            this.orderState = OrderState.PAYMENT_NEEDED;
-        } else {
+        } else if (this.totalPrice == this.payedPrice + this.additionalPrice) {
             this.orderState = OrderState.COMPLETED;
+        } else {
+            this.orderState = OrderState.PAYMENT_NEEDED;
         }
     }
 
@@ -96,10 +99,12 @@ public class Order extends BaseTimeEntity {
     public void updateTotalPriceWithProductPriceChange(Long newTotalPrice) {
         this.totalPrice = newTotalPrice;
 
-        if (totalPrice < payedPrice) {
+        if (this.totalPrice < this.payedPrice + this.additionalPrice) {
             this.orderState = OrderState.REFUND_NEEDED;
-        } else if (totalPrice.equals(payedPrice)) {
+        } else if (this.totalPrice == this.payedPrice + this.additionalPrice) {
             this.orderState = OrderState.COMPLETED;
+        } else {
+            this.orderState = OrderState.PAYMENT_NEEDED;
         }
     }
 
@@ -112,11 +117,41 @@ public class Order extends BaseTimeEntity {
         this.childCount = requestDto.getChildCount();
         this.infantCount = requestDto.getInfantCount();
 
-        if (totalPrice < payedPrice) {
+        if (this.totalPrice < this.payedPrice + this.additionalPrice) {
             this.orderState = OrderState.REFUND_NEEDED;
-        } else if (totalPrice.equals(payedPrice)) {
+        } else if (this.totalPrice == this.payedPrice + this.additionalPrice) {
             this.orderState = OrderState.COMPLETED;
+        } else {
+            this.orderState = OrderState.PAYMENT_NEEDED;
         }
     }
 
+    public void cancel() {
+        this.orderState = OrderState.CANCELED;
+        this.payedPrice = 0L;
+    }
+
+    public void updateAdditionalPrice(Long additionalPrice) {
+        if (!this.orderState.equals(OrderState.CANCELED)) {
+
+            this.additionalPrice = additionalPrice;
+            if (this.totalPrice < this.additionalPrice + this.payedPrice) {
+                this.orderState = OrderState.REFUND_NEEDED;
+            } else if (this.totalPrice == this.additionalPrice + this.payedPrice) {
+                this.orderState = OrderState.COMPLETED;
+            } else {
+                this.orderState = OrderState.PAYMENT_NEEDED;
+            }
+        }
+    }
+
+    public void updateTravelerCount(int newAdultCount, int newChildCount, int newInfantCount) {
+        this.adultCount = newAdultCount;
+        this.childCount = newChildCount;
+        this.infantCount = newInfantCount;
+    }
+
+    public void setOrderState(OrderState orderState) {
+        this.orderState = orderState;
+    }
 }

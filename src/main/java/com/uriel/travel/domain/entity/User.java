@@ -59,6 +59,9 @@ public class User implements UserDetails {
     String socialId;
 
     @Builder.Default
+    boolean marketing = false;
+
+    @Builder.Default
     @JsonIgnore
     @OneToMany(mappedBy = "reserveUser", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Order> orderList = new ArrayList<>();
@@ -112,5 +115,9 @@ public class User implements UserDetails {
 
     public void updatePassword(String password) {
         this.password = password;
+    }
+
+    public void setMarketing(boolean agreement) {
+        this.marketing = agreement;
     }
 }

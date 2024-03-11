@@ -91,4 +91,11 @@ public class UserService {
                         new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
         user.updatePassword(password);
     }
+
+    public void updateMarketingAgreement(String email, boolean agreement) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
+        user.setMarketing(agreement);
+    }
 }

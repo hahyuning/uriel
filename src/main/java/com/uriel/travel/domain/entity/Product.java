@@ -90,4 +90,8 @@ public class Product extends BaseTimeEntity {
 
         this.productCode = resultCode;
     }
+
+    public void updateNowCount(int totalCount) {
+        this.nowCount += totalCount;
+    }
 }

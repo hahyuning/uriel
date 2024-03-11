@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,8 +102,6 @@ public class ProductService {
             product.setPackage(newPackage);
         }
 
-        product.update(requestDto);
-
         ProductDetail productDetail = productDetailRepository.findByProductId(productId);
 
         int adultPrice = productDetail.getAdultPrice();
@@ -119,6 +118,55 @@ public class ProductService {
         int newInfantPrice = requestDto.getInfantPrice();
         int newInfantSurcharge = requestDto.getInfantSurcharge();
 
+        // 출발일시가 변경된 경우
+        if (!product.getStartDate().toLocalDate().equals(requestDto.getStartDate().toLocalDate())) {
+            orderRepository.findByProductId(productId)
+                .forEach(order -> {
+                    int adultCount = order.getAdultCount();
+                    int childCount = order.getChildCount();
+                    int infantCount = order.getInfantCount();
+
+                    int newAdultCount = 0;
+                    int newChildCount = 0;
+                    int newInfantCount = 0;
+
+                    List<Traveler> travelerList = order.getTravelerList();
+
+                    for (Traveler traveler : travelerList) {
+                        LocalDate birth = traveler.getBirth();
+                        int birthYear = birth.getYear();
+                        int birthMonth = birth.getMonthValue();
+                        int birthDay = birth.getDayOfMonth();
+
+                        int startYear = requestDto.getStartDate().getYear();
+                        int startMonth = requestDto.getStartDate().getMonthValue();
+                        int startDay = requestDto.getStartDate().getDayOfMonth();
+
+                        int age = startYear - birthYear;
+                        if (birthMonth * 100 + birthDay > startMonth * 100 + startDay) {
+                            age--;
+                        }
+
+                        if (age < 2) {
+                            newInfantCount++;
+                        } else if (age < 12) {
+                            newChildCount++;
+                        } else {
+                            newAdultCount++;
+                        }
+                    }
+
+                    if (adultCount != newAdultCount || childCount != newChildCount || infantCount != newInfantCount) {
+                        order.updateTravelerCount(newAdultCount, newChildCount, newInfantCount);
+                        Long newTotalPrice = ((long) (newAdultPrice + newAdultSurcharge) * newAdultCount + (long) (newChildPrice + newChildSurcharge) * newChildCount + (long) (newInfantPrice + newInfantSurcharge) * newInfantCount);
+                        order.updateTotalPriceWithProductPriceChange(newTotalPrice);
+                    }
+                });
+        }
+
+        product.update(requestDto);
+
+        // 상품 가격이 변동된 경우
         if (newAdultPrice != adultPrice || newAdultSurcharge != adultSurcharge || newChildPrice != childPrice ||
                 newChildSurcharge != childSurcharge || newInfantPrice != infantPrice || newInfantSurcharge != infantSurcharge) {
             orderRepository.findByProductId(productId)
@@ -127,7 +175,7 @@ public class ProductService {
                         int childCount = order.getChildCount();
                         int infantCount = order.getInfantCount();
 
-                        Long newTotalPrice = Long.valueOf((newAdultPrice + newAdultSurcharge) * adultCount + (newChildPrice + newChildSurcharge) * childCount + (newInfantPrice + newInfantSurcharge) * infantCount);
+                        Long newTotalPrice = ((long) (newAdultPrice + newAdultSurcharge) * adultCount + (long) (newChildPrice + newChildSurcharge) * childCount + (long) (newInfantPrice + newInfantSurcharge) * infantCount);
 
                         order.updateTotalPriceWithProductPriceChange(newTotalPrice);
                     });

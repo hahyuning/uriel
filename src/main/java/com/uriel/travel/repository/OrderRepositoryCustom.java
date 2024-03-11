@@ -13,5 +13,5 @@ public interface OrderRepositoryCustom {
 
     List<OrderFilter.OrderFilterResponseDto> findByReserveUser(OrderFilter.OrderFilterCond filterCond, String email, Pageable pageable);
 
-    Page<OrderFilter.OrderFilterResponseDtoForAdmin> searchOrder(OrderFilter.OrderSearchCond filterCond, Pageable pageable);
+//    Page<OrderFilter.OrderFilterResponseDtoForAdmin> searchOrder(OrderFilter.Or filterCond, Pageable pageable);
 }

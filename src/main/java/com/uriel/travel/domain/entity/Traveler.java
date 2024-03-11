@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
+
 @Entity
 @Getter
 @Builder
@@ -25,7 +27,7 @@ public class Traveler {
     @Enumerated
     Gender gender;
 
-    String birth;
+    LocalDate birth;
 
     String phoneNumber;
 
