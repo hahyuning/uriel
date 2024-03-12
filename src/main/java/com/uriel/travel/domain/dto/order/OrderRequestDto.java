@@ -61,6 +61,9 @@ public class OrderRequestDto {
         String amount;
 
         String imomOrderId;
+
+        boolean marketing;
+
     }
 
     @Getter

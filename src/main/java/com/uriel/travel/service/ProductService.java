@@ -105,19 +105,19 @@ public class ProductService {
 
         ProductDetail productDetail = productDetailRepository.findByProductId(productId);
 
-        int adultPrice = productDetail.getAdultPrice();
-        int adultSurcharge = productDetail.getAdultSurcharge();
-        int childPrice = productDetail.getChildPrice();
-        int childSurcharge = productDetail.getChildSurcharge();
-        int infantPrice = productDetail.getInfantPrice();
-        int infantSurcharge = productDetail.getInfantSurcharge();
+        Long adultPrice = productDetail.getAdultPrice();
+        Long adultSurcharge = productDetail.getAdultSurcharge();
+        Long childPrice = productDetail.getChildPrice();
+        Long childSurcharge = productDetail.getChildSurcharge();
+        Long infantPrice = productDetail.getInfantPrice();
+        Long infantSurcharge = productDetail.getInfantSurcharge();
 
-        int newAdultPrice = requestDto.getAdultPrice();
-        int newAdultSurcharge = requestDto.getAdultSurcharge();
-        int newChildPrice = requestDto.getChildPrice();
-        int newChildSurcharge = requestDto.getChildSurcharge();
-        int newInfantPrice = requestDto.getInfantPrice();
-        int newInfantSurcharge = requestDto.getInfantSurcharge();
+        Long newAdultPrice = requestDto.getAdultPrice();
+        Long newAdultSurcharge = requestDto.getAdultSurcharge();
+        Long newChildPrice = requestDto.getChildPrice();
+        Long newChildSurcharge = requestDto.getChildSurcharge();
+        Long newInfantPrice = requestDto.getInfantPrice();
+        Long newInfantSurcharge = requestDto.getInfantSurcharge();
 
         // 출발일시가 변경된 경우
         if (!product.getStartDate().toLocalDate().equals(requestDto.getStartDate().toLocalDate())) {
@@ -159,7 +159,7 @@ public class ProductService {
 
                     if (adultCount != newAdultCount || childCount != newChildCount || infantCount != newInfantCount) {
                         order.updateTravelerCount(newAdultCount, newChildCount, newInfantCount);
-                        Long newTotalPrice = ((long) (newAdultPrice + newAdultSurcharge) * newAdultCount + (long) (newChildPrice + newChildSurcharge) * newChildCount + (long) (newInfantPrice + newInfantSurcharge) * newInfantCount);
+                        Long newTotalPrice = (newAdultPrice + newAdultSurcharge) * newAdultCount + (newChildPrice + newChildSurcharge) * newChildCount + (newInfantPrice + newInfantSurcharge) * newInfantCount;
                         order.updateTotalPriceWithProductPriceChange(newTotalPrice);
                     }
                 });
@@ -168,15 +168,15 @@ public class ProductService {
         product.update(requestDto);
 
         // 상품 가격이 변동된 경우
-        if (newAdultPrice != adultPrice || newAdultSurcharge != adultSurcharge || newChildPrice != childPrice ||
-                newChildSurcharge != childSurcharge || newInfantPrice != infantPrice || newInfantSurcharge != infantSurcharge) {
+        if (!newAdultPrice.equals(adultPrice) || !newAdultSurcharge.equals(adultSurcharge) || !newChildPrice.equals(childPrice) ||
+                !newChildSurcharge.equals(childSurcharge) || !newInfantPrice.equals(infantPrice) || !newInfantSurcharge.equals(infantSurcharge)) {
             orderRepository.findByProductId(productId)
                     .forEach(order -> {
                         int adultCount = order.getAdultCount();
                         int childCount = order.getChildCount();
                         int infantCount = order.getInfantCount();
 
-                        Long newTotalPrice = ((long) (newAdultPrice + newAdultSurcharge) * adultCount + (long) (newChildPrice + newChildSurcharge) * childCount + (long) (newInfantPrice + newInfantSurcharge) * infantCount);
+                        Long newTotalPrice = (newAdultPrice + newAdultSurcharge) * adultCount + (newChildPrice + newChildSurcharge) * childCount + (newInfantPrice + newInfantSurcharge) * infantCount;
 
                         order.updateTotalPriceWithProductPriceChange(newTotalPrice);
                     });

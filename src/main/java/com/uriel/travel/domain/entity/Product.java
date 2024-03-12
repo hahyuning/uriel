@@ -49,7 +49,7 @@ public class Product extends BaseTimeEntity {
 
     Airline airline; // 항공사
 
-    int price; // 가격
+    Long price; // 가격
 
     // 연관관계
     public void setPackage(Package aPackage) {

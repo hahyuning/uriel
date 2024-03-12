@@ -1,6 +1,7 @@
 package com.uriel.travel.service;
 
 import com.uriel.travel.domain.OrderState;
+import com.uriel.travel.domain.ProductState;
 import com.uriel.travel.domain.dto.order.OrderFilter;
 import com.uriel.travel.domain.dto.order.OrderRequestDto;
 import com.uriel.travel.domain.dto.order.OrderResponseDto;
@@ -75,9 +76,10 @@ public class OrderService {
     public String createOrder(JSONObject jsonObject, OrderRequestDto.Create requestDto, String email) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
 
+        // Order 객체 생성
         Order order = Order.builder()
                 .imomOrderId((String) jsonObject.get("orderId"))
-                .orderDate(LocalDateTime.parse((String) jsonObject.get("approvedAt"), formatter))
+                .orderDate(LocalDateTime.parse((String) jsonObject.get("requestedAt"), formatter))
                 .adultCount(requestDto.getAdultCount())
                 .childCount(requestDto.getChildCount())
                 .infantCount(requestDto.getChildCount())
@@ -86,6 +88,7 @@ public class OrderService {
                 .payedPrice((Long) jsonObject.get("totalAmount"))
                 .build();
 
+        // 결제 방법
         String method = (String) jsonObject.get("method");
         if (method.equals("가상계좌")) {
             order.setOrderState(OrderState.READY);
@@ -93,21 +96,27 @@ public class OrderService {
             order.setOrderState(OrderState.RESERVED);
         }
 
+        // 결제 정보 추가
         order.addOrderNumber((String) jsonObject.get("orderId"));
 
+        // reserve user 연관관계
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND));
         order.setReserveUser(user);
 
+        // product 연관관계
         Product product = productRepository.findById(requestDto.getProductId())
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND));
         product.updateNowCount(requestDto.getTotalCount());
 
         order.setProduct(product);
+
+        // order 객체 저장
         orderRepository.save(order);
 
+        // 여행자 정보 저장
         requestDto.getTravelerInfoList()
                 .forEach(travelerInfo -> {
                     Traveler traveler = travelerInfo.toEntity();
@@ -162,7 +171,7 @@ public class OrderService {
     // 주문 취소
     public void cancelOrder(String imomOrderId) {
         Order order = orderRepository.findByImomOrderId(imomOrderId);
-        order.cancel();
+        order.cancel(order.getPayedPrice());
 
         Product product = productRepository.findById(order.getProduct().getId())
                 .orElseThrow(() ->
@@ -182,6 +191,10 @@ public class OrderService {
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND));
 
+        if (product.getProductState().equals(ProductState.RESERVATION_DEADLINE)) {
+            throw new CustomBadRequestException(ErrorCode.RESERVATION_NOT_AVAILABLE);
+        }
+
         if (product.getNowCount() + totalCount > product.getMinCount()) {
             throw new CustomBadRequestException(ErrorCode.EXCEED_MAX_COUNT);
         }
@@ -192,24 +205,26 @@ public class OrderService {
         // canceled -> 취소
         // partial canceled -> 부분 취소
         Order order = orderRepository.findByTossOrderId(requestDto.getOrderId());
-        if (requestDto.getStatus().equals("DONE")) {
-            order.updateAdditionalPrice((Long) jsonObject.get("totalAmount"));
-        } else if (requestDto.getStatus().equals("CANCELED")) {
-            order.cancel();
-        } else if (requestDto.getStatus().equals("PARTIAL_CANCELED")) {
-            JSONObject cancels = (JSONObject) jsonObject.get("cancels");
-            order.updateAdditionalPrice( -1 * (Long) cancels.get("cancelAmount"));
+        String status = requestDto.getStatus();
+        JSONObject cancels = (JSONObject) jsonObject.get("cancels");
+
+        log.info("가상계좌 결제 상태: " + status);
+
+        if (status.equals("DONE")) { // 가상계좌 입금 완료
+            order.additionalPayment((Long) jsonObject.get("totalAmount"));
+        } else if (status.equals("CANCELED") || status.equals("PARTIAL_CANCELED")) { // 가상계좌 주문 취소
+            order.cancel((Long) cancels.get("cancelAmount"));
         }
     }
 
     public void updateOrderStateByOPWebHook(WebHookInfo.OtherPayments requestDto) {
         // canceled -> 취소
         // partial canceled -> 부분 취소
-        if (requestDto.getData().getStatus().equals("CANCELED")) {
-            orderRepository.findByTossOrderId(requestDto.getData().getOrderId()).cancel();
-        } else if (requestDto.getData().getStatus().equals("PARTIAL_CANCELED")) {
-            orderRepository.findByTossOrderId(requestDto.getData().getOrderId())
-                    .updateAdditionalPrice( -1 * requestDto.getData().getCancel().getCancelAmount());
+        String status = requestDto.getData().getStatus();
+        Order order = orderRepository.findByTossOrderId(requestDto.getData().getOrderId());
+
+        if (status.equals("CANCELED") || status.equals("PARTIAL_CANCELED")) {
+            order.cancel(requestDto.getData().getCancel().getCancelAmount());
         }
     }
 }

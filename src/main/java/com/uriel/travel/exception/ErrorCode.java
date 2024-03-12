@@ -27,6 +27,8 @@ public enum ErrorCode {
     BAD_TEG_TYPE(40009, "태그 타입이 올바르지 않습니다."),
     BAD_SOCIAL_TYPE(40010, "유효하지 않은 소셜 타입입니다."),
     EXCEED_MAX_COUNT(40011, "예약 가능한 인원을 초과했습니다."),
+    RESERVATION_NOT_AVAILABLE(40012, "예약 마감된 상품입니다."),
+    PAYMENT_FAILURE(40013, "결제에 실패했습니다."),
 
     /**
      * 401 : 인증되지 않은 사용자

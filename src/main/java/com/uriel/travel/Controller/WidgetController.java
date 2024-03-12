@@ -1,6 +1,5 @@
 package com.uriel.travel.Controller;
 
-import com.uriel.travel.Base.BaseResponse;
 import com.uriel.travel.domain.dto.order.OrderRequestDto;
 import com.uriel.travel.domain.dto.toss.WebHookInfo;
 import com.uriel.travel.service.OrderService;
@@ -37,9 +36,9 @@ public class WidgetController {
 
     // 예약금 결제
     @RequestMapping(value = "/confirm")
-    public BaseResponse<String> confirmPayment(@RequestBody OrderRequestDto.Create requestDto) throws Exception {
+    public ResponseEntity<JSONObject> confirmPayment(@RequestBody OrderRequestDto.Create requestDto) throws Exception {
 
-        // 예약 가능 여부 체크
+        // 예약 가능 여부 체크 (상품 예약 상태, 인원수 체크)
         orderService.checkReservedUserCount(requestDto.getTotalCount(), requestDto.getProductId());
 
         JSONParser parser = new JSONParser();
@@ -50,7 +49,7 @@ public class WidgetController {
 
         // 토스페이먼츠 API는 시크릿 키를 사용자 ID로 사용하고, 비밀번호는 사용하지 않습니다.
         // 비밀번호가 없다는 것을 알리기 위해 시크릿 키 뒤에 콜론을 추가합니다.
-        String widgetSecretKey = "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6";
+        String widgetSecretKey = "test_sk_Z61JOxRQVEoWEyYPlRnR8W0X9bAq";
         Base64.Encoder encoder = Base64.getEncoder();
         byte[] encodedBytes = encoder.encode((widgetSecretKey + ":").getBytes("UTF-8"));
         String authorizations = "Basic " + new String(encodedBytes, 0, encodedBytes.length);
@@ -74,13 +73,17 @@ public class WidgetController {
         // 결제 성공 및 실패 비즈니스 로직을 구현하세요.
         Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
         JSONObject jsonObject = (JSONObject) parser.parse(reader);
-
-        String imomOrderId = orderService.createOrder(jsonObject, requestDto, "woori@imom.kr");
-        updateMarketingAgreement("woori@imom.kr", requestDto.isMarketing());
-
         responseStream.close();
 
-        return BaseResponse.ok(imomOrderId);
+        // 결제 승인이 이루어지거나, 가상계좌인 경우 Order 객체 생성
+        String method = (String) jsonObject.get("method");
+        String status = (String) jsonObject.get("status");
+
+        if (method.equals("가상계좌") || status.equals("DONE")) {
+            String imomOrderId = orderService.createOrder(jsonObject, requestDto, "woori@imom.kr");
+            updateMarketingAgreement("woori@imom.kr", requestDto.isMarketing());
+        }
+        return ResponseEntity.status(code).body(jsonObject);
     }
 
     // 잔금 완납
@@ -120,9 +123,14 @@ public class WidgetController {
         Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
         JSONObject jsonObject = (JSONObject) parser.parse(reader); // payment 객체?????
 
-        orderService.additionalPayment(jsonObject, requestDto);
-
         responseStream.close();
+
+        String method = (String) jsonObject.get("method");
+        String status = (String) jsonObject.get("status");
+        if (method.equals("가상계좌") || status.equals("DONE")) {
+            orderService.additionalPayment(jsonObject, requestDto);
+            updateMarketingAgreement("woori@imom.kr", requestDto.isMarketing());
+        }
 
         return ResponseEntity.status(code).body(jsonObject);
     }
@@ -137,6 +145,7 @@ public class WidgetController {
         logger.info("가상계좌 웹훅 들어옴");
         logger.info(requestDto.getStatus() + "");
 
+        // 결제 정보 받아오기
         JSONParser parser = new JSONParser();
 
         String widgetSecretKey = "test_sk_Z61JOxRQVEoWEyYPlRnR8W0X9bAq";

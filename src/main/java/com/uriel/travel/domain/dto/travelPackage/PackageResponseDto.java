@@ -27,7 +27,7 @@ public class PackageResponseDto {
         int period;
         String privacy;
         String countryName;
-        int price;
+        Long price;
         String hashTag;
         String hotelInfo;
         String regionInfo;
@@ -67,7 +67,7 @@ public class PackageResponseDto {
             }
         }
 
-        public void setPrice(int price) {
+        public void setPrice(Long price) {
             this.price = price;
         }
     }

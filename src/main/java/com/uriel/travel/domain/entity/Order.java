@@ -109,9 +109,9 @@ public class Order extends BaseTimeEntity {
     }
 
     public void updateTravelerAndPrice(OrderRequestDto.UpdateTraveler requestDto, ProductDetail productDetail) {
-        this.totalPrice = Long.valueOf((productDetail.getAdultPrice() + productDetail.getAdultSurcharge()) * requestDto.getAdultCount()
+        this.totalPrice = (productDetail.getAdultPrice() + productDetail.getAdultSurcharge()) * requestDto.getAdultCount()
                 + (productDetail.getChildPrice() + productDetail.getChildSurcharge()) * requestDto.getChildCount()
-                + (productDetail.getInfantPrice() + productDetail.getInfantSurcharge()) * requestDto.getInfantCount());
+                + (productDetail.getInfantPrice() + productDetail.getInfantSurcharge()) * requestDto.getInfantCount();
 
         this.adultCount = requestDto.getAdultCount();
         this.childCount = requestDto.getChildCount();
@@ -126,9 +126,14 @@ public class Order extends BaseTimeEntity {
         }
     }
 
-    public void cancel() {
-        this.orderState = OrderState.CANCELED;
-        this.payedPrice = 0L;
+    public void cancel(Long cancelAmount) {
+        this.payedPrice -= cancelAmount;
+
+        if (this.payedPrice.equals(0L)) {
+            this.orderState = OrderState.CANCELED;
+        } else {
+            this.orderState = OrderState.PAYMENT_NEEDED;
+        }
     }
 
     public void updateAdditionalPrice(Long additionalPrice) {

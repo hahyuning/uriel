@@ -231,12 +231,12 @@ public class PackageService {
         return packageInfo;
     }
 
-    private int getMinPrice(Package aPackage) {
+    private Long getMinPrice(Package aPackage) {
         // 최저가 계산
-        int minPrice = 0;
+        Long minPrice = 0L;
         for (Product product : aPackage.getProductList()) {
             if (product.getStartDate().isAfter(LocalDateTime.now())) {
-                if (minPrice == 0) {
+                if (minPrice.equals(0L)) {
                     minPrice = product.getPrice();
                 } else if (product.getPrice() <= minPrice) {
                     minPrice = product.getPrice();
