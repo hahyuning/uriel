@@ -1,7 +1,6 @@
 package com.uriel.travel.jwt;
 
 import com.uriel.travel.domain.Role;
-import com.uriel.travel.domain.dto.user.JwtToken;
 import com.uriel.travel.domain.entity.User;
 import com.uriel.travel.util.Aes256Util;
 import io.jsonwebtoken.*;
@@ -81,7 +80,7 @@ public class JwtTokenProvider {
         return JwtToken.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .accessTokenExpiresIn(new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_TIME).getTime()).build();
+                .expiresIn(new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_TIME).getTime()).build();
     }
 
     public String getSubject(Claims claims) {

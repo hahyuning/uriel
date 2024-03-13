@@ -49,7 +49,7 @@ public class PackageFilter {
         String packageName;
         String summary;
         int period;
-        int price;
+        Long price;
         String country;
         String hashTag;
         List<ImageDto> thumbnailList;

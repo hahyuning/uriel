@@ -56,11 +56,12 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     SocialType socialType;
 
-    String socialId;
+    @Builder.Default
+    boolean marketing = false;
 
     @Builder.Default
     @JsonIgnore
-    @OneToMany(mappedBy = "reserveUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "reserveUser", cascade = CascadeType.ALL)
     List<Order> orderList = new ArrayList<>();
 
     @Override
@@ -112,5 +113,9 @@ public class User implements UserDetails {
 
     public void updatePassword(String password) {
         this.password = password;
+    }
+
+    public void setMarketing(boolean agreement) {
+        this.marketing = agreement;
     }
 }

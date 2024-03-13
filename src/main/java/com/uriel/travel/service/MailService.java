@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,12 +20,13 @@ public class MailService {
 
     private final UserRepository userRepository;
     private final MailSender mailSender;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${spring.mail.username}")
     private String mailSenderAddress;
 
-    public MailDto sendMailAndChangePw(String email) {
-        User userByEmail = userRepository.findByEmail(email)
+    public MailDto sendMailAndChangePw(MailDto requestDto) {
+        User user = userRepository.findByEmailAndUserName(requestDto.getEmail(), requestDto.getUserName())
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
 
@@ -32,15 +34,15 @@ public class MailService {
         String tempPw = getTempPassword();
 
         // 비밀번호 업데이트
-        userByEmail.updatePassword(tempPw);
+        user.updatePassword(passwordEncoder.encode(tempPw));
 
         // 메일 전송
         MailDto mailDto = MailDto.builder()
-                .email(email)
+                .email(requestDto.getEmail())
                 .title("아이디/비밀번호 정보입니다.")
                 .message("요청하신 계정 정보는 아래와 같습니다.\n" +
                         "\n" +
-                        "아이디: " + email + "\n" +
+                        "아이디: " + requestDto.getEmail() + "\n" +
                         "\n" +
                         "임시 비밀번호: " + tempPw + " 입니다." + "\n" +
                         "\n" +

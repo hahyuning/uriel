@@ -2,6 +2,7 @@ package com.uriel.travel.domain.dto.order;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.querydsl.core.annotations.QueryProjection;
+import com.uriel.travel.domain.Country;
 import com.uriel.travel.domain.OrderState;
 import com.uriel.travel.domain.ProductState;
 import lombok.AccessLevel;
@@ -29,18 +30,21 @@ public class OrderFilter {
         Long order;
         Long start;
 
-        int offset;
-    }
-
-    @Getter
-    @Setter
-    @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class OrderSearchCond {
-
         String type;
         String target;
+
         int offset;
     }
+
+//    @Getter
+//    @Setter
+//    @FieldDefaults(level = AccessLevel.PRIVATE)
+//    public static class OrderSearchCond {
+//
+//        String type;
+//        String target;
+//        int offset;
+//    }
 
     @Getter
     @Setter
@@ -54,6 +58,7 @@ public class OrderFilter {
         String orderState;
 
         String packageName;
+        String country;
         String productCode;
         String productState;
 
@@ -66,12 +71,13 @@ public class OrderFilter {
         int totalCount;
 
         @QueryProjection
-        public OrderFilterResponseDtoForAdmin(String imomOrderId, LocalDateTime orderDate, OrderState orderState, String packageName, String productCode, ProductState productState, LocalDateTime startDate,
+        public OrderFilterResponseDtoForAdmin(String imomOrderId, LocalDateTime orderDate, OrderState orderState, String packageName, Country country, String productCode, ProductState productState, LocalDateTime startDate,
                                               String reserveUser, String phoneNumber, String email, int totalCount) {
             this.imomOrderId = imomOrderId;
             this.orderDate = orderDate;
             this.orderState = orderState.getViewName();
             this.packageName = packageName;
+            this.country = country.getViewName();
             this.productCode = productCode;
             this.productState = productState.getViewName();
             this.startDate = startDate;

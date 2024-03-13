@@ -28,7 +28,10 @@ public class OrderRequestDto {
         int totalCount;
         Long totalPrice;
 
+        boolean marketing;
+
         List<TravelerInfo> travelerInfoList;
+
     }
 
     @Getter
@@ -58,5 +61,18 @@ public class OrderRequestDto {
         String amount;
 
         String imomOrderId;
+
+        boolean marketing;
+
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class UpdateAdditionalPrice {
+
+        String imomOrderId;
+        Long additionalPrice;
     }
 }

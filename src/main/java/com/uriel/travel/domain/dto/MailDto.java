@@ -13,4 +13,5 @@ public class MailDto {
     private String email;
     private String title;
     private String message;
+    private String userName;
 }

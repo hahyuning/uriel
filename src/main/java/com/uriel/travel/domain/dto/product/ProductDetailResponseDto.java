@@ -45,12 +45,12 @@ public class ProductDetailResponseDto {
         int shopping; // 쇼핑 유무
         int optionalTour; // 선택 관광 유무
 
-        int adultPrice; // 성인 요금
-        int adultSurcharge; // 성인 유류 할증
-        int childPrice; // 아동 요금
-        int childSurcharge; // 아동 유류 할증
-        int infantPrice; // 유아 요금
-        int infantSurcharge; // 유아 유류 할증
+        Long adultPrice; // 성인 요금
+        Long adultSurcharge; // 성인 유류 할증
+        Long childPrice; // 아동 요금
+        Long childSurcharge; // 아동 유류 할증
+        Long infantPrice; // 유아 요금
+        Long infantSurcharge; // 유아 유류 할증
 
         String keyPoint; // 핵심 키포인트
         String includedProduct; // 포함 내역

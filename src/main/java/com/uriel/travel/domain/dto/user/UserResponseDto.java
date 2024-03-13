@@ -1,7 +1,11 @@
 package com.uriel.travel.domain.dto.user;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.uriel.travel.domain.entity.User;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
@@ -32,6 +36,8 @@ public class UserResponseDto {
         String phoneNumber;
         int headCount;
         String childName;
+        String socialType;
+        boolean marketing;
 
         public static UserInfo of(User user) {
             return UserInfo.builder()
@@ -44,8 +50,26 @@ public class UserResponseDto {
                     .phoneNumber(user.getPhoneNumber())
                     .headCount(user.getHeadCount())
                     .childName(user.getChildName())
+                    .socialType(user.getSocialType().toString())
+                    .marketing(user.isMarketing())
                     .build();
         }
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class SocialUserInfo {
+        String email;
+        String userName;
+        String gender;
+        LocalDate birth;
+        String phoneNumber;
+
+        String accessToken;
+        String refreshToken;
     }
 
     @Getter

@@ -43,16 +43,36 @@ public class OrderController {
         return BaseResponse.ok(orderService.getOrderListForAdmin(filterCond));
     }
 
-    // 주문 정보 검색
-    @GetMapping("/search")
-    public BaseResponse<Page<OrderFilter.OrderFilterResponseDtoForAdmin>> orderSearchForAdmin(@ModelAttribute OrderFilter.OrderSearchCond searchCond) {
-        return BaseResponse.ok(orderService.orderSearch(searchCond));
-    }
+//    // 주문 정보 검색
+//    @GetMapping("/search")
+//    public BaseResponse<Page<OrderFilter.OrderFilterResponseDtoForAdmin>> orderSearchForAdmin(@ModelAttribute OrderFilter.OrderSearchCond searchCond) {
+//        return BaseResponse.ok(orderService.orderSearch(searchCond));
+//    }
 
     // 여행자 정보 수정
     @PostMapping("/update/travelers")
     public BaseResponse<Void> updateTravelers(@RequestBody OrderRequestDto.UpdateTraveler requestDto) {
         orderService.updateTravelers(requestDto);
         return BaseResponse.ok();
+    }
+
+    // 주문취소
+    @GetMapping("/cancel/{imomOrderId}")
+    public BaseResponse<Void> cancelOrder(@PathVariable String imomOrderId) {
+        orderService.cancelOrder(imomOrderId);
+        return BaseResponse.ok();
+    }
+
+    // 추가금 변경
+    @PostMapping("/update/price")
+    public BaseResponse<Void> updateAdditionalPrice(@RequestBody OrderRequestDto.UpdateAdditionalPrice requestDto) {
+        orderService.updateAdditionalPrice(requestDto);
+        return BaseResponse.ok();
+    }
+
+    // 엑셀 다운용 전체 목록 조회
+    @GetMapping("/excel")
+    public BaseResponse<List<OrderResponseDto.OrderInfo>> getAllOrderInfoForExcel() {
+        return BaseResponse.ok(orderService.getAllOrderInfos());
     }
 }

@@ -3,7 +3,7 @@ package com.uriel.travel.service;
 import com.uriel.travel.domain.Gender;
 import com.uriel.travel.domain.Role;
 import com.uriel.travel.domain.SocialType;
-import com.uriel.travel.domain.dto.user.JwtToken;
+import com.uriel.travel.jwt.JwtToken;
 import com.uriel.travel.domain.dto.user.UserRequestDto;
 import com.uriel.travel.domain.entity.User;
 import com.uriel.travel.exception.CustomUnauthorizedException;
@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -120,7 +121,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         String email = Aes256Util.decrypt(claims.getSubject());
         String redisRefreshToken = redisService.getValues(email);
 
-        if (redisService.checkExistsValue(redisRefreshToken) && refreshToken.equals(redisRefreshToken)) {
+        if (redisService.checkExistsValue(redisRefreshToken) && Objects.equals(refreshToken, redisRefreshToken)) {
             User user = this.getMemberByEmail(email);
             JwtToken tokenDto = jwtTokenProvider.createToken(user.getEmail(), user.getRole().toString());
             String newAccessToken = tokenDto.getAccessToken();

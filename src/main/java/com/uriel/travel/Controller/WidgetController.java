@@ -1,14 +1,16 @@
 package com.uriel.travel.Controller;
 
-import com.uriel.travel.Base.BaseResponse;
 import com.uriel.travel.domain.dto.order.OrderRequestDto;
+import com.uriel.travel.domain.dto.toss.WebHookInfo;
 import com.uriel.travel.service.OrderService;
+import com.uriel.travel.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,12 +30,19 @@ import java.util.Base64;
 public class WidgetController {
 
     private final OrderService orderService;
+    private final UserService userService;
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     // 예약금 결제
     @RequestMapping(value = "/confirm")
-    public BaseResponse<String> confirmPayment(@RequestBody OrderRequestDto.Create requestDto) throws Exception {
+    public ResponseEntity<JSONObject> confirmPayment(@RequestBody OrderRequestDto.Create requestDto) throws Exception {
+
+        logger.info("예약금 결제 로직 시작");
+        // 예약 가능 여부 체크 (상품 예약 상태, 인원수 체크)
+        orderService.checkReservedUserCount(requestDto.getTotalCount(), requestDto.getProductId());
+
+        logger.info("예약 가능 여부 체크 완료");
 
         JSONParser parser = new JSONParser();
         JSONObject obj = new JSONObject();
@@ -41,9 +50,13 @@ public class WidgetController {
         obj.put("amount", requestDto.getAmount());
         obj.put("paymentKey", requestDto.getPaymentKey());
 
+        logger.info(requestDto.getOrderId());
+        logger.info(requestDto.getAmount());
+        logger.info(requestDto.getPaymentKey());
+
         // 토스페이먼츠 API는 시크릿 키를 사용자 ID로 사용하고, 비밀번호는 사용하지 않습니다.
         // 비밀번호가 없다는 것을 알리기 위해 시크릿 키 뒤에 콜론을 추가합니다.
-        String widgetSecretKey = "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6";
+        String widgetSecretKey = "test_sk_Z61JOxRQVEoWEyYPlRnR8W0X9bAq";
         Base64.Encoder encoder = Base64.getEncoder();
         byte[] encodedBytes = encoder.encode((widgetSecretKey + ":").getBytes("UTF-8"));
         String authorizations = "Basic " + new String(encodedBytes, 0, encodedBytes.length);
@@ -62,17 +75,30 @@ public class WidgetController {
         int code = connection.getResponseCode();
         boolean isSuccess = code == 200;
 
+        logger.info("성공 여부    " + code);
+
         InputStream responseStream = isSuccess ? connection.getInputStream() : connection.getErrorStream();
 
         // 결제 성공 및 실패 비즈니스 로직을 구현하세요.
         Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
-        JSONObject jsonObject = (JSONObject) parser.parse(reader); // payment 객체?????
+        JSONObject jsonObject = (JSONObject) parser.parse(reader);
 
-        String imomOrderId = orderService.createOrder(jsonObject, requestDto, "woori@imom.kr");
+        // 결제 승인이 이루어지거나, 가상계좌인 경우 Order 객체 생성
+        String method = (String) jsonObject.get("method");
+        String status = (String) jsonObject.get("status");
+
+        logger.info("결제 방식, 결제 상태" + method + status);
+
+        if (method.equals("가상계좌") || status.equals("DONE")) {
+            logger.info("주문 생성 시작");
+            String imomOrderId = orderService.createOrder(jsonObject, requestDto, "woori@imom.kr");
+            updateMarketingAgreement("woori@imom.kr", requestDto.isMarketing());
+
+            logger.info("아이맘 주문 번호" + imomOrderId);
+        }
 
         responseStream.close();
-
-        return BaseResponse.ok(imomOrderId);
+        return ResponseEntity.status(code).body(jsonObject);
     }
 
     // 잔금 완납
@@ -87,7 +113,7 @@ public class WidgetController {
 
         // 토스페이먼츠 API는 시크릿 키를 사용자 ID로 사용하고, 비밀번호는 사용하지 않습니다.
         // 비밀번호가 없다는 것을 알리기 위해 시크릿 키 뒤에 콜론을 추가합니다.
-        String widgetSecretKey = "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6";
+        String widgetSecretKey = "test_sk_Z61JOxRQVEoWEyYPlRnR8W0X9bAq";
         Base64.Encoder encoder = Base64.getEncoder();
         byte[] encodedBytes = encoder.encode((widgetSecretKey + ":").getBytes("UTF-8"));
         String authorizations = "Basic " + new String(encodedBytes, 0, encodedBytes.length);
@@ -112,10 +138,60 @@ public class WidgetController {
         Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
         JSONObject jsonObject = (JSONObject) parser.parse(reader); // payment 객체?????
 
-        orderService.additionalPayment(jsonObject, requestDto);
-
         responseStream.close();
 
+        String method = (String) jsonObject.get("method");
+        String status = (String) jsonObject.get("status");
+        if (method.equals("가상계좌") || status.equals("DONE")) {
+            orderService.additionalPayment(jsonObject, requestDto);
+            updateMarketingAgreement("woori@imom.kr", requestDto.isMarketing());
+        }
+
         return ResponseEntity.status(code).body(jsonObject);
+    }
+
+    private void updateMarketingAgreement(String email, boolean agreement) {
+        userService.updateMarketingAgreement(email, agreement);
+    }
+
+    // 가상계좌 웹훅 로직
+    @PostMapping("/virtual-account/hook")
+    public void virtualAccountWebHook(@RequestBody WebHookInfo.VirtualAccount requestDto) throws Exception {
+        logger.info("가상계좌 웹훅 들어옴");
+        logger.info(requestDto.getStatus() + "");
+
+        // 결제 정보 받아오기
+        JSONParser parser = new JSONParser();
+
+        String widgetSecretKey = "test_sk_Z61JOxRQVEoWEyYPlRnR8W0X9bAq";
+        Base64.Encoder encoder = Base64.getEncoder();
+        byte[] encodedBytes = encoder.encode((widgetSecretKey + ":").getBytes("UTF-8"));
+        String authorizations = "Basic " + new String(encodedBytes, 0, encodedBytes.length);
+
+        // 결제를 승인하면 결제수단에서 금액이 차감돼요.
+        URL url = new URL("https://api.tosspayments.com/v1/payments/orders/" + requestDto.getOrderId());
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestProperty("Authorization", authorizations);
+        connection.setRequestMethod("GET");
+        connection.setDoOutput(true);
+
+        int code = connection.getResponseCode();
+        boolean isSuccess = code == 200;
+
+        InputStream responseStream = isSuccess ? connection.getInputStream() : connection.getErrorStream();
+
+        Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
+        JSONObject jsonObject = (JSONObject) parser.parse(reader);
+
+        orderService.updateOrderStateByVAWebHook(requestDto, jsonObject);
+    }
+
+    // 가상계좌 웹훅 로직
+    @PostMapping("/others/hook")
+    public void virtualAccountWebHook(@RequestBody WebHookInfo.OtherPayments requestDto) throws Exception {
+        logger.info("일반결제 웹훅 들어옴");
+        logger.info(requestDto.getData().getStatus() + "");
+
+        orderService.updateOrderStateByOPWebHook(requestDto);
     }
 }

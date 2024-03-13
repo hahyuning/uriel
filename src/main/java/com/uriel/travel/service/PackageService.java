@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +40,8 @@ public class PackageService {
     private final ThumbnailRepository thumbnailRepository;
     private final ScheduleRepository scheduleRepository;
     private final TaggingRepository taggingRepository;
+
+    private final OrderRepository orderRepository;
 
     private final S3Service s3Service;
 
@@ -78,8 +81,20 @@ public class PackageService {
     // 패키지 삭제
     public void delete(List<Long> ids) {
         ids.forEach(id -> {
+            AtomicReference<Boolean> flag = new AtomicReference<>(false);
+
             Package aPackage = getPackageByPackageId(id);
-            packageRepository.delete(aPackage);
+            aPackage.getProductList()
+                            .forEach(product -> {
+                                List<Order> orderList = orderRepository.findByProductId(aPackage.getId());
+                                if (!orderList.isEmpty()) {
+                                    flag.set(true);
+                                }
+                            });
+
+            if (Boolean.FALSE.equals(flag.get())) {
+                packageRepository.delete(aPackage);
+            }
         });
     }
 
@@ -231,12 +246,12 @@ public class PackageService {
         return packageInfo;
     }
 
-    private int getMinPrice(Package aPackage) {
+    private Long getMinPrice(Package aPackage) {
         // 최저가 계산
-        int minPrice = 0;
+        Long minPrice = 0L;
         for (Product product : aPackage.getProductList()) {
             if (product.getStartDate().isAfter(LocalDateTime.now())) {
-                if (minPrice == 0) {
+                if (minPrice.equals(0L)) {
                     minPrice = product.getPrice();
                 } else if (product.getPrice() <= minPrice) {
                     minPrice = product.getPrice();

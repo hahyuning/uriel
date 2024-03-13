@@ -1,11 +1,14 @@
 package com.uriel.travel.service;
 
 import com.uriel.travel.domain.OrderState;
+import com.uriel.travel.domain.ProductState;
 import com.uriel.travel.domain.dto.order.OrderFilter;
 import com.uriel.travel.domain.dto.order.OrderRequestDto;
 import com.uriel.travel.domain.dto.order.OrderResponseDto;
 import com.uriel.travel.domain.dto.order.TravelerInfo;
+import com.uriel.travel.domain.dto.toss.WebHookInfo;
 import com.uriel.travel.domain.entity.*;
+import com.uriel.travel.exception.CustomBadRequestException;
 import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.repository.*;
@@ -14,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,42 +66,60 @@ public class OrderService {
         return orderRepositoryCustom.ordersByFilter(filterCond, pageRequest);
     }
 
-    // 주문 목록 검색
-    @Transactional(readOnly = true)
-    public Page<OrderFilter.OrderFilterResponseDtoForAdmin> orderSearch(OrderFilter.OrderSearchCond searchCond) {
-        PageRequest pageRequest = PageRequest.of(searchCond.getOffset(), 10);
-        return orderRepositoryCustom.searchOrder(searchCond, pageRequest);
-    }
+//    // 주문 목록 검색
+//    @Transactional(readOnly = true)
+//    public Page<OrderFilter.OrderFilterResponseDtoForAdmin> orderSearch(OrderFilter.OrderSearchCond searchCond) {
+//        PageRequest pageRequest = PageRequest.of(searchCond.getOffset(), 10);
+//        return orderRepositoryCustom.searchOrder(searchCond, pageRequest);
+//    }
 
-    // 주문 등록 (토스 연동)
+    // 주문 등록
     public String createOrder(JSONObject jsonObject, OrderRequestDto.Create requestDto, String email) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
 
+        // Order 객체 생성
         Order order = Order.builder()
                 .imomOrderId((String) jsonObject.get("orderId"))
-                .orderDate(LocalDateTime.parse((String) jsonObject.get("approvedAt"), formatter))
+                .orderDate(LocalDateTime.parse((String) jsonObject.get("requestedAt"), formatter))
                 .adultCount(requestDto.getAdultCount())
                 .childCount(requestDto.getChildCount())
                 .infantCount(requestDto.getChildCount())
                 .totalCount(requestDto.getTotalCount())
                 .totalPrice(requestDto.getTotalPrice())
                 .payedPrice((Long) jsonObject.get("totalAmount"))
-                .orderState(OrderState.RESERVED)
                 .build();
 
+        // 결제 방법
+        String method = (String) jsonObject.get("method");
+        if (method.equals("가상계좌")) {
+            order.setOrderState(OrderState.READY);
+        } else {
+            order.setOrderState(OrderState.RESERVED);
+        }
+
+        // 결제 정보 추가
         order.addOrderNumber((String) jsonObject.get("orderId"));
 
+        // reserve user 연관관계
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND));
         order.setReserveUser(user);
 
+        // product 연관관계
         Product product = productRepository.findById(requestDto.getProductId())
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND));
+        product.updateNowCount(requestDto.getTotalCount());
+
         order.setProduct(product);
+
+        // order 객체 저장
         orderRepository.save(order);
 
+        log.info("주문 정보 저장 완료");
+
+        // 여행자 정보 저장
         requestDto.getTravelerInfoList()
                 .forEach(travelerInfo -> {
                     Traveler traveler = travelerInfo.toEntity();
@@ -141,5 +163,80 @@ public class OrderService {
                     traveler.setOrder(order);
                     travelerRepository.save(traveler);
                 });
+
+
+        Product product = productRepository.findById(order.getProduct().getId())
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+        product.updateNowCount(requestDto.getTotalCount() - order.getTotalCount());
+    }
+
+    // 주문 취소
+    public void cancelOrder(String imomOrderId) {
+        Order order = orderRepository.findByImomOrderId(imomOrderId);
+        order.cancel(order.getPayedPrice());
+
+        Product product = productRepository.findById(order.getProduct().getId())
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+        product.updateNowCount(-1 * (order.getTotalCount()));
+    }
+
+    // 추가금 변경
+    public void updateAdditionalPrice(OrderRequestDto.UpdateAdditionalPrice requestDto) {
+        Order order = orderRepository.findByImomOrderId(requestDto.getImomOrderId());
+        order.updateAdditionalPrice(requestDto.getAdditionalPrice());
+    }
+
+    // 예약가능여부 확인 (인원 확인)
+    public void checkReservedUserCount(int totalCount, Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+
+        if (product.getProductState().equals(ProductState.RESERVATION_DEADLINE)) {
+            log.info("예약 마감");
+            throw new CustomBadRequestException(ErrorCode.RESERVATION_NOT_AVAILABLE);
+        }
+
+        if (product.getNowCount() + totalCount > product.getMaxCount()) {
+            log.info("예약 인원 초과");
+            throw new CustomBadRequestException(ErrorCode.EXCEED_MAX_COUNT);
+        }
+    }
+
+    public void updateOrderStateByVAWebHook(WebHookInfo.VirtualAccount requestDto, JSONObject jsonObject) {
+        // done -> 입금 완료
+        // canceled -> 취소
+        // partial canceled -> 부분 취소
+        Order order = orderRepository.findByTossOrderId(requestDto.getOrderId());
+        String status = requestDto.getStatus();
+        JSONObject cancels = (JSONObject) jsonObject.get("cancels");
+
+        log.info("가상계좌 결제 상태: " + status);
+
+        if (status.equals("DONE")) { // 가상계좌 입금 완료
+            order.additionalPayment((Long) jsonObject.get("totalAmount"));
+        } else if (status.equals("CANCELED") || status.equals("PARTIAL_CANCELED")) { // 가상계좌 주문 취소
+            order.cancel((Long) cancels.get("cancelAmount"));
+        }
+    }
+
+    public void updateOrderStateByOPWebHook(WebHookInfo.OtherPayments requestDto) {
+        // canceled -> 취소
+        // partial canceled -> 부분 취소
+        String status = requestDto.getData().getStatus();
+        Order order = orderRepository.findByTossOrderId(requestDto.getData().getOrderId());
+
+        if (status.equals("CANCELED") || status.equals("PARTIAL_CANCELED")) {
+            order.cancel(requestDto.getData().getCancel().getCancelAmount());
+        }
+    }
+
+    public List<OrderResponseDto.OrderInfo> getAllOrderInfos() {
+        return orderRepository.findAll(Sort.by(Sort.Direction.DESC, "orderDate"))
+                .stream()
+                .map(OrderResponseDto.OrderInfo::of)
+                .toList();
     }
 }

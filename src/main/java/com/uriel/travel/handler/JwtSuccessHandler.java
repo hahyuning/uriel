@@ -1,7 +1,7 @@
 package com.uriel.travel.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.uriel.travel.domain.dto.user.JwtToken;
+import com.uriel.travel.jwt.JwtToken;
 import com.uriel.travel.domain.entity.User;
 import com.uriel.travel.jwt.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;

@@ -52,40 +52,40 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                 .fetch();
     }
 
-    @Override
-    public Page<OrderFilter.OrderFilterResponseDtoForAdmin> searchOrder(OrderFilter.OrderSearchCond searchCond, Pageable pageable) {
-        List<OrderFilter.OrderFilterResponseDtoForAdmin> orderList = jpaQueryFactory
-                .select(new QOrderFilter_OrderFilterResponseDtoForAdmin(
-                        order.imomOrderId,
-                        order.orderDate,
-                        order.orderState,
-                        order.product.aPackage.packageName,
-                        order.product.productCode,
-                        order.product.productState,
-                        order.product.startDate,
-                        order.reserveUser.krName,
-                        order.reserveUser.phoneNumber,
-                        order.reserveUser.email,
-                        order.totalCount
-                ))
-                .from(order)
-                .where(
-                        searchTarget(searchCond)
-                )
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-
-        Long count = jpaQueryFactory
-                .select(order.count())
-                .from(order)
-                .where(
-                        searchTarget(searchCond)
-                )
-                .fetchOne();
-
-        return new PageImpl<>(orderList, pageable, count);
-    }
+//    @Override
+//    public Page<OrderFilter.OrderFilterResponseDtoForAdmin> searchOrder(OrderFilter.OrderSearchCond searchCond, Pageable pageable) {
+//        List<OrderFilter.OrderFilterResponseDtoForAdmin> orderList = jpaQueryFactory
+//                .select(new QOrderFilter_OrderFilterResponseDtoForAdmin(
+//                        order.imomOrderId,
+//                        order.orderDate,
+//                        order.orderState,
+//                        order.product.aPackage.packageName,
+//                        order.product.productCode,
+//                        order.product.productState,
+//                        order.product.startDate,
+//                        order.reserveUser.krName,
+//                        order.reserveUser.phoneNumber,
+//                        order.reserveUser.email,
+//                        order.totalCount
+//                ))
+//                .from(order)
+//                .where(
+//                        searchTarget(searchCond)
+//                )
+//                .offset(pageable.getOffset())
+//                .limit(pageable.getPageSize())
+//                .fetch();
+//
+//        Long count = jpaQueryFactory
+//                .select(order.count())
+//                .from(order)
+//                .where(
+//                        searchTarget(searchCond)
+//                )
+//                .fetchOne();
+//
+//        return new PageImpl<>(orderList, pageable, count);
+//    }
 
     @Override
     public Page<OrderFilter.OrderFilterResponseDtoForAdmin> ordersByFilter(OrderFilter.OrderFilterCond filterCond, Pageable pageable) {
@@ -95,6 +95,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                         order.orderDate,
                         order.orderState,
                         order.product.aPackage.packageName,
+                        order.product.aPackage.country,
                         order.product.productCode,
                         order.product.productState,
                         order.product.startDate,
@@ -108,7 +109,8 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                         packageIdEq(filterCond),
                         countryEq(filterCond),
                         orderStateEq(filterCond),
-                        orderDateBtw(filterCond)
+                        orderDateBtw(filterCond),
+                        searchTarget(filterCond)
                 )
                 .orderBy(
                         createOrderSpecifier(filterCond)
@@ -178,7 +180,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         return orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]);
     }
 
-    public BooleanExpression searchTarget(OrderFilter.OrderSearchCond searchCond) {
+    public BooleanExpression searchTarget(OrderFilter.OrderFilterCond searchCond) {
         if (searchCond.getType() == null || searchCond.getTarget() == null) {
             return null;
         }

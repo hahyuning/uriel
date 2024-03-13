@@ -17,4 +17,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("select o from Order o where o.product.id =:productId")
     List<Order> findByProductId(Long productId);
+
+    @Query("select o from Order o join o.orderNumberList n where n=:orderId")
+    Order findByTossOrderId(String orderId);
 }

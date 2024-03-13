@@ -58,11 +58,11 @@ public class ProductFilter {
         int maxCount;
         int nowCount;
         String airline;
-        int price;
+        Long price;
         String productState;
 
         @QueryProjection
-        public ProductFilterResponseDto(Long id, String productCode, LocalDateTime startDate, LocalDateTime endDate, Airline airline, int price, int maxCount, int nowCount, ProductState productState) {
+        public ProductFilterResponseDto(Long id, String productCode, LocalDateTime startDate, LocalDateTime endDate, Airline airline, Long price, int maxCount, int nowCount, ProductState productState) {
             this.productId = id;
             this.productCode = productCode;
             this.startDate = startDate;
