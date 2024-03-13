@@ -2,7 +2,6 @@ package com.uriel.travel.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uriel.travel.Base.BaseResponse;
-import com.uriel.travel.domain.dto.user.JwtToken;
 import com.uriel.travel.domain.dto.user.UserRequestDto;
 import com.uriel.travel.domain.entity.User;
 import com.uriel.travel.service.RedisService;

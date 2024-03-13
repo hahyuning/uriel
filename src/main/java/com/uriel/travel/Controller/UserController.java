@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
@@ -68,6 +70,19 @@ public class UserController {
     @PostMapping("/reset-pw")
     private BaseResponse<Void> updatePassword(@RequestBody UserRequestDto.NewPassword passwordDto) {
         userService.updatePassword(SecurityUtil.getCurrentUsername(), passwordDto.getPassword());
+        return BaseResponse.ok();
+    }
+
+    // 엑셀 다운용 전체 목록 조회
+    @GetMapping("/excel")
+    private BaseResponse<List<UserResponseDto.UserInfo>> getAllUsersForExcel() {
+        return BaseResponse.ok(userService.getAllUserInfos());
+    }
+
+    // 회원 탈퇴
+    @GetMapping("/withdraw")
+    private BaseResponse<Void> withdrawUser() {
+        userService.deleteUser(SecurityUtil.getCurrentUsername());
         return BaseResponse.ok();
     }
 }

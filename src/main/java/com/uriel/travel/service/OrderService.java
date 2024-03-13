@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -230,5 +231,12 @@ public class OrderService {
         if (status.equals("CANCELED") || status.equals("PARTIAL_CANCELED")) {
             order.cancel(requestDto.getData().getCancel().getCancelAmount());
         }
+    }
+
+    public List<OrderResponseDto.OrderInfo> getAllOrderInfos() {
+        return orderRepository.findAll(Sort.by(Sort.Direction.DESC, "orderDate"))
+                .stream()
+                .map(OrderResponseDto.OrderInfo::of)
+                .toList();
     }
 }

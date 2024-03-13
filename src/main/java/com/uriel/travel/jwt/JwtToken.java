@@ -1,4 +1,4 @@
-package com.uriel.travel.domain.dto.user;
+package com.uriel.travel.jwt;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -14,5 +14,6 @@ public class JwtToken {
 
     String accessToken;
     String refreshToken;
-    Long accessTokenExpiresIn;
+    String grantType;
+    Long expiresIn;
 }

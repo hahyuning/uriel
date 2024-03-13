@@ -60,6 +60,8 @@ public class UserRequestDto {
         String phoneNumber;
         int headCount; //가족 인원수
         String childName;
+
+        String socialType;
     }
 
     @Getter

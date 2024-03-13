@@ -56,8 +56,6 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     SocialType socialType;
 
-    String socialId;
-
     @Builder.Default
     boolean marketing = false;
 

@@ -69,4 +69,10 @@ public class OrderController {
         orderService.updateAdditionalPrice(requestDto);
         return BaseResponse.ok();
     }
+
+    // 엑셀 다운용 전체 목록 조회
+    @GetMapping("/excel")
+    public BaseResponse<List<OrderResponseDto.OrderInfo>> getAllOrderInfoForExcel() {
+        return BaseResponse.ok(orderService.getAllOrderInfos());
+    }
 }

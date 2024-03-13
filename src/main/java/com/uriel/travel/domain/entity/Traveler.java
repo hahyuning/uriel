@@ -31,7 +31,7 @@ public class Traveler {
 
     String phoneNumber;
 
-    boolean isRepresentative;
+    boolean representative;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")

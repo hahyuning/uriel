@@ -8,9 +8,11 @@ import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -97,5 +99,18 @@ public class UserService {
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
         user.setMarketing(agreement);
+    }
+
+    public List<UserResponseDto.UserInfo> getAllUserInfos() {
+        return userRepository.findAll(Sort.by(Sort.Direction.ASC, "krName"))
+                .stream()
+                .map(UserResponseDto.UserInfo::of)
+                .toList();
+    }
+
+    public void deleteUser(String email) {
+        userRepository.delete(userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER)));
     }
 }
