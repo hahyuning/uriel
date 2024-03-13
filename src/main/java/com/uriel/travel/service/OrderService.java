@@ -116,6 +116,8 @@ public class OrderService {
         // order 객체 저장
         orderRepository.save(order);
 
+        log.info("주문 정보 저장 완료");
+
         // 여행자 정보 저장
         requestDto.getTravelerInfoList()
                 .forEach(travelerInfo -> {
@@ -192,10 +194,12 @@ public class OrderService {
                         new CustomNotFoundException(ErrorCode.NOT_FOUND));
 
         if (product.getProductState().equals(ProductState.RESERVATION_DEADLINE)) {
+            log.info("예약 마감");
             throw new CustomBadRequestException(ErrorCode.RESERVATION_NOT_AVAILABLE);
         }
 
-        if (product.getNowCount() + totalCount > product.getMinCount()) {
+        if (product.getNowCount() + totalCount > product.getMaxCount()) {
+            log.info("예약 인원 초과");
             throw new CustomBadRequestException(ErrorCode.EXCEED_MAX_COUNT);
         }
     }

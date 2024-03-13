@@ -38,14 +38,21 @@ public class WidgetController {
     @RequestMapping(value = "/confirm")
     public ResponseEntity<JSONObject> confirmPayment(@RequestBody OrderRequestDto.Create requestDto) throws Exception {
 
+        logger.info("예약금 결제 로직 시작");
         // 예약 가능 여부 체크 (상품 예약 상태, 인원수 체크)
         orderService.checkReservedUserCount(requestDto.getTotalCount(), requestDto.getProductId());
+
+        logger.info("예약 가능 여부 체크 완료");
 
         JSONParser parser = new JSONParser();
         JSONObject obj = new JSONObject();
         obj.put("orderId", requestDto.getOrderId());
         obj.put("amount", requestDto.getAmount());
         obj.put("paymentKey", requestDto.getPaymentKey());
+
+        logger.info(requestDto.getOrderId());
+        logger.info(requestDto.getAmount());
+        logger.info(requestDto.getPaymentKey());
 
         // 토스페이먼츠 API는 시크릿 키를 사용자 ID로 사용하고, 비밀번호는 사용하지 않습니다.
         // 비밀번호가 없다는 것을 알리기 위해 시크릿 키 뒤에 콜론을 추가합니다.
@@ -68,21 +75,29 @@ public class WidgetController {
         int code = connection.getResponseCode();
         boolean isSuccess = code == 200;
 
+        logger.info("성공 여부    " + code);
+
         InputStream responseStream = isSuccess ? connection.getInputStream() : connection.getErrorStream();
 
         // 결제 성공 및 실패 비즈니스 로직을 구현하세요.
         Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
         JSONObject jsonObject = (JSONObject) parser.parse(reader);
-        responseStream.close();
 
         // 결제 승인이 이루어지거나, 가상계좌인 경우 Order 객체 생성
         String method = (String) jsonObject.get("method");
         String status = (String) jsonObject.get("status");
 
+        logger.info("결제 방식, 결제 상태" + method + status);
+
         if (method.equals("가상계좌") || status.equals("DONE")) {
+            logger.info("주문 생성 시작");
             String imomOrderId = orderService.createOrder(jsonObject, requestDto, "woori@imom.kr");
             updateMarketingAgreement("woori@imom.kr", requestDto.isMarketing());
+
+            logger.info("아이맘 주문 번호" + imomOrderId);
         }
+
+        responseStream.close();
         return ResponseEntity.status(code).body(jsonObject);
     }
 

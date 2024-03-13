@@ -30,7 +30,7 @@ public class Tag {
 
     @Builder.Default
     @JsonIgnore
-    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL)
     List<Tagging> taggingList = new ArrayList<>();
 
     public void update(TagRequestDto.Update requestDto) {

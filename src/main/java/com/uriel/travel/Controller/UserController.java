@@ -61,7 +61,7 @@ public class UserController {
     // 비밀번호 재설정 링크 메일 전송
     @PostMapping("/send-mail")
     private BaseResponse<MailDto> sendEmail(@RequestBody MailDto mailDto) {
-        return BaseResponse.ok(mailService.sendMailAndChangePw(mailDto.getEmail()));
+        return BaseResponse.ok(mailService.sendMailAndChangePw(mailDto));
     }
 
     // 비밀번호 재설정

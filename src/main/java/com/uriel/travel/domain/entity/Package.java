@@ -69,12 +69,12 @@ public class Package extends BaseTimeEntity {
 
     @Builder.Default
     @JsonIgnore
-    @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL)
     List<Product> productList = new ArrayList<>();
 
     @Builder.Default
     @JsonIgnore
-    @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "aPackage", cascade = CascadeType.ALL)
     List<Tagging> taggingList = new ArrayList<>();
 
     public void update(PackageRequestDto.Update requestDto) {

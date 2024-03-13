@@ -63,7 +63,7 @@ public class User implements UserDetails {
 
     @Builder.Default
     @JsonIgnore
-    @OneToMany(mappedBy = "reserveUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "reserveUser", cascade = CascadeType.ALL)
     List<Order> orderList = new ArrayList<>();
 
     @Override
