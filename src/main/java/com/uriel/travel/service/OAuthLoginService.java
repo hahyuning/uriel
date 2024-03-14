@@ -69,7 +69,8 @@ public class OAuthLoginService {
                     .userName(oAuthInfoResponse.getName())
                     .gender(Gender.mapToGender(oAuthInfoResponse.getGender()).getViewName())
                     .phoneNumber(oAuthInfoResponse.getPhoneNumber())
-                    .birth(oAuthInfoResponse.getBirth()).build();
+                    .birth(oAuthInfoResponse.getBirth())
+                    .socialType(oAuthInfoResponse.getOAuthProvider().getViewName()).build();
         }
     }
 

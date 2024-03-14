@@ -9,6 +9,7 @@ import com.uriel.travel.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // 이메일 체크
     @Transactional(readOnly = true)
@@ -87,11 +89,12 @@ public class UserService {
                 .email(user.getEmail()).build();
     }
 
-    public void updatePassword(String email, String password) {
-        User user = userRepository.findByEmail(email)
+    public void updatePassword(UserRequestDto.NewPassword passwordDto) {
+
+        User user = userRepository.findByEmail(passwordDto.getEmail())
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
-        user.updatePassword(password);
+        user.updatePassword(passwordEncoder.encode(passwordDto.getPassword()));
     }
 
     public void updateMarketingAgreement(String email, boolean agreement) {

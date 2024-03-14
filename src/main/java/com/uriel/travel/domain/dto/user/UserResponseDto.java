@@ -1,6 +1,5 @@
 package com.uriel.travel.domain.dto.user;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.uriel.travel.domain.entity.User;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -59,7 +58,7 @@ public class UserResponseDto {
     @Getter
     @Setter
     @Builder
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+//    @JsonInclude(JsonInclude.Include.NON_NULL)
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class SocialUserInfo {
         String email;
@@ -67,6 +66,7 @@ public class UserResponseDto {
         String gender;
         LocalDate birth;
         String phoneNumber;
+        String socialType;
 
         String accessToken;
         String refreshToken;

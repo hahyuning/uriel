@@ -78,6 +78,7 @@ public class UserRequestDto {
     @NoArgsConstructor
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class NewPassword {
+        String email;
         String password;
     }
 }

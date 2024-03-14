@@ -67,9 +67,9 @@ public class UserController {
     }
 
     // 비밀번호 재설정
-    @PostMapping("/reset-pw")
+    @PutMapping("/reset-pw")
     private BaseResponse<Void> updatePassword(@RequestBody UserRequestDto.NewPassword passwordDto) {
-        userService.updatePassword(SecurityUtil.getCurrentUsername(), passwordDto.getPassword());
+        userService.updatePassword(passwordDto);
         return BaseResponse.ok();
     }
 

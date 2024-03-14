@@ -65,6 +65,6 @@ public class NaverInfoResponse implements OAuthInfoResponse {
 
     @Override
     public SocialType getOAuthProvider() {
-        return null;
+        return SocialType.NAVER;
     }
 }
