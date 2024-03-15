@@ -69,7 +69,8 @@ public class OAuthLoginService {
                     .userName(oAuthInfoResponse.getName())
                     .gender(Gender.mapToGender(oAuthInfoResponse.getGender()).getViewName())
                     .phoneNumber(oAuthInfoResponse.getPhoneNumber())
-                    .birth(oAuthInfoResponse.getBirth()).build();
+                    .birth(oAuthInfoResponse.getBirth())
+                    .socialType(oAuthInfoResponse.getOAuthProvider().getViewName()).build();
         }
     }
 
@@ -85,6 +86,7 @@ public class OAuthLoginService {
                 .socialType(SocialType.from(requestDto.getSocialType()))
                 .headCount(requestDto.getHeadCount())
                 .childName(requestDto.getChildName())
+                .marketing(requestDto.getMarketing())
                 .build();
 
         String email = userRepository.save(user).getEmail();

@@ -62,7 +62,7 @@ public class OrderRequestDto {
 
         String imomOrderId;
 
-        boolean marketing;
+        String marketing;
 
     }
 
@@ -74,5 +74,15 @@ public class OrderRequestDto {
 
         String imomOrderId;
         Long additionalPrice;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class UpdateMemo {
+
+        String imomOrderId;
+        String memo;
     }
 }

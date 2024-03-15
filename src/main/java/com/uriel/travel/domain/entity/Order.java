@@ -62,6 +62,9 @@ public class Order extends BaseTimeEntity {
 
     OrderState orderState;
 
+    @Builder.Default
+    String memo = "";
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     User reserveUser;
@@ -158,5 +161,9 @@ public class Order extends BaseTimeEntity {
 
     public void setOrderState(OrderState orderState) {
         this.orderState = orderState;
+    }
+
+    public void updateMemo(String memo) {
+        this.memo = memo;
     }
 }

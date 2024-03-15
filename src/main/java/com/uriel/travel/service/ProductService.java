@@ -48,7 +48,7 @@ public class ProductService {
         // 패키지 연관관계
         Package packageById = packageRepository.findById(requestDto.getPackageId())
                 .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND_PACKAGE));
         product.setPackage(packageById);
 
         // 상품 저장
@@ -74,7 +74,7 @@ public class ProductService {
         // 패키지 연관관계
         Package packageById = packageRepository.findById(requestDto.getPackageId())
                 .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND_PACKAGE));
 
         product.setPackage(packageById);
         product.setPrivacy(requestDto.getPrivacy());
@@ -94,7 +94,7 @@ public class ProductService {
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND_PRODUCT));
 
 
         // 패키지 수정
@@ -214,7 +214,7 @@ public class ProductService {
                 Product product = getProductByProductId(productId);
                 Package aPackage = packageRepository.findById(product.getAPackage().getId())
                         .orElseThrow(() ->
-                                new CustomNotFoundException(ErrorCode.NOT_FOUND));
+                                new CustomNotFoundException(ErrorCode.NOT_FOUND_PACKAGE));
 
                 ProductDetail productDetail = productDetailRepository.findByProductId(productId);
                 productDetailRepository.delete(productDetail);
@@ -230,7 +230,7 @@ public class ProductService {
         ids.forEach(id -> {
             Product product = productRepository.findById(id)
                     .orElseThrow(() ->
-                            new CustomNotFoundException(ErrorCode.NOT_FOUND));
+                            new CustomNotFoundException(ErrorCode.NOT_FOUND_PRODUCT));
 
             product.setPrivacy(privacy);
         });
@@ -318,7 +318,7 @@ public class ProductService {
     private Product getProductByProductId(Long productId) {
         return productRepository.findById(productId)
                 .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND_PRODUCT));
     }
 
     // 패키지 정보 수정
@@ -332,7 +332,7 @@ public class ProductService {
 
         return packageRepository.findById(packageId)
                 .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND_PRODUCT));
     }
 
     // 스케쥴링

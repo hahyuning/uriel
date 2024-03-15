@@ -34,9 +34,9 @@ public class TagService {
 
         // 태그 중복 확인
         tagRepository.findByTagContent(requestDto.getTagContent())
-                        .ifPresent(tag -> {
-                            throw new CustomBadRequestException(ErrorCode.DUPLICATE_TAG);
-                        });
+            .ifPresent(tag -> {
+                throw new CustomBadRequestException(ErrorCode.DUPLICATE_TAG);
+            });
 
         tagRepository.save(requestDto.toEntity());
     }
@@ -45,7 +45,7 @@ public class TagService {
     public void update(TagRequestDto.Update requestDto) {
         Tag tag = tagRepository.findById(requestDto.getTagId())
                 .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND_TAG));
         tag.update(requestDto);
     }
 
@@ -53,7 +53,7 @@ public class TagService {
     public void delete(Long tagId) {
         Tag tag = tagRepository.findById(tagId)
                 .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND_TAG));
         tagRepository.delete(tag);
     }
 
@@ -61,7 +61,7 @@ public class TagService {
     public void taggingToPackage(List<String> tagList, Long packageId) {
         Package aPackage = packageRepository.findById(packageId)
                 .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND_PACKAGE));
 
         tagList.forEach(tagContent -> {
             Tag tag = tagRepository.findByTagContent(tagContent)

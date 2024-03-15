@@ -53,6 +53,8 @@ public class OrderResponseDto {
         List<String> orderNumberList;
         List<TravelerInfo> travelerInfos;
 
+        String memo;
+
         public static OrderInfo of(Order order) {
             return OrderInfo.builder()
                     .imomOrderId(order.getImomOrderId())
@@ -75,6 +77,7 @@ public class OrderResponseDto {
                     .payedPrice(order.getPayedPrice())
                     .balance(order.getTotalPrice() - order.getPayedPrice())
                     .orderNumberList(order.getOrderNumberList())
+                    .memo(order.getMemo())
                     .build();
         }
     }

@@ -3,10 +3,10 @@ package com.uriel.travel.service;
 import com.uriel.travel.domain.Country;
 import com.uriel.travel.domain.SaveState;
 import com.uriel.travel.domain.dto.ImageDto;
+import com.uriel.travel.domain.dto.tag.TagResponseDto;
 import com.uriel.travel.domain.dto.travelPackage.PackageFilter;
 import com.uriel.travel.domain.dto.travelPackage.PackageRequestDto;
 import com.uriel.travel.domain.dto.travelPackage.PackageResponseDto;
-import com.uriel.travel.domain.dto.tag.TagResponseDto;
 import com.uriel.travel.domain.entity.Package;
 import com.uriel.travel.domain.entity.*;
 import com.uriel.travel.exception.CustomNotFoundException;
@@ -24,7 +24,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -85,12 +84,12 @@ public class PackageService {
 
             Package aPackage = getPackageByPackageId(id);
             aPackage.getProductList()
-                            .forEach(product -> {
-                                List<Order> orderList = orderRepository.findByProductId(aPackage.getId());
-                                if (!orderList.isEmpty()) {
-                                    flag.set(true);
-                                }
-                            });
+                    .forEach(product -> {
+                        List<Order> orderList = orderRepository.findByProductId(aPackage.getId());
+                        if (!orderList.isEmpty()) {
+                            flag.set(true);
+                        }
+                    });
 
             if (Boolean.FALSE.equals(flag.get())) {
                 packageRepository.delete(aPackage);
@@ -194,7 +193,7 @@ public class PackageService {
             // 최저가 계산
             Package aPackage = packageRepository.findById(dto.getPackageId())
                     .orElseThrow(() ->
-                            new CustomNotFoundException(ErrorCode.NOT_FOUND));
+                            new CustomNotFoundException(ErrorCode.NOT_FOUND_PACKAGE));
 
             dto.setPrice(getMinPrice(aPackage));
 
@@ -286,6 +285,6 @@ public class PackageService {
         return packageRepository.findAllPackageNames()
                 .stream()
                 .map(PackageResponseDto.PackageInfoSimple::new)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

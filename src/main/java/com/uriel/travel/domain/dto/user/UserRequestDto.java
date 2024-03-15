@@ -34,6 +34,8 @@ public class UserRequestDto {
 
         int headCount; //가족 인원수
         String childName;
+
+        String marketing;
     }
 
     @Getter
@@ -62,6 +64,7 @@ public class UserRequestDto {
         String childName;
 
         String socialType;
+        String marketing;
     }
 
     @Getter
@@ -78,6 +81,7 @@ public class UserRequestDto {
     @NoArgsConstructor
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class NewPassword {
+        String email;
         String password;
     }
 }

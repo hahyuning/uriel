@@ -91,8 +91,14 @@ public class WidgetController {
 
         if (method.equals("가상계좌") || status.equals("DONE")) {
             logger.info("주문 생성 시작");
-            String imomOrderId = orderService.createOrder(jsonObject, requestDto, "woori@imom.kr");
-            updateMarketingAgreement("woori@imom.kr", requestDto.isMarketing());
+            String imomOrderId = orderService.createOrder(jsonObject, requestDto, "admin@imom.kr");
+
+            if (requestDto.isMarketing()) {
+                updateMarketingAgreement("admin@imom.kr", "동의");
+            } else {
+                updateMarketingAgreement("admin@imom.kr", "비동의");
+            }
+
 
             logger.info("아이맘 주문 번호" + imomOrderId);
         }
@@ -144,13 +150,13 @@ public class WidgetController {
         String status = (String) jsonObject.get("status");
         if (method.equals("가상계좌") || status.equals("DONE")) {
             orderService.additionalPayment(jsonObject, requestDto);
-            updateMarketingAgreement("woori@imom.kr", requestDto.isMarketing());
+            updateMarketingAgreement("woori@imom.kr", requestDto.getMarketing());
         }
 
         return ResponseEntity.status(code).body(jsonObject);
     }
 
-    private void updateMarketingAgreement(String email, boolean agreement) {
+    private void updateMarketingAgreement(String email, String agreement) {
         userService.updateMarketingAgreement(email, agreement);
     }
 
