@@ -86,6 +86,7 @@ public class OAuthLoginService {
                 .socialType(SocialType.from(requestDto.getSocialType()))
                 .headCount(requestDto.getHeadCount())
                 .childName(requestDto.getChildName())
+                .marketing(requestDto.getMarketing())
                 .build();
 
         String email = userRepository.save(user).getEmail();

@@ -39,7 +39,7 @@ public class ScheduleService {
     public void deleteAllSchedule(Long packageId) {
         Package aPackage  = packageRepository.findById(packageId)
                 .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND_PACKAGE));
 
         List<Schedule> allByPackageId = scheduleRepository.findAllByPackageId(packageId);
         allByPackageId.forEach(schedule -> {

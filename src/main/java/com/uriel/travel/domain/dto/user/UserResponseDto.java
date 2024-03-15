@@ -36,7 +36,7 @@ public class UserResponseDto {
         int headCount;
         String childName;
         String socialType;
-        boolean marketing;
+        String marketing;
 
         public static UserInfo of(User user) {
             return UserInfo.builder()
@@ -50,7 +50,7 @@ public class UserResponseDto {
                     .headCount(user.getHeadCount())
                     .childName(user.getChildName())
                     .socialType(user.getSocialType().toString())
-                    .marketing(user.isMarketing())
+                    .marketing(user.getMarketing())
                     .build();
         }
     }

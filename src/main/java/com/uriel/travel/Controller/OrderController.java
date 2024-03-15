@@ -75,4 +75,11 @@ public class OrderController {
     public BaseResponse<List<OrderResponseDto.OrderInfo>> getAllOrderInfoForExcel() {
         return BaseResponse.ok(orderService.getAllOrderInfos());
     }
+
+    // 메모 변경
+    @PostMapping("/update/memo")
+    public BaseResponse<Void> updateMemo(@RequestBody OrderRequestDto.UpdateMemo requestDto) {
+        orderService.updateMemo(requestDto);
+        return BaseResponse.ok();
+    }
 }

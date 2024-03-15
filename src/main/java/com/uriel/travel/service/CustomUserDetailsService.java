@@ -3,6 +3,8 @@ package com.uriel.travel.service;
 import com.uriel.travel.domain.Gender;
 import com.uriel.travel.domain.Role;
 import com.uriel.travel.domain.SocialType;
+import com.uriel.travel.exception.CustomBadRequestException;
+import com.uriel.travel.exception.CustomNotFoundException;
 import com.uriel.travel.jwt.JwtToken;
 import com.uriel.travel.domain.dto.user.UserRequestDto;
 import com.uriel.travel.domain.entity.User;
@@ -42,12 +44,12 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private User getMemberByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("일치하는 정보가 없습니다."));
+                .orElseThrow(() -> new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
     }
 
     public User signUp(UserRequestDto.SignUp requestDto) {
         if(userRepository.existsByEmail(requestDto.getEmail())){
-            throw new RuntimeException("사용중인 이메일입니다.");
+            throw new CustomBadRequestException(ErrorCode.DUPLICATE_EMAIL);
         }
         return userRepository.save(User.builder()
                         .krName(requestDto.getUserName())
@@ -62,6 +64,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                         .childName(requestDto.getChildName())
                         .role(Role.ROLE_USER)
                         .socialType(SocialType.LOCAL)
+                        .marketing(requestDto.getMarketing())
                         .build());
     }
 

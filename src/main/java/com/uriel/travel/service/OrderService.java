@@ -103,13 +103,13 @@ public class OrderService {
         // reserve user 연관관계
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
         order.setReserveUser(user);
 
         // product 연관관계
         Product product = productRepository.findById(requestDto.getProductId())
                 .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND_PRODUCT));
         product.updateNowCount(requestDto.getTotalCount());
 
         order.setProduct(product);
@@ -167,7 +167,7 @@ public class OrderService {
 
         Product product = productRepository.findById(order.getProduct().getId())
                 .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND_PRODUCT));
         product.updateNowCount(requestDto.getTotalCount() - order.getTotalCount());
     }
 
@@ -178,7 +178,7 @@ public class OrderService {
 
         Product product = productRepository.findById(order.getProduct().getId())
                 .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND_PRODUCT));
         product.updateNowCount(-1 * (order.getTotalCount()));
     }
 
@@ -192,7 +192,7 @@ public class OrderService {
     public void checkReservedUserCount(int totalCount, Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND_PRODUCT));
 
         if (product.getProductState().equals(ProductState.RESERVATION_DEADLINE)) {
             log.info("예약 마감");
@@ -238,5 +238,10 @@ public class OrderService {
                 .stream()
                 .map(OrderResponseDto.OrderInfo::of)
                 .toList();
+    }
+
+    public void updateMemo(OrderRequestDto.UpdateMemo requestDto) {
+        orderRepository.findByImomOrderId(requestDto.getImomOrderId())
+                .updateMemo(requestDto.getMemo());
     }
 }

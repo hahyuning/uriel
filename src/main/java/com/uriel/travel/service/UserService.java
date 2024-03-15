@@ -97,7 +97,7 @@ public class UserService {
         user.updatePassword(passwordEncoder.encode(passwordDto.getPassword()));
     }
 
-    public void updateMarketingAgreement(String email, boolean agreement) {
+    public void updateMarketingAgreement(String email, String agreement) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER));

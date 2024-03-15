@@ -182,7 +182,7 @@ public class S3Service {
 
         Package aPackage = packageRepository.findById(id)
                 .orElseThrow(() ->
-                        new CustomNotFoundException(ErrorCode.NOT_FOUND));
+                        new CustomNotFoundException(ErrorCode.NOT_FOUND_PACKAGE));
 
         dtoList.forEach(dto -> {
             Thumbnail thumbnail = new Thumbnail(dto.getOriginalImageName(),

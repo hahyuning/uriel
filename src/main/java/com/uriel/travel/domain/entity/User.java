@@ -56,8 +56,7 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     SocialType socialType;
 
-    @Builder.Default
-    boolean marketing = false;
+    String marketing;
 
     @Builder.Default
     @JsonIgnore
@@ -115,7 +114,7 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    public void setMarketing(boolean agreement) {
+    public void setMarketing(String agreement) {
         this.marketing = agreement;
     }
 }
