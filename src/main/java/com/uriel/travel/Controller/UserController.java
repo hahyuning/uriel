@@ -80,7 +80,7 @@ public class UserController {
     }
 
     // 회원 탈퇴
-    @GetMapping("/withdraw")
+    @DeleteMapping("/withdraw")
     private BaseResponse<Void> withdrawUser() {
         userService.deleteUser(SecurityUtil.getCurrentUsername());
         return BaseResponse.ok();

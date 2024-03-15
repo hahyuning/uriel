@@ -1,14 +1,10 @@
 package com.uriel.travel.domain.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.uriel.travel.domain.TagType;
 import com.uriel.travel.domain.dto.tag.TagRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -28,10 +24,10 @@ public class Tag {
     @Enumerated(EnumType.STRING)
     TagType tagType;
 
-    @Builder.Default
-    @JsonIgnore
-    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL)
-    List<Tagging> taggingList = new ArrayList<>();
+//    @Builder.Default
+//    @JsonIgnore
+//    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL)
+//    List<Tagging> taggingList = new ArrayList<>();
 
     public void update(TagRequestDto.Update requestDto) {
         this.tagContent = requestDto.getTagContent();

@@ -11,6 +11,8 @@ import com.uriel.travel.domain.dto.order.OrderFilter;
 import com.uriel.travel.domain.dto.order.QOrderFilter_OrderFilterResponseDto;
 import com.uriel.travel.domain.dto.order.QOrderFilter_OrderFilterResponseDtoForAdmin;
 import com.uriel.travel.domain.entity.QOrder;
+import com.uriel.travel.domain.entity.QProduct;
+import com.uriel.travel.domain.entity.QUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -27,6 +29,8 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
 
     private final JPAQueryFactory jpaQueryFactory;
     QOrder order = QOrder.order;
+    QProduct product = QProduct.product;
+    QUser user = QUser.user;
 
     @Override
     public List<OrderFilter.OrderFilterResponseDto> findByReserveUser(OrderFilter.OrderFilterCond filterCond, String reserveUserEmail, Pageable pageable) {
@@ -35,12 +39,14 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                         order.imomOrderId,
                         order.orderDate,
                         order.orderState,
-                        order.product.aPackage.packageName,
-                        order.product.startDate,
+                        product.aPackage.packageName,
+                        product.startDate,
                         order.totalCount,
-                        order.product.productState
+                        product.productState
                 ))
                 .from(order)
+                .join(product)
+                .on(order.productId.eq(product.id))
                 .where(
                         reserveUserEq(reserveUserEmail)
                 )
@@ -94,17 +100,19 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                         order.imomOrderId,
                         order.orderDate,
                         order.orderState,
-                        order.product.aPackage.packageName,
-                        order.product.aPackage.country,
-                        order.product.productCode,
-                        order.product.productState,
-                        order.product.startDate,
-                        order.reserveUser.krName,
-                        order.reserveUser.phoneNumber,
-                        order.reserveUser.email,
+                        product.aPackage.packageName,
+                        product.aPackage.country,
+                        product.productCode,
+                        product.productState,
+                        product.startDate,
+                        user.krName,
+                        user.phoneNumber,
+                        user.email,
                         order.totalCount
                 ))
                 .from(order)
+                .join(product).on(order.productId.eq(product.id))
+                .join(user).on(order.reserveUserEmail.eq(user.email))
                 .where(
                         packageIdEq(filterCond),
                         countryEq(filterCond),
@@ -134,7 +142,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     }
 
     private BooleanExpression reserveUserEq(String reserveUserEmail) {
-        return order.reserveUser.email.eq(reserveUserEmail);
+        return order.reserveUserEmail.eq(reserveUserEmail);
     }
 
     private BooleanExpression orderDateBtw(OrderFilter.OrderFilterCond filterCond) {
@@ -147,7 +155,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     private BooleanExpression packageIdEq(OrderFilter.OrderFilterCond filterCond) {
 
         if (filterCond.getPackageId() == null)  return null;
-        return order.product.aPackage.id.eq(filterCond.getPackageId());
+        return product.aPackage.id.eq(filterCond.getPackageId());
     }
 
     private BooleanExpression orderStateEq(OrderFilter.OrderFilterCond filterCond) {
@@ -158,7 +166,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
 
     public BooleanExpression countryEq(OrderFilter.OrderFilterCond filterCond) {
         if (filterCond.getCountry() != null) {
-            return order.product.aPackage.country.eq(Country.from(filterCond.getCountry()));
+            return product.aPackage.country.eq(Country.from(filterCond.getCountry()));
         }
         return null;
     }
@@ -167,7 +175,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
 
         if (filterCond.getUserNameOrder() != null) {
-            orderSpecifiers.add(new OrderSpecifier(filterCond.getUserNameOrder() == 0 ? Order.ASC : Order.DESC, order.reserveUser.krName));
+            orderSpecifiers.add(new OrderSpecifier(filterCond.getUserNameOrder() == 0 ? Order.ASC : Order.DESC, user.krName));
         }
 
         if (filterCond.getOrder() != null) {
@@ -175,7 +183,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         }
 
         if (filterCond.getStart() != null) {
-            orderSpecifiers.add(new OrderSpecifier(filterCond.getStart() == 0 ? Order.ASC : Order.DESC, order.product.startDate));
+            orderSpecifiers.add(new OrderSpecifier(filterCond.getStart() == 0 ? Order.ASC : Order.DESC, product.startDate));
         }
         return orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]);
     }
@@ -186,15 +194,15 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         }
 
         if (Objects.equals(SearchType.from(searchCond.getType()), SearchType.RESERVE_USER)) {
-            return order.reserveUser.krName.eq(searchCond.getTarget());
+            return user.krName.eq(searchCond.getTarget());
         } else if (Objects.equals(SearchType.from(searchCond.getType()), SearchType.PHONE_NUMBER)) {
-            return order.reserveUser.phoneNumber.eq(searchCond.getTarget());
+            return user.phoneNumber.eq(searchCond.getTarget());
         } else if (Objects.equals(SearchType.from(searchCond.getType()), SearchType.EMAIL)) {
-            return order.reserveUser.email.eq(searchCond.getTarget());
+            return order.reserveUserEmail.eq(searchCond.getTarget());
         } else if (Objects.equals(SearchType.from(searchCond.getType()), SearchType.IMOM_ORDER_ID)) {
             return order.imomOrderId.eq(searchCond.getTarget());
         } else if (Objects.equals(SearchType.from(searchCond.getType()), SearchType.PRODUCT_CODE)) {
-            return order.product.productCode.eq(searchCond.getTarget());
+            return order.productCode.eq(searchCond.getTarget());
         }
 
         return null;

@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @RequiredArgsConstructor
@@ -80,20 +79,8 @@ public class PackageService {
     // 패키지 삭제
     public void delete(List<Long> ids) {
         ids.forEach(id -> {
-            AtomicReference<Boolean> flag = new AtomicReference<>(false);
-
-            Package aPackage = getPackageByPackageId(id);
-            aPackage.getProductList()
-                    .forEach(product -> {
-                        List<Order> orderList = orderRepository.findByProductId(aPackage.getId());
-                        if (!orderList.isEmpty()) {
-                            flag.set(true);
-                        }
-                    });
-
-            if (Boolean.FALSE.equals(flag.get())) {
-                packageRepository.delete(aPackage);
-            }
+            packageRepository.delete(packageRepository.findById(id)
+                    .orElseThrow(() -> new CustomNotFoundException(ErrorCode.NOT_FOUND_PACKAGE)));
         });
     }
 

@@ -35,9 +35,9 @@ public class Order extends BaseTimeEntity {
 
     LocalDateTime orderDate; // toss 응답 -> approveAt
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    Product product;
+    Long productId;
+
+    String productCode;
 
     @Builder.Default
     int adultCount = 0;
@@ -65,9 +65,7 @@ public class Order extends BaseTimeEntity {
     @Builder.Default
     String memo = "";
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    User reserveUser;
+    String reserveUserEmail;
 
     @Builder.Default
     @JsonIgnore
@@ -75,12 +73,12 @@ public class Order extends BaseTimeEntity {
     List<Traveler> travelerList = new ArrayList<>();
 
     public void setProduct(Product product) {
-        this.product = product;
+        this.productId = product.getId();
+        this.productCode = product.getProductCode();
     }
 
     public void setReserveUser(User user) {
-        this.reserveUser = user;
-        user.getOrderList().add(this);
+        this.reserveUserEmail = user.getEmail();
     }
 
     public void additionalPayment(Long totalAmount) {

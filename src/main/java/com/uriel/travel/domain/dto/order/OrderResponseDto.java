@@ -2,6 +2,8 @@ package com.uriel.travel.domain.dto.order;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.uriel.travel.domain.entity.Order;
+import com.uriel.travel.domain.entity.Product;
+import com.uriel.travel.domain.entity.User;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -48,6 +50,7 @@ public class OrderResponseDto {
 
         Long totalPrice;
         Long payedPrice;
+        Long additionalPrice;
         Long balance;
 
         List<String> orderNumberList;
@@ -59,26 +62,33 @@ public class OrderResponseDto {
             return OrderInfo.builder()
                     .imomOrderId(order.getImomOrderId())
                     .orderDate(order.getOrderDate())
-                    .reserveUser(order.getReserveUser().getKrName())
-                    .birth(order.getReserveUser().getBirth())
-                    .gender(order.getReserveUser().getGender().getViewName())
-                    .email(order.getReserveUser().getEmail())
-                    .phoneNumber(order.getReserveUser().getPhoneNumber())
-                    .packageName(order.getProduct().getAPackage().getPackageName())
-                    .productCode(order.getProduct().getProductCode())
+                    .productCode(order.getProductCode())
                     .orderState(order.getOrderState().getViewName())
-                    .startDate(order.getProduct().getStartDate())
-                    .endDate(order.getProduct().getEndDate())
                     .adultCount(order.getAdultCount())
                     .childCount(order.getChildCount())
                     .infantCount(order.getInfantCount())
                     .totalCount(order.getTotalCount())
-                    .totalPrice(order.getTotalPrice())
+                    .totalPrice(order.getTotalPrice() + order.getAdditionalPrice())
                     .payedPrice(order.getPayedPrice())
-                    .balance(order.getTotalPrice() - order.getPayedPrice())
+                    .additionalPrice(order.getAdditionalPrice())
+                    .balance(order.getTotalPrice() - order.getPayedPrice() + order.getAdditionalPrice())
                     .orderNumberList(order.getOrderNumberList())
                     .memo(order.getMemo())
                     .build();
+        }
+
+        public void setReserveUserInfo(User user) {
+            this.reserveUser = user.getKrName();
+            this.birth = user.getBirth();
+            this.gender = user.getGender().getViewName();
+            this.email = user.getEmail();
+            this.phoneNumber = user.getPhoneNumber();
+        }
+
+        public void setProductInfo(Product product) {
+            this.packageName = product.getAPackage().getPackageName();
+            this.startDate = product.getStartDate();
+            this.endDate = product.getEndDate();
         }
     }
 
@@ -92,7 +102,10 @@ public class OrderResponseDto {
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime orderDate;
 
+        String reserveUser;
+
         String packageName;
+        String productCode;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime startDate;
@@ -100,21 +113,39 @@ public class OrderResponseDto {
         LocalDateTime endDate;
 
         int totalCount;
+        int adultCount;
+        int childCount;
+        int infantCount;
 
-        String productState;
-        String orderState;
+        Long totalPrice;
+        Long payedPrice;
+        Long balance;
+
+        List<TravelerInfo> travelerInfos;
 
         public static MyOrder of(Order order) {
             return MyOrder.builder()
                     .imomOrderId(order.getImomOrderId())
                     .orderDate(order.getOrderDate())
-                    .packageName(order.getProduct().getAPackage().getPackageName())
-                    .startDate(order.getProduct().getStartDate())
-                    .endDate(order.getProduct().getEndDate())
+                    .productCode(order.getProductCode())
                     .totalCount(order.getTotalCount())
-                    .productState(order.getProduct().getProductState().getViewName())
-                    .orderState(order.getOrderState().getViewName())
+                    .adultCount(order.getAdultCount())
+                    .childCount(order.getChildCount())
+                    .infantCount(order.getInfantCount())
+                    .totalPrice(order.getTotalPrice() + order.getAdditionalPrice())
+                    .payedPrice(order.getPayedPrice())
+                    .balance(order.getTotalPrice() - order.getPayedPrice() + order.getAdditionalPrice())
                     .build();
+        }
+
+        public void setReserveUserInfo(User user) {
+            this.reserveUser = user.getKrName();
+        }
+
+        public void setProductInfo(Product product) {
+            this.packageName = product.getAPackage().getPackageName();
+            this.startDate = product.getStartDate();
+            this.endDate = product.getEndDate();
         }
     }
 }

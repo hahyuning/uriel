@@ -33,7 +33,6 @@ public class Tagging {
     public void setTag(Tag tag) {
         this.tag = tag;
         this.tagType = tag.getTagType();
-        tag.getTaggingList().add(this);
     }
 
     public void setPackage(Package aPackage) {

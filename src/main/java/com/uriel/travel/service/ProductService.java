@@ -208,20 +208,16 @@ public class ProductService {
     // 상품 일괄 삭제
     public void delete(List<Long> ids) {
         ids.forEach(productId -> {
-            List<Order> orderList = orderRepository.findByProductId(productId);
-            if (!orderList.isEmpty()) {
+            Product product = getProductByProductId(productId);
+            Package aPackage = packageRepository.findById(product.getAPackage().getId())
+                    .orElseThrow(() ->
+                            new CustomNotFoundException(ErrorCode.NOT_FOUND_PACKAGE));
 
-                Product product = getProductByProductId(productId);
-                Package aPackage = packageRepository.findById(product.getAPackage().getId())
-                        .orElseThrow(() ->
-                                new CustomNotFoundException(ErrorCode.NOT_FOUND_PACKAGE));
+            ProductDetail productDetail = productDetailRepository.findByProductId(productId);
+            productDetailRepository.delete(productDetail);
 
-                ProductDetail productDetail = productDetailRepository.findByProductId(productId);
-                productDetailRepository.delete(productDetail);
-
-                aPackage.getProductList().remove(product);
-                productRepository.delete(product);
-            }
+            aPackage.getProductList().remove(product);
+            productRepository.delete(product);
         });
     }
 

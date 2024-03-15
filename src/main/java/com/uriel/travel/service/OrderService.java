@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,10 +48,34 @@ public class OrderService {
         return orderRepositoryCustom.findByReserveUser(filterCond, loginUserId, pageRequest);
     }
 
-    // 주문 정보 상세 조회
+    // 주문 정보 상세 조회 (관리자)
     @Transactional(readOnly = true)
     public OrderResponseDto.OrderInfo getOrderInfo(String imomOrderId) {
-        OrderResponseDto.OrderInfo orderResponseDto = OrderResponseDto.OrderInfo.of(orderRepository.findByImomOrderId(imomOrderId));
+        Order order = orderRepository.findByImomOrderId(imomOrderId);
+        OrderResponseDto.OrderInfo orderResponseDto = OrderResponseDto.OrderInfo.of(order);
+
+        orderResponseDto.setReserveUserInfo(userRepository.findByEmail(order.getReserveUserEmail())
+                .orElseThrow(() -> new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER)));
+        orderResponseDto.setProductInfo(productRepository.findById(order.getProductId())
+                .orElseThrow(() -> new CustomNotFoundException(ErrorCode.NOT_FOUND_PRODUCT)));
+
+        List<Traveler> travelerList = travelerRepository.findByImomOrderId(imomOrderId);
+        List<TravelerInfo> travelerInfos = travelerList.stream().map(TravelerInfo::new).collect(Collectors.toList());
+        orderResponseDto.setTravelerInfos(travelerInfos);
+
+        return orderResponseDto;
+    }
+
+    // 주문 정보 상세 조회 (사용자)
+    @Transactional(readOnly = true)
+    public OrderResponseDto.MyOrder getMyOrderInfo(String imomOrderId) {
+        Order order = orderRepository.findByImomOrderId(imomOrderId);
+        OrderResponseDto.MyOrder orderResponseDto = OrderResponseDto.MyOrder.of(order);
+
+        orderResponseDto.setReserveUserInfo(userRepository.findByEmail(order.getReserveUserEmail())
+                .orElseThrow(() -> new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER)));
+        orderResponseDto.setProductInfo(productRepository.findById(order.getProductId())
+                .orElseThrow(() -> new CustomNotFoundException(ErrorCode.NOT_FOUND_PRODUCT)));
 
         List<Traveler> travelerList = travelerRepository.findByImomOrderId(imomOrderId);
         List<TravelerInfo> travelerInfos = travelerList.stream().map(TravelerInfo::new).collect(Collectors.toList());
@@ -151,7 +176,7 @@ public class OrderService {
         int newInfantCount = requestDto.getInfantCount();
 
         if (adultCount != newAdultCount || childCount != newChildCount || infantCount != newInfantCount) {
-            ProductDetail productDetail = productDetailRepository.findByProductId(order.getProduct().getId());
+            ProductDetail productDetail = productDetailRepository.findByProductId(order.getProductId());
             order.updateTravelerAndPrice(requestDto, productDetail);
         }
 
@@ -165,7 +190,7 @@ public class OrderService {
                 });
 
 
-        Product product = productRepository.findById(order.getProduct().getId())
+        Product product = productRepository.findById(order.getProductId())
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND_PRODUCT));
         product.updateNowCount(requestDto.getTotalCount() - order.getTotalCount());
@@ -176,7 +201,7 @@ public class OrderService {
         Order order = orderRepository.findByImomOrderId(imomOrderId);
         order.cancel(order.getPayedPrice());
 
-        Product product = productRepository.findById(order.getProduct().getId())
+        Product product = productRepository.findById(order.getProductId())
                 .orElseThrow(() ->
                         new CustomNotFoundException(ErrorCode.NOT_FOUND_PRODUCT));
         product.updateNowCount(-1 * (order.getTotalCount()));
@@ -234,10 +259,19 @@ public class OrderService {
     }
 
     public List<OrderResponseDto.OrderInfo> getAllOrderInfos() {
-        return orderRepository.findAll(Sort.by(Sort.Direction.DESC, "orderDate"))
-                .stream()
-                .map(OrderResponseDto.OrderInfo::of)
-                .toList();
+        List<OrderResponseDto.OrderInfo> result = new ArrayList<>();
+        orderRepository.findAll(Sort.by(Sort.Direction.DESC, "orderDate"))
+                .forEach(order -> {
+                    OrderResponseDto.OrderInfo orderResponseDto = OrderResponseDto.OrderInfo.of(order);
+
+                    orderResponseDto.setReserveUserInfo(userRepository.findByEmail(order.getReserveUserEmail())
+                            .orElseThrow(() -> new CustomNotFoundException(ErrorCode.NOT_FOUND_MEMBER)));
+                    orderResponseDto.setProductInfo(productRepository.findById(order.getProductId())
+                            .orElseThrow(() -> new CustomNotFoundException(ErrorCode.NOT_FOUND_PRODUCT)));
+
+                    result.add(orderResponseDto);
+                });
+        return result;
     }
 
     public void updateMemo(OrderRequestDto.UpdateMemo requestDto) {

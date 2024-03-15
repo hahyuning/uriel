@@ -37,6 +37,12 @@ public class OrderController {
         return BaseResponse.ok(orderService.getOrderInfo(imomorderid));
     }
 
+    // 주문 정보 상세 조회
+    @GetMapping("/myinfo/{imomorderid}")
+    public BaseResponse<OrderResponseDto.MyOrder> getMyOrderInfo(@PathVariable String imomorderid) {
+        return BaseResponse.ok(orderService.getMyOrderInfo(imomorderid));
+    }
+
     // 관리자 주문 목록 조회
     @PostMapping
     public BaseResponse<Page<OrderFilter.OrderFilterResponseDtoForAdmin>> getOrderListForAdmin(@RequestBody OrderFilter.OrderFilterCond filterCond) {
