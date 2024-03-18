@@ -14,6 +14,7 @@ import com.uriel.travel.exception.ErrorCode;
 import com.uriel.travel.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -236,14 +237,31 @@ public class OrderService {
         // partial canceled -> 부분 취소
         Order order = orderRepository.findByTossOrderId(requestDto.getOrderId());
         String status = requestDto.getStatus();
-        JSONObject cancels = (JSONObject) jsonObject.get("cancels");
 
         log.info("가상계좌 결제 상태: " + status);
 
         if (status.equals("DONE")) { // 가상계좌 입금 완료
             order.additionalPayment((Long) jsonObject.get("totalAmount"));
         } else if (status.equals("CANCELED") || status.equals("PARTIAL_CANCELED")) { // 가상계좌 주문 취소
-            order.cancel((Long) cancels.get("cancelAmount"));
+
+            JSONArray cancels = (JSONArray) jsonObject.get("cancels");
+            String lastTransactionKey = (String) jsonObject.get("lastTransactionKey");
+
+            log.info("cancels 배열  " + cancels.toString());
+            log.info("lastTransactionKey  " + lastTransactionKey);
+
+            for (int i = 0; i < cancels.size(); i++) {
+
+                JSONObject cancel = (JSONObject) cancels.get(i);
+                String transactionKey = (String) cancel.get("transactionKey");
+
+                log.info("transactionKey  " + transactionKey);
+
+                if (transactionKey.equals(lastTransactionKey)) {
+                    order.cancel((Long) cancel.get("cancelAmount"));
+                    log.info("취소 처리 완료");
+                }
+            }
         }
     }
 

@@ -34,19 +34,19 @@ public class ProductDetail extends BaseTimeEntity {
     Long infantPrice; // 유아 요금
     Long infantSurcharge; // 유아 유류 할증
 
-    @Lob
+    @Column(columnDefinition = "text")
     String keyPoint; // 핵심 키포인트
 
-    @Lob
+    @Column(columnDefinition = "text")
     String includedProduct; // 포함 내역
 
-    @Lob
+    @Column(columnDefinition = "text")
     String excludedProduct; // 불포함 내역
 
-    @Lob
+    @Column(columnDefinition = "text")
     String reservationNotice; // 예약 유의사항
 
-    @Lob
+    @Column(columnDefinition = "text")
     String travelRegion; // 여행지역
 
     public ProductDetail(ProductRequestDto.Create requestDto, Product product) {

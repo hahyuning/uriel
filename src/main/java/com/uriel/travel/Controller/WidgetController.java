@@ -83,24 +83,24 @@ public class WidgetController {
         Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
         JSONObject jsonObject = (JSONObject) parser.parse(reader);
 
-        // 결제 승인이 이루어지거나, 가상계좌인 경우 Order 객체 생성
-        String method = (String) jsonObject.get("method");
-        String status = (String) jsonObject.get("status");
+        if (isSuccess) {
+            // 결제 승인이 이루어지거나, 가상계좌인 경우 Order 객체 생성
+            String method = (String) jsonObject.get("method");
+            String status = (String) jsonObject.get("status");
 
-        logger.info("결제 방식, 결제 상태" + method + status);
+            logger.info("결제 방식, 결제 상태" + method + status);
 
-        if (method.equals("가상계좌") || status.equals("DONE")) {
-            logger.info("주문 생성 시작");
-            String imomOrderId = orderService.createOrder(jsonObject, requestDto, "admin@imom.kr");
+            if (method.equals("가상계좌") || status.equals("DONE")) {
+                logger.info("주문 생성 시작");
+                String imomOrderId = orderService.createOrder(jsonObject, requestDto, "admin@imom.kr");
 
-            if (requestDto.isMarketing()) {
-                updateMarketingAgreement("admin@imom.kr", "동의");
-            } else {
-                updateMarketingAgreement("admin@imom.kr", "비동의");
+                if (requestDto.isMarketing()) {
+                    updateMarketingAgreement("admin@imom.kr", "동의");
+                } else {
+                    updateMarketingAgreement("admin@imom.kr", "비동의");
+                }
+                logger.info("아이맘 주문 번호" + imomOrderId);
             }
-
-
-            logger.info("아이맘 주문 번호" + imomOrderId);
         }
 
         responseStream.close();
