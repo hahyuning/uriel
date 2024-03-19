@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -272,7 +273,13 @@ public class OrderService {
         Order order = orderRepository.findByTossOrderId(requestDto.getData().getOrderId());
 
         if (status.equals("CANCELED") || status.equals("PARTIAL_CANCELED")) {
-            order.cancel(requestDto.getData().getCancel().getCancelAmount());
+            String lastTransactionKey = requestDto.getData().getLastTransactionKey();
+             Arrays.stream(requestDto.getData().getCancels()).toList()
+                             .forEach(cancel -> {
+                                 if (cancel.getTransactionKey().equals(lastTransactionKey)) {
+                                     order.cancel(cancel.getCancelAmount());
+                                 }
+                             });
         }
     }
 

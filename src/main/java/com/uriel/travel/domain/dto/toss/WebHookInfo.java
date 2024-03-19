@@ -37,7 +37,8 @@ public class WebHookInfo {
         String status;
         String approvedAt;
         Long totalAmount;
-        Cancel cancel;
+        String lastTransactionKey;
+        Cancel[] cancels;
     }
 
     @Getter
@@ -45,5 +46,6 @@ public class WebHookInfo {
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class Cancel {
         Long cancelAmount;
+        String transactionKey;
     }
 }
